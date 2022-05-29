@@ -20,7 +20,7 @@ cd ~ && git clone git@github.com:skyerguo/SocNet.git
 ## 安装必要的库
 
 ```
-cd SocNet && zsh environment_initialize.sh
+cd ~/SocNet && sh environment_initialize.sh
 ```
 
 ## 重启生效
