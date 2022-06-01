@@ -26,6 +26,7 @@ sudo service redis-server restart
 sudo apt-get install -yqq python3-distutils python3-pip
 pip3 install --upgrade pip setuptools
 # pip3 install flask scrapy beautifulsoup4 dnspython gunicorn supervisor numpy
+pip3 install shapely geopandas
 
 ## 安装apt
 sudo apt-get -yqq install wondershaper nload iftop zip unzip
