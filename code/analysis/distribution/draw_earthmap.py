@@ -4,7 +4,7 @@ import geopandas as gpd
 import pandas as pd
 # import matplotlib.pyplot as plt
 # import json
-# import csv
+import csv
 import os
 # from usage.get_region_position import region2position as region2position
 
@@ -30,9 +30,7 @@ def draw_all():
             longitude = line.split(',')[1]
             latitude = line.split(',')[2].strip()
             region2position[region] = {'longitude': longitude, 'latitude': latitude}
-            geometry.append(zip(longitude, latitude))
-
-    # with open(measure_path_name, 'r') as csv_file:
+            # geometry.append(zip(longitude, latitude))
 
     # for i in range(1, 2):
     #     data_root_path = 'machine_data/'
@@ -60,14 +58,21 @@ def draw_all():
 
     # geometry = [Point(xy) for xy in zip(df['Longitude'], df['Latitude'])]
 
-    properties = {}     # 定义 properties
-    properties['City'] = ['GD']  # 如果后面要再添加数据，就用properties['City'].append()
-    properties['Country'] = ['CN'] 
-    df = pd.DataFrame(properties)  
+    # properties = {}     # 定义 properties
+    # properties['City'] = ['GD']  # 如果后面要再添加数据，就用properties['City'].append()
+    # properties['Country'] = ['CN'] 
+    # df = pd.DataFrame(properties)  
     # df['geometry'] = geometry
 
+    with open('../../../data/static/tmp_position.csv', 'w') as csv_writer:
+        f_csv = csv.writer(csv_writer)
+        f_csv.writerow(['longitude', 'latitude'])
+        for area in area_all:
+            f_csv.writerow([region2position[area]['longitude'], region2position[area]['longitude']])
+
+    df = pd.read_csv('../../../data/static/tmp_position.csv', delimiter=',', skiprows=0, low_memory=False)
+
     gdf = gpd.GeoDataFrame(df, geometry=geometry)
-    exit()
 
     # this is a simple map that goes with geopandas
     world = gpd.read_file(gpd.datasets.get_path('naturalearth_lowres'))
@@ -84,6 +89,4 @@ def draw_all():
     plt.show()
 
 if __name__ == '__main__':
-    # draw_server()
-    # draw_client()
     draw_all()
