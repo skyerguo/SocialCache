@@ -2,7 +2,7 @@ from shapely.geometry import Point
 import geopandas as gpd
 # from geopandas import GeoDataFrame
 import pandas as pd
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 # import json
 import csv
 import os
@@ -27,50 +27,18 @@ def draw_all():
                 cnt_line += 1
                 continue
             region = line.split(',')[0]
-            longitude = line.split(',')[1]
-            latitude = line.split(',')[2].strip()
+            latitude = line.split(',')[1]
+            longitude = line.split(',')[2].strip()
             region2position[region] = {'longitude': longitude, 'latitude': latitude}
-            # geometry.append(zip(longitude, latitude))
-
-    # for i in range(1, 2):
-    #     data_root_path = 'machine_data/'
-    #     machine_path = data_root_path + path_name[i]
-    #     position_list = position_name[i]
-
-    #     machine_dict = json.load(open(machine_path, 'r'))
-
-    #     # client
-
-    # with open(data_root_path + "tmp_position.csv", "w") as csv_writer:
-    #     f_csv = csv.writer(csv_writer)
-    #     f_csv.writerow(['Longitude', 'Latitude'])
-    #     for item in machine_dict:
-    #         try:
-    #             if i == 0:
-    #                 region_name = item.replace('-c', '')
-    #             elif i == 1:
-    #                 region_name = item['region']
-    #             f_csv.writerow(region2position(region_name, position_list))
-    #         except:
-    #             pass
-
-    # df = pd.read_csv(data_root_path + "tmp_position.csv", delimiter=',', skiprows=0, low_memory=False)
-
-    # geometry = [Point(xy) for xy in zip(df['Longitude'], df['Latitude'])]
-
-    # properties = {}     # 定义 properties
-    # properties['City'] = ['GD']  # 如果后面要再添加数据，就用properties['City'].append()
-    # properties['Country'] = ['CN'] 
-    # df = pd.DataFrame(properties)  
-    # df['geometry'] = geometry
 
     with open('../../../data/static/tmp_position.csv', 'w') as csv_writer:
         f_csv = csv.writer(csv_writer)
         f_csv.writerow(['longitude', 'latitude'])
         for area in area_all:
-            f_csv.writerow([region2position[area]['longitude'], region2position[area]['longitude']])
+            f_csv.writerow([region2position[area]['longitude'], region2position[area]['latitude']])
 
     df = pd.read_csv('../../../data/static/tmp_position.csv', delimiter=',', skiprows=0, low_memory=False)
+    geometry = [Point(xy) for xy in zip(df['longitude'], df['latitude'])]
 
     gdf = gpd.GeoDataFrame(df, geometry=geometry)
 
@@ -79,14 +47,13 @@ def draw_all():
     # if i != 0:
     #     last = gdf.plot(ax=last, marker='o', color=color_name[i], markersize=35, alpha=alpha[i])
     # else:
-    last = gdf.plot(ax=world.plot(figsize=(10, 6)), marker='o', color=color_name[i], markersize=35,
-                    alpha=alpha[i])
+    last = gdf.plot(ax=world.plot(figsize=(10, 6)), marker='o', color='red', markersize=35,
+                    alpha=1)
 
     plt.xlabel('Longitude', fontsize=20)
     plt.ylabel('Latitude', fontsize=20)
-    plt.title('Client Distribution', fontsize=32)
-    # plt.savefig('analysis/figure/position/client_all.svg', dpi=600, format='svg')
-    plt.show()
+    plt.title('Machine Distribution', fontsize=32)
+    plt.savefig('../../../figures/machine_distribution.pdf', dpi=300)
 
 if __name__ == '__main__':
     draw_all()
