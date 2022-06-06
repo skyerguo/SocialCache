@@ -67,12 +67,11 @@ class Redis_cache:
         self.redis.delete(min_value_related_key)
 
     def insert(self, picture_hash, picture_value):
-
         '''如果当前cache的空间使用完了，则替换'''
         if self.redis.dbsize() >= self.cache_size:
             self.remove_cache_node()
         
-        
+        '''插入redis数据库'''
         self.redis.set(name=picture_hash, value=pickle.dumps(picture_value))
 
         '''如有有使用优先队列，每次插入时需要维护优先队列'''
