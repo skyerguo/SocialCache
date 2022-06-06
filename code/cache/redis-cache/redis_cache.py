@@ -2,13 +2,20 @@ import logging
 import json
 import redis
 import pickle
+import queue
 
 class Redis_cache:
-    def __init__(self, db):
+    def __init__(self, db, use_priority_queue=True):
+        """初始化
+
+        Args:
+            db (int): 数据库表单
+            use_priority_queue (bool, optional): 是否使用优先队列维护权值最小的点. Defaults to True.
+        """
         logging.info("initing redis cache...")
 
         '''从config获得参数'''
-        config = json.load(open('config.json', 'r'))
+        config = json.load(open('code/cache/redis-cache/config.json', 'r'))
         self.cache_size = int(config['cache-size'])
 
         '''获得本机的IP地址，作为redis IP'''
@@ -30,6 +37,11 @@ class Redis_cache:
         '''实验开始，清空该数据库'''
         self.redis.flushdb()
 
+        '''设置优先队列'''
+        self.use_priority_queue = use_priority_queue
+        if self.use_priority_queue:
+            self.priority_queue = queue.PriorityQueue()
+
     def __del__(self):
         '''程序结束后，自动关闭连接，释放资源'''
         self.redis.connection_pool.disconnect()
@@ -37,22 +49,35 @@ class Redis_cache:
     def remove_cache_node(self):
         '''删掉权值最小的cache数据'''
 
-        '''这里暂时用for循环着最小值，之后改成小根堆'''
-        min_value = 1e9
-        min_value_related_key = -1
-        for curr_key in self.redis.keys():
-            # print(curr_key, self.redis.get(name=curr_key))
-            curr_value = pickle.loads(self.redis.get(name=curr_key))
-            if curr_value < min_value:
-                min_value = curr_value
-                min_value_related_key = curr_key
+        '''寻找权值最小的key'''
+        if self.use_priority_queue:
+            a = self.priority_queue.get() ## 取出并在priority_queue中去掉该元素
+            min_value = a[0]
+            min_value_related_key = a[1]
+        else:
+            min_value = 1e9
+            min_value_related_key = -1
+            for curr_key in self.redis.keys():
+                # print(curr_key, self.redis.get(name=curr_key))
+                curr_value = pickle.loads(self.redis.get(name=curr_key))
+                if curr_value < min_value:
+                    min_value = curr_value
+                    min_value_related_key = curr_key
         
         self.redis.delete(min_value_related_key)
 
     def insert(self, picture_hash, picture_value):
+
+        '''如果当前cache的空间使用完了，则替换'''
         if self.redis.dbsize() >= self.cache_size:
             self.remove_cache_node()
+        
+        
         self.redis.set(name=picture_hash, value=pickle.dumps(picture_value))
+
+        '''如有有使用优先队列，每次插入时需要维护优先队列'''
+        if self.use_priority_queue:
+            self.priority_queue.put((picture_value, picture_hash))
 
     def find(self, picture_hash):
         value = pickle.loads(self.redis.get(name=picture_hash))
