@@ -1,6 +1,7 @@
 import logging
 import json
 import redis
+import pickle
 
 class Redis_cache:
     def __init__(self, db):
@@ -8,7 +9,7 @@ class Redis_cache:
 
         '''从config获得参数'''
         config = json.load(open('config.json', 'r'))
-        self.cache_size = config['cache-size']
+        self.cache_size = int(config['cache-size'])
 
         '''获得本机的IP地址，作为redis IP'''
         self.redis_ip = "128.105.145.13"
@@ -26,20 +27,39 @@ class Redis_cache:
         )
         self.redis = redis.Redis(connection_pool=pool)
 
+        '''实验开始，清空该数据库'''
+        self.redis.flushdb()
+
     def __del__(self):
         '''程序结束后，自动关闭连接，释放资源'''
         self.redis.connection_pool.disconnect()
 
+    def remove_cache_node(self):
+        '''删掉权值最小的cache数据'''
+
+        '''这里暂时用for循环着最小值，之后改成小根堆'''
+        min_value = 1e9
+        min_value_related_key = -1
+        for curr_key in self.redis.keys():
+            # print(curr_key, self.redis.get(name=curr_key))
+            curr_value = pickle.loads(self.redis.get(name=curr_key))
+            if curr_value < min_value:
+                min_value = curr_value
+                min_value_related_key = curr_key
+        
+        self.redis.delete(min_value_related_key)
+
     def insert(self, picture_hash, picture_value):
-        self.redis.set(name=picture_hash, value=picture_value)
-        pass
+        if self.redis.dbsize() >= self.cache_size:
+            self.remove_cache_node()
+        self.redis.set(name=picture_hash, value=pickle.dumps(picture_value))
 
     def find(self, picture_hash):
-        # r = redis.Redis(host=self.redis_ip , port='6379' , db=6 ,decode_responses=True)
-        value = self.redis.get(name=picture_hash)
+        value = pickle.loads(self.redis.get(name=picture_hash))
         print(value)
-        pass
 
 if __name__ == '__main__':
     r = Redis_cache(0)
-    r.insert('123', 456)
+    for i in range(5):
+        r.insert(i, i)
+    
