@@ -26,7 +26,7 @@ sudo service redis-server restart
 sudo apt-get install -yqq python3-distutils python3-pip
 pip3 install --upgrade pip setuptools
 # pip3 install flask scrapy beautifulsoup4 dnspython gunicorn supervisor numpy
-pip3 install shapely geopandas matplotlib
+pip3 install shapely geopandas matplotlib redis
 
 ## 安装apt
 sudo apt-get -yqq install wondershaper nload iftop zip unzip
@@ -68,12 +68,12 @@ echo "export PYTHONWARNINGS=ignore" >> ~/.zshrc
 echo "export PYTHONPATH=$PYTHONPATH:$HOME/mininet" >> ~/.zshrc 
 source ~/.zshrc
 
-## cache相关
-deb http://us.archive.ubuntu.com/ubuntu/ trusty main restricted universe multiverse
-deb-src http://us.archive.ubuntu.com/ubuntu/ trusty main restricted universe multiverse
-sudo apt-get update
-sudo apt-get install -yqq libglib2.0-dev python3-pip python3-matplotlib
-pip3 install heapdict mmh3 PyMimircache
-git clone -b master --recurse-submodules git@github.com:1a1a11a/PyMimircache.git
-cd PyMimircache
-sudo python3 setup.py install
+# ## cache相关
+# deb http://us.archive.ubuntu.com/ubuntu/ trusty main restricted universe multiverse
+# deb-src http://us.archive.ubuntu.com/ubuntu/ trusty main restricted universe multiverse
+# sudo apt-get update
+# sudo apt-get install -yqq libglib2.0-dev python3-pip python3-matplotlib
+# pip3 install heapdict mmh3 PyMimircache
+# git clone -b master --recurse-submodules git@github.com:1a1a11a/PyMimircache.git
+# cd PyMimircache
+# sudo python3 setup.py install
