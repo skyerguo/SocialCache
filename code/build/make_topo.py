@@ -4,85 +4,41 @@ import random
 import json
 import copy
 
-SET_MAX_BW = 5 ## 假设最大的带宽为5MB/s
-CLIENT_NUMBER = 100
-DISPATCHER_NUMBER = 5 # 最多10个
-SERVER_NUMBER = 15
-THREAD_NUMBER = 5 # 每个CLIENT的线程数，请算一下14433+CLIENT_NUMBER*THREAD_NUMBER，是否可能造成冲突**
+# SET_MAX_BW = 10 ## 假设最大的带宽为10MB/s
 
-csv_file_path = '../../data/static/measure.csv'
+area_all = ['asia-east1','asia-east2','asia-northeast1','asia-northeast2','asia-northeast3','asia-south1','asia-south2','asia-southeast2','australia-southeast1','australia-southeast2','europe-central2','europe-north1','europe-west1','europe-west2','europe-west3','europe-west4','europe-west6','northamerica-northeast1','northamerica-northeast2','southamerica-east1','southamerica-west1','us-east1','us-east4','us-west1','us-west2','us-west3','us-west4']
+area_zone = {
+    '0': ['asia-east1','asia-east2','asia-northeast1','asia-northeast2','asia-northeast3','asia-south1','asia-south2','asia-southeast2'], 
+    '1': ['australia-southeast1','australia-southeast2'], 
+    '2': ['europe-central2','europe-north1','europe-west1','europe-west2','europe-west3','europe-west4','europe-west6'],
+    '3': ['northamerica-northeast1','northamerica-northeast2'],
+    '4': ['southamerica-east1','southamerica-west1'],
+    '5': ['us-east1','us-east4','us-west1','us-west2','us-west3','us-west4'],
+}
+zone_ignore = ['asia-southeast1', 'us-central1']
+
+max_bw = 0
+csv_file_path = 'data/static/measure.csv'
 f_in = open(csv_file_path, 'r')
 csv_reader = csv.reader(f_in)
 
-area_all = ['asia-east1','asia-east2','asia-northeast1','asia-northeast2','asia-northeast3','asia-south1','asia-south2','asia-southeast2','australia-southeast1','australia-southeast2','europe-central2','europe-north1','europe-west1','europe-west2','europe-west3','europe-west4','europe-west6','northamerica-northeast1','northamerica-northeast2','southamerica-east1','southamerica-west1','us-east1','us-east4','us-west1','us-west2','us-west3','us-west4']
-area_zone = [
-    ['asia-east1','asia-east2','asia-northeast1','asia-northeast2','asia-northeast3','asia-south1','asia-south2','asia-southeast2'], 
-    ['australia-southeast1','australia-southeast2'], 
-    ['europe-central2','europe-north1','europe-west1','europe-west2','europe-west3','europe-west4','europe-west6'],
-    ['northamerica-northeast1','northamerica-northeast2'],
-    ['southamerica-east1','southamerica-west1'],
-    ['us-east1','us-east4','us-west1','us-west2','us-west3','us-west4'],
-]
-zone_ignore = ['asia-southeast1', 'us-central1']
+'''获得两种反向查找方式'''
+map_area2id = {}
+map_area2zone = {}
+for i in range(len(area_all)):
+    map_area2id[area_all[i]] = i
+for curr_zone in area_zone.keys():
+    for i in range(len(area_zone[curr_zone])):
+        map_area2zone[area_zone[curr_zone][i]] = int(curr_zone)
 
-zone_dispatcher = ['asia-southeast2', 'australia-southeast1', 'europe-west3', 'northamerica-northeast1', 'southamerica-west1', 'us-west2']
-zone_server = [
-    ['asia-east1','asia-northeast3','asia-south2','asia-southeast2'], 
-    ['australia-southeast1'],
-    ['europe-central2','europe-north1','europe-west1'],
-    ['northamerica-northeast1','northamerica-northeast2'],
-    ['southamerica-east1'],
-    ['us-east1','us-east4','us-west3','us-west4'], 
-]
-zone_ratio = [4, 1, 3, 2, 1, 4] # 保证相加 = SERVER_NUMBER
-
-## 4 1 3 2 1 4  server分布 Polygon+Anycast
-## client按照server的zone分布来
-## FastRoute
-## 2 1 1 1 1 2  外层      
-## 1 0 1 0 0 1  内层
-## 1 0 1 1 0 1  中层 
-## 映射关系
-## aus->asia，southamerica->us, northamerica->us
-## 0->2, 1->2, 2->3
-## 4->2
-## 5->6, 6->7
-## 8->9, 9->14
-## 10->13
-## 11->13, 12->13, 13->14
-dns_links = [[0,2], [1,2], [2,3], [4,2], [5,6], [6,7], [8,9], [9,14], [10,13], [11,13], [12,13], [13,14]]
-dns_outers = [[0,1], [4], [5], [8], [10], [11,12]] 
-
-zone_dispatcher = zone_dispatcher[:DISPATCHER_NUMBER]
-client2dispatcher = [0 for _ in range(len(area_all))]
-client2dispatcher[0] = client2dispatcher[1] = client2dispatcher[2] = client2dispatcher[3] =  client2dispatcher[4] = client2dispatcher[5] = client2dispatcher[6] =  client2dispatcher[7] = 0
-client2dispatcher[8] = client2dispatcher[9] = 1
-client2dispatcher[10] = client2dispatcher[11] = client2dispatcher[12] = client2dispatcher[13] = client2dispatcher[14] = client2dispatcher[15] =  client2dispatcher[16] =  2
-client2dispatcher[17] = client2dispatcher[18] = 3
-client2dispatcher[19] = client2dispatcher[20] = 4
-client2dispatcher[21] = client2dispatcher[22] = client2dispatcher[23] = client2dispatcher[24] = client2dispatcher[25] = client2dispatcher[26] = 5
-
-client_zone = []
-dispatcher_zone = copy.deepcopy(zone_dispatcher)
-server_zone = [y for x in zone_server for y in x]
-
-zone_number = 0
-zone_map = {}
-
-max_bw = 0
-
+'''处理数据中的Gb,Mb,Kb'''
 lines = []
-
 for line in csv_reader:
     lines.append(line)
 
     area = line[0][:-2]
     if area in zone_ignore:
         continue
-    if area not in zone_map:    
-        zone_map[area] = zone_number
-        zone_number += 1
-
     if not line[3]:
         continue
     elif 'Mb' in line[3].split('_')[1]:
@@ -95,25 +51,44 @@ for line in csv_reader:
         line[3] = float(line[3].split('_')[0]) / 1000
         max_bw = max(max_bw, line[3])
 
-latency_topo = [[0 for _ in range(zone_number)] for _ in range(zone_number)]
-bandwidth_topo = [[0 for _ in range(zone_number)] for _ in range(zone_number)]
-
-print("max bandwidth: ", max_bw)
-# exit(0)
-# print("zone_number:", zone_number)
+latency_topo = [[0 for _ in range(len(area_all))] for _ in range(len(area_all))]
+bandwidth_topo = [[0 for _ in range(len(area_all))] for _ in range(len(area_all))]
 
 for line in lines:
     if (line[0][:-2] in zone_ignore) or (line[1][7:-2] in zone_ignore):
         continue
 
-    src = zone_map[line[0][:-2]] 
-    des = zone_map[line[1][7:-2]]
+    src = map_area2id[line[0][:-2]] 
+    des = map_area2id[line[1][7:-2]]
 
     latency_topo[src][des] = float(line[2])
     latency_topo[des][src] = float(line[2])
 
-    bandwidth_topo[src][des] = (line[3] / max_bw) * SET_MAX_BW
-    bandwidth_topo[des][src] = (line[3] / max_bw) * SET_MAX_BW
+    bandwidth_topo[src][des] = line[3]
+    bandwidth_topo[des][src] = line[3]
+
+# print(latency_topo)
+# print(bandwidth_topo)
+
+level_3_area = ['asia-east1', 'australia-southeast2', 'europe-central2', 'northamerica-northeast1', 'southamerica-east1']
+level_3_id = [map_area2id[x] for x in level_3_area]
+level_2_area = ['us-east1', 'asia-northeast1', 'southamerica-west1']
+level_2_id = [map_area2id[x] for x in level_2_area]
+level_1_area = ['us-west2']
+level_1_id = [map_area2id[x] for x in level_1_area]
+
+result = {}
+result['level_3_id'] = level_3_id
+result['level_2_id'] = level_2_id
+result['level_1_id'] = level_1_id
+result['latency_topo'] = latency_topo
+result['bandwidth_topo'] = bandwidth_topo
+
+json_file = 'code/build/topo.json'
+f_out = open(json_file, 'w')
+json.dump(result, f_out)
+f_out.close()
+exit()
 
 # print(latency_topo)
 # print(bandwidth_topo[0])
