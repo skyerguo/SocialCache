@@ -3,6 +3,7 @@ import json
 import redis
 import pickle
 import queue
+import subprocess
 
 class Redis_cache:
     def __init__(self, db, use_priority_queue=True):
@@ -19,10 +20,10 @@ class Redis_cache:
         self.cache_size = int(config['cache-size'])
 
         '''获得本机的IP地址，作为redis IP'''
-        self.redis_ip = "128.105.145.13"
-        # ret = subprocess.Popen("ifconfig eno1 | grep inet | awk '{print $2}' | cut -f 2 -d ':'",shell=True,stdout=subprocess.PIPE)
-        # self.redis_ip = ret.stdout.read().decode("utf-8").strip('\n')
-        # ret.stdout.close()
+        # self.redis_ip = "128.105.145.13"
+        ret = subprocess.Popen("ifconfig enp1s0f0 | grep inet | awk '{print $2}' | cut -f 2 -d ':'",shell=True,stdout=subprocess.PIPE)
+        self.redis_ip = ret.stdout.read().decode("utf-8").strip('\n')
+        ret.stdout.close()
 
         '''连接池'''
         pool = redis.ConnectionPool(
@@ -58,7 +59,6 @@ class Redis_cache:
             min_value = 1e9
             min_value_related_key = -1
             for curr_key in self.redis.keys():
-                # print(curr_key, self.redis.get(name=curr_key))
                 curr_value = pickle.loads(self.redis.get(name=curr_key))
                 if curr_value < min_value:
                     min_value = curr_value
@@ -86,4 +86,3 @@ if __name__ == '__main__':
     r = Redis_cache(0)
     for i in range(5):
         r.insert(i, i)
-    
