@@ -196,6 +196,6 @@ class Build_network:
         CLI(self.net)
 
 
-if __name__ == '__main__':
-    b = Build_network()
-    b.run()
+# if __name__ == '__main__':
+#     b = Build_network()
+#     b.run()
