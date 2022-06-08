@@ -16,7 +16,7 @@ class Redis_cache:
         logging.info("initing redis cache...")
 
         '''从config获得参数'''
-        config = json.load(open('code/cache/redis-cache/config.json', 'r'))
+        config = json.load(open('code/cache/redis_cache/config.json', 'r'))
         self.cache_size = int(config['cache-size'])
 
         '''获得本机的IP地址，作为redis IP'''
@@ -82,7 +82,7 @@ class Redis_cache:
         value = pickle.loads(self.redis.get(name=picture_hash))
         print(value)
 
-if __name__ == '__main__':
-    r = Redis_cache(0)
-    for i in range(5):
-        r.insert(i, i)
+# if __name__ == '__main__':
+#     r = Redis_cache(0)
+#     for i in range(5):
+#         r.insert(i, i)
