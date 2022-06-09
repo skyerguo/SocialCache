@@ -6,14 +6,12 @@ trace_dir = 'naive'
 m = Make_trace(trace_dir)
 m.run()
 
+## read_trace
+f_in = open("data/traces/" + trace_dir + "/all_timeline.txt", "r")
+for line in f_in:
+    current_type = line.split("+")[-1].strip()
+    current_location = eval(line.split("+")[2])
+f_in.close()
+
 b = Build_network()
 b.run()
-
-## read_trace
-f_posts_in = open("data/traces/" + trace_dir + "/posts_timeline.txt", "r")
-f_views_in = open("data/traces/" + trace_dir + "/views_timeline.txt", "r")
-
-
-
-f_posts_in.close()
-f_views_in.close()
