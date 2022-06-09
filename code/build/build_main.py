@@ -193,7 +193,7 @@ class Build_network:
         '''构建网络拓扑'''
         self.myNetwork()
 
-        CLI(self.net)
+        # CLI(self.net)
 
 
 # if __name__ == '__main__':

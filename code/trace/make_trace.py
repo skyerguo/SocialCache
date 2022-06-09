@@ -72,7 +72,7 @@ class Make_trace:
         for file_name in files:
             f_in = open(posts_dir_path + file_name, "r")
             for line in f_in:
-                posts_all.append(line.strip()+'+'+file_name.split(".")[0]+'+posts')
+                posts_all.append(line.strip()+'+'+file_name.split(".")[0]+'+post')
             f_in.close()
 
         '''每条信息为a+b+c+d+e，a为时间戳，b为媒体文件大小，c为发布地理位置，d为用户id，e为post标记'''
@@ -161,14 +161,24 @@ class Make_trace:
         self.posts_timeline = self.get_posts_timeline()
         self.views_timeline = self.get_views_timeline()
 
+        '''输出posts按时间排序'''
         f_out = open("data/traces/" + self.dir_name + "/posts_timeline.txt", "w")
         for post_line in self.posts_timeline:
             print(post_line, file=f_out)
         f_out.close()
 
+        '''输出views按时间排序'''
         f_out = open("data/traces/" + self.dir_name + "/views_timeline.txt", "w")
         for view_line in self.views_timeline:
             print(view_line, file=f_out)
+        f_out.close()
+
+        '''输出所有的按时间排序'''
+        all_timeline = self.posts_timeline + self.views_timeline
+        all_timeline.sort(key=lambda x:x.split("+")[0])
+        f_out = open("data/traces/" + self.dir_name + "/all_timeline.txt", "w")
+        for line in all_timeline:
+            print(line, file=f_out)
         f_out.close()
 
     def run(self):
@@ -180,7 +190,6 @@ class Make_trace:
         self.G.add_edges_from_file("data/traces/" + self.dir_name + "/relations.txt")
         self.synthesis_timeline()
 
- 
-if __name__ == '__main__':
-    m = Make_trace('naive')
-    m.run()
+# if __name__ == '__main__':
+#     m = Make_trace('naive')
+#     m.run()
