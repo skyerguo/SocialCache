@@ -146,11 +146,11 @@ class Make_trace:
                 for view_step in range(len(views_order)):
                     current_view_time += 5
                     if views_order[view_step] >= friend_view_number: 
-                        views_all.append(str(current_view_time) + '+' + str(views_nearby[views_order[view_step] - friend_view_number]) + '+' + str(user_id) + '+' + 'view')
+                        views_all.append(str(current_view_time) + '+' + str(views_nearby[views_order[view_step] - friend_view_number]) + '+' + str(user_location) + '+' + str(user_id) + '+' + 'view')
                     else:
-                        views_all.append(str(current_view_time) + '+' + str(views_friend[views_order[view_step]]) + '+' + str(user_id) + '+' + 'view')
+                        views_all.append(str(current_view_time) + '+' + str(views_friend[views_order[view_step]]) + '+' + str(user_location) + '+' + str(user_id) + '+' + 'view')
             f_in.close()
-        '''每条信息为a+b+c，a为时间戳，b为post_id，c为用户id，d为view标记'''
+        '''每条信息为a+b+c+d+e，a为时间戳，b为post_id，c为checkin的地理位置, d为用户id，e为view标记'''
         views_all.sort(key=lambda x:x.split("+")[0])
         return views_all
 
