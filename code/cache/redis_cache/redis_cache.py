@@ -6,7 +6,7 @@ import queue
 import subprocess
 
 class Redis_cache:
-    def __init__(self, db, use_priority_queue=True):
+    def __init__(self, db, cache_size=10, use_priority_queue=True):
         """初始化
 
         Args:
@@ -15,9 +15,9 @@ class Redis_cache:
         """
         logging.info("initing redis cache...")
 
-        '''从config获得参数'''
-        config = json.load(open('code/cache/redis_cache/config.json', 'r'))
-        self.cache_size = int(config['cache-size'])
+        # '''从config获得参数'''
+        # config = json.load(open('code/cache/redis_cache/config.json', 'r'))
+        self.cache_size = int(cache_size)
 
         '''获得本机的IP地址，作为redis IP'''
         # self.redis_ip = "128.105.145.13"
@@ -79,8 +79,12 @@ class Redis_cache:
             self.priority_queue.put((picture_value, picture_hash))
 
     def find(self, picture_hash):
-        value = pickle.loads(self.redis.get(name=picture_hash))
-        print(value)
+        value = self.redis.get(name=picture_hash)
+        if value:
+            value = pickle.loads(value)
+        else:
+            value = -1
+        return value
 
 # if __name__ == '__main__':
 #     r = Redis_cache(0)

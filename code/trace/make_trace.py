@@ -63,22 +63,6 @@ class Make_trace:
                 now_time += time_interval
             f_out.close()
 
-
-    def get_posts_timeline(self):
-        '''将posts合成一个序列，返回一个list'''
-        posts_all = []
-        posts_dir_path = "data/traces/" + self.dir_name + "/tweet_posts/"
-        files = os.listdir(posts_dir_path)
-        for file_name in files:
-            f_in = open(posts_dir_path + file_name, "r")
-            for line in f_in:
-                posts_all.append(line.strip()+'+'+file_name.split(".")[0]+'+post')
-            f_in.close()
-
-        '''每条信息为a+b+c+d+e，a为时间戳，b为媒体文件大小，c为发布地理位置，d为用户id，e为post标记'''
-        posts_all.sort(key=lambda x:x.split("+")[0])
-        return posts_all
-
     def binary_search_latest(self, timestamp):
         '''找到timestamp之前的最后一个post的id'''
         low_id = 0; high_id = len(self.posts_timeline); 
@@ -115,6 +99,25 @@ class Make_trace:
                 if len(views_nearby) >= number:
                     return views_nearby
         return views_nearby
+
+
+    def get_posts_timeline(self):
+        '''将posts合成一个序列，返回一个list'''
+        posts_all = []
+        posts_dir_path = "data/traces/" + self.dir_name + "/tweet_posts/"
+        files = os.listdir(posts_dir_path)
+        for file_name in files:
+            f_in = open(posts_dir_path + file_name, "r")
+            for line in f_in:
+                posts_all.append(line.strip()+'+'+file_name.split(".")[0])
+            f_in.close()
+
+        '''每条信息为a+b+c+d+e+f，a为时间戳，b为媒体文件大小，c为发布地理位置，d为用户id，e为post_id, f为post标记'''
+        posts_all.sort(key=lambda x:x.split("+")[0])
+        for post_id in range(len(posts_all)):
+            posts_all[post_id] = posts_all[post_id] + '+' + str(post_id) + '+' + 'post'
+        return posts_all
+
 
     def get_views_timeline(self):
         '''将check_in数据生成合理的浏览序列，返回一个lists'''
