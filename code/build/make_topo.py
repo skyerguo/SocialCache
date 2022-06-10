@@ -69,13 +69,16 @@ for line in lines:
 
 # print(delay_topo)
 # print(bandwidth_topo)
-
+'''定义每层节点地理位置'''
 level_3_area = ['asia-east1', 'australia-southeast2', 'europe-central2', 'northamerica-northeast1', 'southamerica-east1']
 level_3_id = [map_area2id[x] for x in level_3_area]
 level_2_area = ['us-east1', 'asia-northeast1', 'southamerica-west1']
 level_2_id = [map_area2id[x] for x in level_2_area]
 level_1_area = ['us-west2']
 level_1_id = [map_area2id[x] for x in level_1_area]
+'''定义层级向上绑定关系'''
+up_bind_3_2 = [1, 1, 0, 0, 2]
+up_bind_2_1 = [0, 0, 0]
 
 '''获得经纬度'''
 areaid2position = {}
@@ -97,6 +100,8 @@ result = {}
 result['level_3_id'] = level_3_id
 result['level_2_id'] = level_2_id
 result['level_1_id'] = level_1_id
+result['up_bind_3_2'] = up_bind_3_2
+result['up_bind_2_1'] = up_bind_2_1
 result['delay_topo'] = delay_topo
 result['bandwidth_topo'] = bandwidth_topo
 result['areaid2position'] = areaid2position
