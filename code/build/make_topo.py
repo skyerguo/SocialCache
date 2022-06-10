@@ -91,7 +91,7 @@ with open(position_path_name, 'r') as csv_file:
             continue
         latitude = line.split(',')[1]
         longitude = line.split(',')[2].strip()
-        areaid2position[map_area2id[curr_area]] = {'longitude': longitude, 'latitude': latitude}
+        areaid2position[map_area2id[curr_area]] = {'lon': longitude, 'lat': latitude}
 
 result = {}
 result['level_3_id'] = level_3_id
