@@ -6,7 +6,7 @@ import random
 import code.util.util as util
 
 class Make_trace:
-    def __init__(self, dir_name, user_number=100, edge_create_probability=0.3,):
+    def __init__(self, dir_name, user_number=1000, edge_create_probability=0.3,):
         ## 100个用户，随机连边
         self.user_number = user_number
         self.edge_create_probability = edge_create_probability
@@ -22,6 +22,7 @@ class Make_trace:
 
         self.G.add_edges_from_file(file_path)
         self.in_degree_dict = self.G.in_degree()
+        print(self.in_degree_dict)
 
     def make_posts(self):
         '''建立发布的轨迹，时间+地点+图片大小'''
