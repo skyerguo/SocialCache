@@ -1,7 +1,3 @@
-## 安装zsh
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
-sudo usermod -s /bin/zsh gtc
-
 ## 设置时区
 sudo cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
