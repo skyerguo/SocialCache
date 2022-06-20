@@ -17,6 +17,11 @@ git config --global user.name skyerguo97 && git config --global user.email skyer
 cd ~ && git clone git@github.com:skyerguo/SocNet.git
 ```
 
+## 安装zsh
+
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
+sudo usermod -s /bin/zsh gtc
+
 ## 安装必要的库
 
 ```
