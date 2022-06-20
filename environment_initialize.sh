@@ -43,6 +43,14 @@ git clone https://github.com/mininet/mininet.git
 cd ~/mininet
 util/install.sh -nv
 
+## 语言环境 
+echo "export PYTHONIOENCONDING=utf8" >> ~/.zshrc 
+echo "export LC_ALL=en_US.UTF-8" >> ~/.zshrc 
+echo "export LANG=en_US.UTF-8" >> ~/.zshrc 
+echo "export PYTHONWARNINGS=ignore" >> ~/.zshrc 
+echo "export PYTHONPATH=$PYTHONPATH:$HOME/mininet" >> ~/.zshrc 
+source ~/.zshrc
+
 ## 设置进程限制
 echo 530603 | sudo tee /sys/fs/cgroup/pids/user.slice/user-${UID}.slice/pids.max 
 sudo sed -i 's/#UserTasksMax=33%/UserTasksMax=infinity/g' /etc/systemd/logind.conf
@@ -55,14 +63,6 @@ echo "gtc            soft    nproc           330603" | sudo tee -a /etc/security
 echo "gtc            hard    nproc           330603" | sudo tee -a /etc/security/limits.conf
 echo "gtc            soft    nofile          102400" | sudo tee -a /etc/security/limits.conf
 echo "gtc            hard    nofile          102400" | sudo tee -a /etc/security/limits.conf
-
-## 语言环境 
-echo "export PYTHONIOENCONDING=utf8" >> ~/.zshrc 
-echo "export LC_ALL=en_US.UTF-8" >> ~/.zshrc 
-echo "export LANG=en_US.UTF-8" >> ~/.zshrc 
-echo "export PYTHONWARNINGS=ignore" >> ~/.zshrc 
-echo "export PYTHONPATH=$PYTHONPATH:$HOME/mininet" >> ~/.zshrc 
-source ~/.zshrc
 
 # ## cache相关
 # deb http://us.archive.ubuntu.com/ubuntu/ trusty main restricted universe multiverse
