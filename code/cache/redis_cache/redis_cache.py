@@ -4,9 +4,10 @@ import redis
 import pickle
 import queue
 import subprocess
+from collections import OrderedDict, defaultdict
 
 class Redis_cache:
-    def __init__(self, db, cache_size=10, use_priority_queue=True):
+    def __init__(self, db, cache_size=10, use_priority_queue=True, use_LRU_cache=False):
         """初始化
 
         Args:
@@ -43,6 +44,11 @@ class Redis_cache:
         if self.use_priority_queue:
             self.priority_queue = queue.PriorityQueue()
 
+        '''设置LRU的字典'''
+        self.use_LRU_cache = use_LRU_cache
+        if self.use_LRU_cache:
+            self.LRUcache = OrderedDict() # 用有序字典来实现LRU
+
     def __del__(self):
         '''程序结束后，自动关闭连接，释放资源'''
         self.redis.connection_pool.disconnect()
@@ -77,6 +83,15 @@ class Redis_cache:
         '''如有有使用优先队列，每次插入时需要维护优先队列'''
         if self.use_priority_queue:
             self.priority_queue.put((picture_value, picture_hash))
+        
+        if self.use_LRU_cache: #TODO，这里需要考虑redis里面要怎么修改，对应上面的remove_cache_node()需要修改
+            '''若数据已存在，表示命中一次，需要把数据移到缓存队列末端'''
+            if picture_hash in self.LRUcache:
+                self.LRUcache.move_to_end(picture_hash)
+            '''若缓存已满，则需要淘汰最早没有使用的数据'''
+            if self.redis.dbsize() >= self.cache_size:
+                self.LRUcache.popitem(last=False)
+            self.LRUcache[picture_hash]=picture_value
 
     def find(self, picture_hash):
         value = self.redis.get(name=picture_hash)
