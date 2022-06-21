@@ -35,6 +35,9 @@ class Main:
         for level_3_host_id in range(self.build_network.level_3_host_number):
             self.build_network.level_3_host[level_3_host_id].redis_cache = Redis_cache(db=len(host_all), cache_size=10, use_LRU_cache=use_LRU_cache)
             host_all.append(self.build_network.level_3_host[level_2_host_id])
+        
+        self.find_success_number = [0, 0, 0, 0]
+        self.find_fail_number = [0, 0, 0, 0]
 
     def Classical(self, specific_type):
         '''read_trace'''
@@ -55,7 +58,6 @@ class Main:
 
             if current_type == "post":
                 post_id = int(line.split('+')[4])
-                # print(current_type, post_id)
                 self.build_network.level_3_host[selected_level_3_id].redis_cache.insert(post_id, current_timestamp)
                 self.build_network.level_2_host[bind_level_2_id].redis_cache.insert(post_id, current_timestamp)
                 self.build_network.level_1_host[bind_level_1_id].redis_cache.insert(post_id, current_timestamp)
@@ -83,6 +85,7 @@ class Main:
         print("三级CDN缓存命中率：", self.find_success_number[3] / (self.find_success_number[3] + self.find_fail_number[3]))
         print("二级CDN缓存命中率：", self.find_success_number[2] / (self.find_success_number[2] + self.find_fail_number[2]))
         print("一级CDN缓存命中率：", self.find_success_number[1] / (self.find_success_number[1] + self.find_fail_number[1]))
+        # print("二级缓存命中数和失效数：", self.find_success_number[2], self.find_fail_number[2])
 
     def PageRank(self):
         self.reflush_cache()
@@ -133,7 +136,7 @@ class Main:
 
     def run(self, caching_policy):
         if caching_policy == 'FIFO':
-            self.Classical()
+            self.Classical(specific_type="FIFO")
         elif caching_policy == "LRU":
             self.Classical(specific_type="LRU")
         elif caching_policy == 'PageRank':

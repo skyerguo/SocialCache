@@ -7,7 +7,7 @@ import subprocess
 from collections import OrderedDict, defaultdict
 
 class Redis_cache:
-    def __init__(self, db, cache_size=10, use_priority_queue=True, use_LRU_cache=False):
+    def __init__(self, db, cache_size=5, use_priority_queue=True, use_LRU_cache=False):
         """初始化
 
         Args:
@@ -22,7 +22,7 @@ class Redis_cache:
 
         '''获得本机的IP地址，作为redis IP'''
         # self.redis_ip = "128.105.145.13"
-        ret = subprocess.Popen("ifconfig enp1s0f0 | grep inet | awk '{print $2}' | cut -f 2 -d ':'",shell=True,stdout=subprocess.PIPE)
+        ret = subprocess.Popen("ifconfig eno1 | grep inet | awk '{print $2}' | cut -f 2 -d ':'",shell=True,stdout=subprocess.PIPE)
         self.redis_ip = ret.stdout.read().decode("utf-8").strip('\n')
         ret.stdout.close()
 
@@ -53,29 +53,45 @@ class Redis_cache:
         '''程序结束后，自动关闭连接，释放资源'''
         self.redis.connection_pool.disconnect()
 
-    def remove_cache_node(self):
+    def remove_cache_node(self, given_key=''):
         '''删掉权值最小的cache数据'''
 
-        '''寻找权值最小的key'''
-        if self.use_priority_queue:
-            a = self.priority_queue.get() ## 取出并在priority_queue中去掉该元素
-            min_value = a[0]
-            min_value_related_key = a[1]
+        '''如果有指定的key，直接删除'''
+        if given_key != '':
+            remove_key = given_key
         else:
-            min_value = 1e9
-            min_value_related_key = -1
-            for curr_key in self.redis.keys():
-                curr_value = pickle.loads(self.redis.get(name=curr_key))
-                if curr_value < min_value:
-                    min_value = curr_value
-                    min_value_related_key = curr_key
-        
-        self.redis.delete(min_value_related_key)
+            '''否则寻找权值最小的key'''
+            if self.use_priority_queue:
+                a = self.priority_queue.get() ## 取出并在priority_queue中去掉该元素
+                min_value = a[0]
+                remove_key = a[1]
+            else:
+                min_value = 1e9
+                remove_key = -1
+                for curr_key in self.redis.keys():
+                    curr_value = pickle.loads(self.redis.get(name=curr_key))
+                    if curr_value < min_value:
+                        min_value = curr_value
+                        remove_key = curr_key
+        self.redis.delete(remove_key)
 
     def insert(self, picture_hash, picture_value):
-        '''如果当前cache的空间使用完了，则替换'''
-        if self.redis.dbsize() >= self.cache_size:
-            self.remove_cache_node()
+        
+        '''如果是LRU，特殊处理'''
+        if self.use_LRU_cache: 
+            '''若数据已存在，表示命中一次，需要把数据移到缓存队列末端'''
+            if picture_hash in self.LRUcache:
+                self.LRUcache.move_to_end(picture_hash)
+            '''若缓存已满，则需要淘汰最早没有使用的数据'''
+            if self.redis.dbsize() >= self.cache_size:
+                self.LRUcache.popitem(last=False)
+                self.remove_cache_node(given_key=next(iter(self.LRUcache)))
+            self.LRUcache[picture_hash] = picture_value
+
+        else:
+            '''如果当前cache的空间使用完了，且不是LRU，则按照内在的权值替换'''
+            if self.redis.dbsize() >= self.cache_size:
+                self.remove_cache_node()
         
         '''插入redis数据库'''
         self.redis.set(name=picture_hash, value=pickle.dumps(picture_value))
@@ -83,15 +99,6 @@ class Redis_cache:
         '''如有有使用优先队列，每次插入时需要维护优先队列'''
         if self.use_priority_queue:
             self.priority_queue.put((picture_value, picture_hash))
-        
-        if self.use_LRU_cache: #TODO，这里需要考虑redis里面要怎么修改，对应上面的remove_cache_node()需要修改
-            '''若数据已存在，表示命中一次，需要把数据移到缓存队列末端'''
-            if picture_hash in self.LRUcache:
-                self.LRUcache.move_to_end(picture_hash)
-            '''若缓存已满，则需要淘汰最早没有使用的数据'''
-            if self.redis.dbsize() >= self.cache_size:
-                self.LRUcache.popitem(last=False)
-            self.LRUcache[picture_hash]=picture_value
 
     def find(self, picture_hash):
         value = self.redis.get(name=picture_hash)
@@ -101,7 +108,7 @@ class Redis_cache:
             value = -1
         return value
 
-# if __name__ == '__main__':
-#     r = Redis_cache(0)
-#     for i in range(5):
-#         r.insert(i, i)
+if __name__ == '__main__':
+    r = Redis_cache(0)
+    for i in range(10):
+        r.insert(i, i)
