@@ -21,13 +21,20 @@ class Main:
         self.make_trace = Make_trace(self.trace_dir)
         self.make_trace.run()
 
-        self.find_success_number = [0, 0, 0, 0]
-        self.find_fail_number = [0, 0, 0, 0]
+        # self.find_success_number = [0, 0, 0, 0]
+        # self.find_fail_number = [0, 0, 0, 0]
+
+    def start_http_server(self, db):
+        '''在每个节点启动HTTP server'''
+        temp_data_path = '/proj/socnet-PG0/temp_media_data/' + str(db) + '/'
+        util.reflush_path(temp_data_path)
+
 
     def reflush_cache(self, use_LRU_cache=False):
         host_all = []
         for level_1_host_id in range(self.build_network.level_1_host_number):
             self.build_network.level_1_host[level_1_host_id].redis_cache = Redis_cache(db=len(host_all), cache_size=1000, use_LRU_cache=use_LRU_cache)
+            # self.build_network.level_1_host[level_1_host_id].start_http_server(db=len(host_all))
             host_all.append(self.build_network.level_1_host[level_1_host_id])
         for level_2_host_id in range(self.build_network.level_2_host_number):
             self.build_network.level_2_host[level_2_host_id].redis_cache = Redis_cache(db=len(host_all), cache_size=100, use_LRU_cache=use_LRU_cache)
@@ -35,7 +42,7 @@ class Main:
         for level_3_host_id in range(self.build_network.level_3_host_number):
             self.build_network.level_3_host[level_3_host_id].redis_cache = Redis_cache(db=len(host_all), cache_size=10, use_LRU_cache=use_LRU_cache)
             host_all.append(self.build_network.level_3_host[level_2_host_id])
-        
+
         self.find_success_number = [0, 0, 0, 0]
         self.find_fail_number = [0, 0, 0, 0]
 
