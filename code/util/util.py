@@ -1,4 +1,6 @@
 import math
+import os
+import shutil
 
 def calc_geolocation_distance(loc1, loc2): 
     '''计算两个地理位置的地表距离，返回单位为公里'''
@@ -23,3 +25,13 @@ def find_nearest_location(loc1, loc_list):
             nearest_distance = calc_geolocation_distance(loc1, loc_list[loc_id])
             nearest_id = loc_id
     return nearest_id
+
+def reflush_path(path):
+    if os.path.exists(path):
+        if os.path.isdir(path):
+            shutil.rmtree(path)
+        elif os.path.isfile(path):
+            os.remove(path)
+        elif os.path.islink(path):
+            os.remove(path)
+    os.system('mkdir -p ' + path)

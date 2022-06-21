@@ -14,6 +14,7 @@ import os
 import subprocess
 import sys
 import configparser
+import code.util.simple_httpserver as simple_httpserver
 
 # SELECT_TOPO = json.load(open('../json-files/topo.json', 'r'))
 
@@ -187,7 +188,6 @@ class Build_network:
 
         '''等待30秒，保证网络构建完成'''
         time.sleep(30) 
-
 
     def run(self):
         '''构建网络拓扑'''
