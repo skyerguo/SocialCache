@@ -6,8 +6,8 @@ import random
 import code.util.util as util
 
 class Make_trace:
-    def __init__(self, dir_name, user_number=1000, edge_create_probability=0.3,):
-        ## 100个用户，随机连边
+    def __init__(self, dir_name, user_number=1000, edge_create_probability=0.3):
+        ## 1000个用户，随机连边
         self.user_number = user_number
         self.edge_create_probability = edge_create_probability
         self.start_time = 1000000000
@@ -66,7 +66,7 @@ class Make_trace:
 
     def binary_search_latest(self, timestamp):
         '''找到timestamp之前的最后一个post的id'''
-        low_id = 0; high_id = len(self.posts_timeline); 
+        low_id = 0; high_id = len(self.posts_timeline) - 1; 
         while low_id < high_id:
             mid_id = int((low_id+high_id+1)/2)
             if int(self.posts_timeline[mid_id].split("+")[0]) < timestamp:
