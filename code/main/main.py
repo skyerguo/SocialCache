@@ -3,10 +3,11 @@ from code.trace.make_trace import Make_trace
 from code.cache.redis_cache.redis_cache import Redis_cache
 import easygraph as eg
 import code.util.util as util
+from mininet.cli import CLI
 import json
 
 class Main:
-    def __init__(self):
+    def __init__(self, use_http_server=False):
 
         self.build_network = Build_network()
         self.build_network.run()
@@ -21,26 +22,35 @@ class Main:
         self.make_trace = Make_trace(self.trace_dir)
         self.make_trace.run()
 
+        self.use_http_server = use_http_server
+
         # self.find_success_number = [0, 0, 0, 0]
         # self.find_fail_number = [0, 0, 0, 0]
 
-    def start_http_server(self, db):
+    def start_http_server(self, host, db, host_ip):
         '''在每个节点启动HTTP server'''
-        temp_data_path = '/proj/socnet-PG0/temp_media_data/' + str(db) + '/'
-        util.reflush_path(temp_data_path)
-
+        temp_save_data_path = '/proj/socnet-PG0/temp_media_data/' + str(db) + '/save/'
+        util.reflush_path(temp_save_data_path)
+        print("!!!! start_http_server!!!! host_ip: ", host_ip)
+        host.cmdPrint('cd %s && nohup python3 /users/gtc/SocNet/code/util/simple_httpserver.py -l %s -p %s -n 1>> log1.txt 2>> log2.txt &'%(temp_save_data_path, str(host_ip), str(4433+int(db))))
+        
 
     def reflush_cache(self, use_LRU_cache=False):
         host_all = []
         for level_1_host_id in range(self.build_network.level_1_host_number):
             self.build_network.level_1_host[level_1_host_id].redis_cache = Redis_cache(db=len(host_all), cache_size=1000, use_LRU_cache=use_LRU_cache)
-            # self.build_network.level_1_host[level_1_host_id].start_http_server(db=len(host_all))
+            if self.use_http_server:
+                self.start_http_server(host=self.build_network.level_1_host[level_1_host_id], db=len(host_all), host_ip=self.build_network.level_1_host_ip[level_1_host_id])
             host_all.append(self.build_network.level_1_host[level_1_host_id])
         for level_2_host_id in range(self.build_network.level_2_host_number):
             self.build_network.level_2_host[level_2_host_id].redis_cache = Redis_cache(db=len(host_all), cache_size=100, use_LRU_cache=use_LRU_cache)
+            if self.use_http_server:
+                self.start_http_server(host=self.build_network.level_2_host[level_2_host_id], db=len(host_all), host_ip=self.build_network.level_2_host_ip[level_2_host_id])
             host_all.append(self.build_network.level_2_host[level_2_host_id])
         for level_3_host_id in range(self.build_network.level_3_host_number):
             self.build_network.level_3_host[level_3_host_id].redis_cache = Redis_cache(db=len(host_all), cache_size=10, use_LRU_cache=use_LRU_cache)
+            if self.use_http_server:
+                self.start_http_server(host=self.build_network.level_3_host[level_3_host_id], db=len(host_all), host_ip=self.build_network.level_3_host_ip[level_3_host_id])
             host_all.append(self.build_network.level_3_host[level_2_host_id])
 
         self.find_success_number = [0, 0, 0, 0]
@@ -150,7 +160,7 @@ class Main:
             self.PageRank()
 
 if __name__ == '__main__':
-    main_program = Main()
+    main_program = Main(use_http_server=True)
     main_program.run('FIFO')
-    main_program.run('LRU')
-    main_program.run('PageRank')
+    # main_program.run('LRU')
+    # main_program.run('PageRank')

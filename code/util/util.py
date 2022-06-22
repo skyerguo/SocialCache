@@ -28,10 +28,12 @@ def find_nearest_location(loc1, loc_list):
 
 def reflush_path(path):
     if os.path.exists(path):
-        if os.path.isdir(path):
-            shutil.rmtree(path)
-        elif os.path.isfile(path):
-            os.remove(path)
-        elif os.path.islink(path):
-            os.remove(path)
+        if 'temp' in path:
+            os.system('rm -rf ' + path)
+        # if os.path.isdir(path):
+        #     shutil.rmtree(path)
+        # elif os.path.isfile(path):
+        #     os.remove(path)
+        # elif os.path.islink(path):
+        #     os.remove(path)
     os.system('mkdir -p ' + path)
