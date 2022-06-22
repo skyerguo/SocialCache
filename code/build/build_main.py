@@ -29,6 +29,7 @@ class Build_network:
         self.level_1_host = []
         self.level_2_host = []
         self.level_3_host = []
+
         self.switch = []
 
         '''读取topo文件，并设置参数'''
@@ -36,6 +37,10 @@ class Build_network:
         self.level_1_host_number = len(self.topo['level_1_id'])
         self.level_2_host_number = len(self.topo['level_2_id'])
         self.level_3_host_number = len(self.topo['level_3_id'])
+
+        self.level_1_host_ip = ['' for _ in range(self.level_1_host_number)]
+        self.level_2_host_ip = ['' for _ in range(self.level_2_host_number)]
+        self.level_3_host_ip = ['' for _ in range(self.level_3_host_number)]
 
         self.switch_number = self.level_1_host_number + self.level_2_host_number + 1  #设置switch数量，除了最下面一层，每层各有一个switch，最后一个用来帮助redis连外网
 
@@ -99,11 +104,14 @@ class Build_network:
 
         print('*** Add hosts\n')
         for level_1_host_id in range(self.level_1_host_number):
-            self.level_1_host.append(self.net.addHost('a%s'%str(level_1_host_id), cpu=self.topo['cpu_level_1']/self.level_1_host_number, ip='10.0.%s.1'%str(level_1_host_id), defaultRoute=None)) 
+            self.level_1_host_ip[level_1_host_id] = '10.0.%s.1'%str(level_1_host_id)
+            self.level_1_host.append(self.net.addHost('a%s'%str(level_1_host_id), cpu=self.topo['cpu_level_1']/self.level_1_host_number, ip=self.level_1_host_ip[level_1_host_id], defaultRoute=None)) 
         for level_2_host_id in range(self.level_2_host_number):
-            self.level_2_host.append(self.net.addHost('b%s'%str(level_2_host_id), cpu=self.topo['cpu_level_2']/self.level_2_host_number, ip='10.0.%s.3'%str(level_2_host_id), defaultRoute=None)) 
+            self.level_2_host_ip[level_2_host_id] = '10.0.%s.3'%str(level_2_host_id)
+            self.level_2_host.append(self.net.addHost('b%s'%str(level_2_host_id), cpu=self.topo['cpu_level_2']/self.level_2_host_number, ip=self.level_2_host_ip[level_2_host_id], defaultRoute=None)) 
         for level_3_host_id in range(self.level_3_host_number):
-            self.level_3_host.append(self.net.addHost('c%s'%str(level_3_host_id), cpu=self.topo['cpu_level_3']/self.level_3_host_number, ip='10.0.%s.5'%str(level_3_host_id), defaultRoute=None)) 
+            self.level_3_host_ip[level_3_host_id] = '10.0.%s.5'%str(level_3_host_id)
+            self.level_3_host.append(self.net.addHost('c%s'%str(level_3_host_id), cpu=self.topo['cpu_level_3']/self.level_3_host_number, ip=self.level_3_host_ip[level_3_host_id], defaultRoute=None)) 
         
         print('*** Add links\n')
         '''level_1和level_2之间的结果，通过level_1对应的switch相连'''
