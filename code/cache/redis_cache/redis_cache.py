@@ -5,6 +5,7 @@ import pickle
 import queue
 import subprocess
 from collections import OrderedDict, defaultdict
+import os
 
 class Redis_cache:
     def __init__(self, db, cache_size=5, use_priority_queue=True, use_LRU_cache=False):
@@ -49,6 +50,9 @@ class Redis_cache:
         if self.use_LRU_cache:
             self.LRUcache = OrderedDict() # 用有序字典来实现LRU
 
+        '''设置实际数据文件存储路径'''
+        self.data_path = '/dev/null'
+
     def __del__(self):
         '''程序结束后，自动关闭连接，释放资源'''
         self.redis.connection_pool.disconnect()
@@ -75,8 +79,7 @@ class Redis_cache:
                         remove_key = curr_key
         self.redis.delete(remove_key)
 
-    def insert(self, picture_hash, picture_value):
-        
+    def insert(self, picture_hash, picture_value, media_size=0):
         '''如果是LRU，特殊处理'''
         if self.use_LRU_cache: 
             '''若数据已存在，表示命中一次，需要把数据移到缓存队列末端'''
@@ -100,6 +103,11 @@ class Redis_cache:
         if self.use_priority_queue:
             self.priority_queue.put((picture_value, picture_hash))
 
+        '''如果需要创建图片，则在路径中创建一个文件'''
+        if media_size != 0:
+            if self.data_path != '/dev/null': ## 启用HTTP了
+                os.system('head -c %s /dev/zero > %s'%(str(media_size), self.data_path + str(picture_hash)))
+
     def find(self, picture_hash):
         value = self.redis.get(name=picture_hash)
         if value:
@@ -108,7 +116,7 @@ class Redis_cache:
             value = -1
         return value
 
-if __name__ == '__main__':
-    r = Redis_cache(0)
-    for i in range(10):
-        r.insert(i, i)
+# if __name__ == '__main__':
+#     r = Redis_cache(0)
+#     for i in range(10):
+#         r.insert(i, i)

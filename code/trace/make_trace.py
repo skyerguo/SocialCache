@@ -113,7 +113,7 @@ class Make_trace:
                 posts_all.append(line.strip()+'+'+file_name.split(".")[0])
             f_in.close()
 
-        '''每条信息为a+b+c+d+e+f，a为时间戳，b为媒体文件大小，c为发布地理位置，d为用户id，e为post_id, f为post标记'''
+        '''每条信息为0+1+2+3+4+5，0为时间戳，1为媒体文件大小，2为发布地理位置，3为用户id，4为post_id, 5为post标记'''
         posts_all.sort(key=lambda x:x.split("+")[0])
         for post_id in range(len(posts_all)):
             posts_all[post_id] = posts_all[post_id] + '+' + str(post_id) + '+' + 'post'
@@ -154,7 +154,7 @@ class Make_trace:
                     else:
                         views_all.append(str(current_view_time) + '+' + str(views_friend[views_order[view_step]]) + '+' + str(user_location) + '+' + str(user_id) + '+' + 'view')
             f_in.close()
-        '''每条信息为a+b+c+d+e，a为时间戳，b为post_id，c为checkin的地理位置, d为用户id，e为view标记'''
+        '''每条信息为0+1+2+3+4，0为时间戳，1为post_id，2为checkin的地理位置, 3为用户id，4为view标记'''
         views_all.sort(key=lambda x:x.split("+")[0])
         return views_all
 
