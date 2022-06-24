@@ -95,6 +95,7 @@ class Redis_cache:
             '''如果当前cache的空间使用完了，且不是LRU，则按照内在的权值替换'''
             if self.redis.dbsize() >= self.cache_size:
                 self.remove_cache_node()
+            
         
         '''插入redis数据库'''
         self.redis.set(name=picture_hash, value=pickle.dumps(picture_value))
