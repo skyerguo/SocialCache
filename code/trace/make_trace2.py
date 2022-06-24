@@ -19,7 +19,25 @@ class gen_trace_data:
     def load_network(self, filename, draw=False):
         self.user_net = nx.DiGraph()
         with open(filename, encoding='utf-8') as fd:
-            [self.user_net.add_edge(int(edge.split()[0]), int(edge.split()[1])) for edge in fd.readlines()]
+            newid = 0
+            node_dict = {}
+            for edge in fd.readlines():
+                node1, node2 = int(edge.split()[0]), int(edge.split()[1])
+                try:
+                    n1 = node_dict[node1]
+                except KeyError:
+                    node_dict[node1] = newid
+                    n1 = newid
+                    newid += 1
+                try:
+                    n2 = node_dict[node2]
+                except KeyError:
+                    node_dict[node2] = newid
+                    n2 = newid
+                    newid += 1
+
+                self.user_net.add_edge(n1, n2)
+                #print("add edge (%d, %d)" %(n1, n2))
         
         # dump user network
         if draw:
@@ -70,12 +88,12 @@ class gen_trace_data:
         activity_interval = np.random.lognormal(self.lognormal_mu, self.lognormal_theta, activity_num)
         time = 0
         for interval in activity_interval:
-            time += interval
+            time += int(interval * 10)
             time_list.append(time)
             loc_list.append(random.choice(self.location_list))
-        
+
         return pd.DataFrame(dict(timestamp=time_list, publish=kind_list, location=loc_list))
-    
+
     def build_user_activity(self):
         self.df_trace = pd.DataFrame(columns=["timestamp", "publish", "location", "user_id"])
         for rowidx, row in self.user_df.iterrows():
@@ -84,17 +102,31 @@ class gen_trace_data:
             #print(df)
             self.df_trace = pd.concat([self.df_trace, df])
         
-        self.df_trace.sort_values(by="timestamp")
-        #print(self.user_df)
-        #print(self.df_trace)
+        self.df_trace = self.df_trace.sort_values(by="timestamp").reset_index(drop=True)
+        print(self.df_trace)
         self.df_trace.to_csv("trace.csv")
     
+    def trans_trace2timeline(self):
+
+        fd = open("all_timeline.txt", "w+")
+        post_seq_num = 0
+        for rowidx, row in self.df_trace.iterrows():
+            line = str(row["timestamp"]) + "+1" + "+{'lat': '%.2f', 'lon': '%.2f'}" %(row["location"][0], row["location"][1]) + "+" + str(row["user_id"])
+            if row["publish"] == 1:
+                line += "+" + str(post_seq_num) + "+post"
+                post_seq_num += 1
+            else:
+                line += "+view"
+            fd.write(line + '\n')
+
+        fd.close()
+
     def launch(self):
-        self.load_network(self.edge_file)
+        self.load_network(self.edge_file, draw=True)
         self.load_location(self.loc_file)
         self.build_user_df()
         self.build_user_activity()
-        
+        self.trans_trace2timeline()
         
     
 if __name__ == "__main__":

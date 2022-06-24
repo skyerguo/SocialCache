@@ -8,7 +8,7 @@ import json
 import os
 
 class Main:
-    def __init__(self, use_http_server=False):
+    def __init__(self, trace_dir, use_http_server=False):
 
         self.build_network = Build_network()
         self.build_network.run()
@@ -19,7 +19,7 @@ class Main:
         for area_id in level_3_area_id:
             self.level_3_area_location.append(self.topo["areaid2position"][str(area_id)])
 
-        self.trace_dir = 'naive'
+        self.trace_dir = trace_dir
         self.make_trace = Make_trace(self.trace_dir)
         self.make_trace.run()
 
@@ -82,8 +82,8 @@ class Main:
                 post_id = int(line.split('+')[4])
                 media_size = int(float(line.split('+')[1]) * 1000)
                 self.build_network.level_3_host[selected_level_3_id].redis_cache.insert(post_id, current_timestamp, media_size=media_size)
-                self.build_network.level_2_host[bind_level_2_id].redis_cache.insert(post_id, current_timestamp)
-                self.build_network.level_1_host[bind_level_1_id].redis_cache.insert(post_id, current_timestamp)
+                # self.build_network.level_2_host[bind_level_2_id].redis_cache.insert(post_id, current_timestamp)
+                # self.build_network.level_1_host[bind_level_1_id].redis_cache.insert(post_id, current_timestamp)
 
             elif current_type == "view":
                 post_id = int(line.split('+')[1])
@@ -166,7 +166,7 @@ class Main:
             self.PageRank()
 
 if __name__ == '__main__':
-    main_program = Main(use_http_server=True)
+    main_program = Main(trace_dir='naive', use_http_server=True)
     main_program.run('FIFO')
     # main_program.run('LRU')
     # main_program.run('PageRank')
