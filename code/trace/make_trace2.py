@@ -16,8 +16,10 @@ class gen_trace_data:
         self.edge_file  = edge_file
         self.loc_file   = loc_file
     
-    def load_network(self, filename, draw=False):
+    def load_network(self, filename, output_edge_filename="relations.txt", draw=False):
         self.user_net = nx.DiGraph()
+        f_out = open(output_edge_filename, 'w')
+        node_max = 0
         with open(filename, encoding='utf-8') as fd:
             newid = 0
             node_dict = {}
@@ -37,8 +39,12 @@ class gen_trace_data:
                     newid += 1
 
                 self.user_net.add_edge(n1, n2)
+                print("%d %d" %(n1, n2), file=f_out)
+                node_max = max(node_max, n1)
+                node_max = max(node_max, n2)
                 #print("add edge (%d, %d)" %(n1, n2))
         
+        print("node_max: ", node_max)
         # dump user network
         if draw:
             nx.draw(self.user_net)
@@ -123,10 +129,10 @@ class gen_trace_data:
 
     def launch(self):
         self.load_network(self.edge_file, draw=True)
-        self.load_location(self.loc_file)
-        self.build_user_df()
-        self.build_user_activity()
-        self.trans_trace2timeline()
+        # self.load_location(self.loc_file)
+        # self.build_user_df()
+        # self.build_user_activity()
+        # self.trans_trace2timeline()
         
     
 if __name__ == "__main__":

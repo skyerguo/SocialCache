@@ -192,7 +192,7 @@ class Make_trace:
         # self.make_posts()
         # self.make_checkins()
         self.G.add_edges_from_file("data/traces/" + self.dir_name + "/relations.txt")
-        self.synthesis_timeline()
+        # self.synthesis_timeline()
 
 # if __name__ == '__main__':
 #     m = Make_trace('naive')
