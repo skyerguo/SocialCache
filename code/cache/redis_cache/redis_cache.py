@@ -53,6 +53,9 @@ class Redis_cache:
         '''设置实际数据文件存储路径'''
         self.data_path = '/dev/null'
 
+        '''设置上一层的redis_cache'''
+        self.has_higher_cache = False
+
     def __del__(self):
         '''程序结束后，自动关闭连接，释放资源'''
         self.redis.connection_pool.disconnect()

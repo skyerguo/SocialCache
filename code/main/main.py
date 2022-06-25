@@ -38,25 +38,36 @@ class Main:
         os.system("ps -ef |grep simple_httpserver.py | grep -v grep | awk '{print $2}' | xargs sudo kill -9 > /dev/null 2>&1 && sleep 3")
         host_all = []
         for level_1_host_id in range(self.build_network.level_1_host_number):
-            self.build_network.level_1_host[level_1_host_id].redis_cache = Redis_cache(db=len(host_all), cache_size=1000, use_LRU_cache=use_LRU_cache)
+            self.build_network.level_1_host[level_1_host_id].redis_cache = Redis_cache(db=len(host_all), cache_size=10000, use_LRU_cache=use_LRU_cache)
             if self.use_http_server:
                 self.build_network.level_1_host[level_1_host_id].redis_cache.data_path = '/proj/socnet-PG0/temp_media_data/' + str(len(host_all)) + '/save/'
                 self.start_http_server(host=self.build_network.level_1_host[level_1_host_id], db=len(host_all), host_ip=self.build_network.level_1_host_ip[level_1_host_id], temp_save_data_path=self.build_network.level_1_host[level_1_host_id].redis_cache.data_path)
             host_all.append(self.build_network.level_1_host[level_1_host_id])
 
         for level_2_host_id in range(self.build_network.level_2_host_number):
-            self.build_network.level_2_host[level_2_host_id].redis_cache = Redis_cache(db=len(host_all), cache_size=100, use_LRU_cache=use_LRU_cache)
+            self.build_network.level_2_host[level_2_host_id].redis_cache = Redis_cache(db=len(host_all), cache_size=1000, use_LRU_cache=use_LRU_cache)
             if self.use_http_server:
                 self.build_network.level_2_host[level_2_host_id].redis_cache.data_path = '/proj/socnet-PG0/temp_media_data/' + str(len(host_all)) + '/save/'
                 self.start_http_server(host=self.build_network.level_2_host[level_2_host_id], db=len(host_all), host_ip=self.build_network.level_2_host_ip[level_2_host_id], temp_save_data_path=self.build_network.level_2_host[level_2_host_id].redis_cache.data_path)
             host_all.append(self.build_network.level_2_host[level_2_host_id])
 
         for level_3_host_id in range(self.build_network.level_3_host_number):
-            self.build_network.level_3_host[level_3_host_id].redis_cache = Redis_cache(db=len(host_all), cache_size=10, use_LRU_cache=use_LRU_cache)
+            self.build_network.level_3_host[level_3_host_id].redis_cache = Redis_cache(db=len(host_all), cache_size=100, use_LRU_cache=use_LRU_cache)
             if self.use_http_server:
                 self.build_network.level_3_host[level_3_host_id].redis_cache.data_path = '/proj/socnet-PG0/temp_media_data/' + str(len(host_all)) + '/save/'
                 self.start_http_server(host=self.build_network.level_3_host[level_3_host_id], db=len(host_all), host_ip=self.build_network.level_3_host_ip[level_3_host_id], temp_save_data_path=self.build_network.level_3_host[level_3_host_id].redis_cache.data_path)
             host_all.append(self.build_network.level_3_host[level_3_host_id])
+
+        '''设置层级关系'''
+        for level_3_host_id in range(self.build_network.level_3_host_number):
+            bind_level_2_id = self.topo['up_bind_3_2'][level_3_host_id]
+            self.build_network.level_3_host[level_3_host_id].redis_cache.has_higher_cache = True
+            self.build_network.level_3_host[level_3_host_id].redis_cache.higher_cache = self.build_network.level_2_host[bind_level_2_id].redis_cache
+
+        for level_2_host_id in range(self.build_network.level_2_host_number):
+            bind_level_1_id = self.topo['up_bind_2_1'][level_2_host_id]
+            self.build_network.level_2_host[level_2_host_id].redis_cache.has_higher_cache = True
+            self.build_network.level_2_host[level_2_host_id].redis_cache.higher_cache = self.build_network.level_1_host[bind_level_1_id].redis_cache
 
         self.find_success_number = [0, 0, 0, 0]
         self.find_fail_number = [0, 0, 0, 0]
@@ -68,8 +79,10 @@ class Main:
         else:
             self.reflush_cache()
 
+
         f_in = open("data/traces/" + self.trace_dir + "/all_timeline.txt", "r")
         for line in f_in:
+            # print(line)
             current_type = line.split('+')[-1].strip()
             current_location = eval(line.split('+')[2])
             current_timestamp = int(line.split('+')[0])
@@ -81,9 +94,10 @@ class Main:
             if current_type == "post":
                 post_id = int(line.split('+')[4])
                 media_size = int(float(line.split('+')[1]) * 1000)
+                ## 往第三层级插入，后续的调整都由redis内部完成
                 self.build_network.level_3_host[selected_level_3_id].redis_cache.insert(post_id, current_timestamp, media_size=media_size)
-                # self.build_network.level_2_host[bind_level_2_id].redis_cache.insert(post_id, current_timestamp)
-                # self.build_network.level_1_host[bind_level_1_id].redis_cache.insert(post_id, current_timestamp)
+                self.build_network.level_2_host[bind_level_2_id].redis_cache.insert(post_id, current_timestamp)
+                self.build_network.level_1_host[bind_level_1_id].redis_cache.insert(post_id, current_timestamp)
 
             elif current_type == "view":
                 post_id = int(line.split('+')[1])
@@ -114,10 +128,12 @@ class Main:
         self.reflush_cache()
         '''计算PageRank'''
         page_rank_metrics = eg.functions.not_sorted.pagerank(self.make_trace.G)
+        # print("page_rank_metrics: ", page_rank_metrics)
 
         '''read_trace'''
         f_in = open("data/traces/" + self.trace_dir + "/all_timeline.txt", "r")
         for line in f_in:
+            # print(line)
             current_type = line.split('+')[-1].strip()
             current_location = eval(line.split('+')[2])
             current_timestamp = int(line.split('+')[0])
@@ -129,9 +145,10 @@ class Main:
             if current_type == "post":
                 post_id = int(line.split('+')[4])
                 user_id = int(line.split('+')[3])
-                self.build_network.level_3_host[selected_level_3_id].redis_cache.insert(post_id, int(page_rank_metrics[str(user_id)] * 10000) + current_timestamp)
-                self.build_network.level_2_host[bind_level_2_id].redis_cache.insert(post_id, int(page_rank_metrics[str(user_id)] * 10000) + current_timestamp)
-                self.build_network.level_1_host[bind_level_1_id].redis_cache.insert(post_id, int(page_rank_metrics[str(user_id)] * 10000) + current_timestamp)
+                media_size = int(float(line.split('+')[1]) * 1000)
+                self.build_network.level_3_host[selected_level_3_id].redis_cache.insert(post_id, int(page_rank_metrics[str(user_id)] * 10000),media_size=media_size)
+                self.build_network.level_2_host[bind_level_2_id].redis_cache.insert(post_id, int(page_rank_metrics[str(user_id)] * 10000))
+                self.build_network.level_1_host[bind_level_1_id].redis_cache.insert(post_id, int(page_rank_metrics[str(user_id)] * 10000))
 
             elif current_type == "view":
                 post_id = int(line.split('+')[1])
@@ -166,7 +183,7 @@ class Main:
             self.PageRank()
 
 if __name__ == '__main__':
-    main_program = Main(trace_dir='naive', use_http_server=True)
+    main_program = Main(trace_dir='myk', use_http_server=False)
     main_program.run('FIFO')
-    # main_program.run('LRU')
-    # main_program.run('PageRank')
+    main_program.run('LRU')
+    main_program.run('PageRank')
