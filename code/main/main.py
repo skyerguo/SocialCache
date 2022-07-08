@@ -25,40 +25,75 @@ class Main:
 
         self.use_http_server = use_http_server
 
+        '''存储结果数据的文件夹'''
+        self.result_path = '/proj/socnet-PG0/data/' + str(time.strftime("%Y-%m-%d_%H:%M:%S", time.localtime())) + '/'
+        util.reflush_path(self.result_path)
+
         # self.find_success_number = [0, 0, 0, 0]
         # self.find_fail_number = [0, 0, 0, 0]
 
-    def start_http_server(self, host, db, host_ip, temp_save_data_path):
+    def start_http_server(self, host, db, host_ip, temp_picture_path):
         '''
             在每个节点启动HTTP server.
             The port number is 4333 + db
         '''
-        util.reflush_path(temp_save_data_path)
-        host.cmdPrint('cd %s && nohup python3 /users/gtc/SocNet/code/util/simple_httpserver.py -l %s -p %s -n 1>> log1.txt 2>> log2.txt &'%(temp_save_data_path, str(host_ip), str(4433+int(db))))
+
+        '''清空temp文件夹，创建对应ip的result文件夹'''
+        util.reflush_path(temp_picture_path)
+        os.system('mkdir -p ' + self.result_path + 'http/' + host_ip)
+        os.system('mkdir -p ' + self.result_path + 'curl/' + host_ip)
+        os.system('mkdir -p ' + self.result_path + 'wget/' + host_ip)
+        os.system('mkdir -p ' + self.result_path + 'flow/' + host_ip)
+        
+        host.cmdPrint('cd %s && nohup python3 /users/gtc/SocNet/code/util/simple_httpserver.py -l %s -p %s -n 1>> %s/http_log1.txt 2>> %s/http_log2.txt &'%(temp_picture_path, str(host_ip), str(4433+int(db)), self.result_path+'http/'+host_ip, self.result_path+'http/'+host_ip))
         
 
     def reflush_cache(self, use_LRU_cache=False):
         os.system("ps -ef |grep simple_httpserver.py | grep -v grep | awk '{print $2}' | xargs sudo kill -9 > /dev/null 2>&1 && sleep 3") ## 删除之前的HTTP_server
         host_all = []
         for level_1_host_id in range(self.build_network.level_1_host_number):
-            self.build_network.level_1_host[level_1_host_id].redis_cache = Redis_cache(db=len(host_all), mininet_node=self.build_network.level_1_host[level_1_host_id], cache_size=10000, use_LRU_cache=use_LRU_cache)
+            self.build_network.level_1_host[level_1_host_id].redis_cache = Redis_cache(
+                db=len(host_all),
+                host=self.build_network.level_1_host[level_1_host_id], 
+                cache_size=10000, 
+                use_LRU_cache=use_LRU_cache, 
+                result_path=self.result_path,
+                host_ip=self.build_network.level_1_host_ip[level_1_host_id]
+            )
+
             if self.use_http_server:
-                self.build_network.level_1_host[level_1_host_id].redis_cache.data_path = '/proj/socnet-PG0/temp_media_data/' + str(len(host_all)) + '/save/'
-                self.start_http_server(host=self.build_network.level_1_host[level_1_host_id], db=len(host_all), host_ip=self.build_network.level_1_host_ip[level_1_host_id], temp_save_data_path=self.build_network.level_1_host[level_1_host_id].redis_cache.data_path)
+                self.build_network.level_1_host[level_1_host_id].redis_cache.data_path = '/proj/socnet-PG0/temp_media_data/' + str(len(host_all)) + '/picture/'
+                self.start_http_server(host=self.build_network.level_1_host[level_1_host_id], db=len(host_all), host_ip=self.build_network.level_1_host_ip[level_1_host_id], temp_picture_path=self.build_network.level_1_host[level_1_host_id].redis_cache.data_path)
             host_all.append(self.build_network.level_1_host[level_1_host_id])
 
         for level_2_host_id in range(self.build_network.level_2_host_number):
-            self.build_network.level_2_host[level_2_host_id].redis_cache = Redis_cache(db=len(host_all), mininet_node=self.build_network.level_2_host[level_2_host_id], cache_size=1000, use_LRU_cache=use_LRU_cache)
+            self.build_network.level_2_host[level_2_host_id].redis_cache = Redis_cache(
+                db=len(host_all), 
+                host=self.build_network.level_2_host[level_2_host_id], 
+                cache_size=1000, 
+                use_LRU_cache=use_LRU_cache,
+                result_path=self.result_path,
+                host_ip=self.build_network.level_2_host_ip[level_2_host_id]
+            )
+
             if self.use_http_server:
-                self.build_network.level_2_host[level_2_host_id].redis_cache.data_path = '/proj/socnet-PG0/temp_media_data/' + str(len(host_all)) + '/save/'
-                self.start_http_server(host=self.build_network.level_2_host[level_2_host_id], db=len(host_all), host_ip=self.build_network.level_2_host_ip[level_2_host_id], temp_save_data_path=self.build_network.level_2_host[level_2_host_id].redis_cache.data_path)
+                self.build_network.level_2_host[level_2_host_id].redis_cache.data_path = '/proj/socnet-PG0/temp_media_data/' + str(len(host_all)) + '/picture/'
+                self.start_http_server(host=self.build_network.level_2_host[level_2_host_id], db=len(host_all), host_ip=self.build_network.level_2_host_ip[level_2_host_id], temp_picture_path=self.build_network.level_2_host[level_2_host_id].redis_cache.data_path)
             host_all.append(self.build_network.level_2_host[level_2_host_id])
 
         for level_3_host_id in range(self.build_network.level_3_host_number):
-            self.build_network.level_3_host[level_3_host_id].redis_cache = Redis_cache(db=len(host_all), mininet_node=self.build_network.level_3_host[level_3_host_id], cache_size=100, use_LRU_cache=use_LRU_cache)
+            self.build_network.level_3_host[level_3_host_id].redis_cache = Redis_cache(
+                db=len(host_all), 
+                host=self.build_network.level_3_host[level_3_host_id], 
+                cache_size=100, 
+                use_LRU_cache=use_LRU_cache,
+                result_path=self.result_path,
+                host_ip=self.build_network.level_3_host_ip[level_3_host_id]
+            )
+
             if self.use_http_server:
-                self.build_network.level_3_host[level_3_host_id].redis_cache.data_path = '/proj/socnet-PG0/temp_media_data/' + str(len(host_all)) + '/save/'
-                self.start_http_server(host=self.build_network.level_3_host[level_3_host_id], db=len(host_all), host_ip=self.build_network.level_3_host_ip[level_3_host_id], temp_save_data_path=self.build_network.level_3_host[level_3_host_id].redis_cache.data_path)
+                self.build_network.level_3_host[level_3_host_id].redis_cache.data_path = '/proj/socnet-PG0/temp_media_data/' + str(len(host_all)) + '/picture/'
+                self.start_http_server(host=self.build_network.level_3_host[level_3_host_id], db=len(host_all), host_ip=self.build_network.level_3_host_ip[level_3_host_id], temp_picture_path=self.build_network.level_3_host[level_3_host_id].redis_cache.data_path)
             host_all.append(self.build_network.level_3_host[level_3_host_id])
 
         '''设置层级关系'''
@@ -89,8 +124,12 @@ class Main:
             self.reflush_cache()
 
         f_in = open("data/traces/" + self.trace_dir + "/all_timeline.txt", "r")
+        cnt_line = 0 
         for line in f_in:
-            # print(line)
+            print(cnt_line)
+            cnt_line += 1
+            if cnt_line > 3:
+               break 
             current_type = line.split('+')[-1].strip()
             current_location = eval(line.split('+')[2])
             current_timestamp = int(line.split('+')[0])
@@ -101,7 +140,7 @@ class Main:
 
             if current_type == "post":
                 post_id = int(line.split('+')[4])
-                media_size = int(float(line.split('+')[1]) * 1000)
+                media_size = int(float(line.split('+')[1]))
                 ## 往第三层级插入，后续的调整都由redis内部完成
                 self.build_network.level_3_host[selected_level_3_id].redis_cache.insert(post_id, current_timestamp, media_size=media_size, cache_level=3)
                 # self.build_network.level_2_host[bind_level_2_id].redis_cache.insert(post_id, current_timestamp)
@@ -125,11 +164,29 @@ class Main:
                 print("ERROR!")
         f_in.close()
 
+        CLI(self.build_network.net)
+
+        if self.use_http_server == True:
+            for level_3_host_id in range(self.build_network.level_3_host_number):
+                for eth_port in range(self.build_network.level_2_host_number):
+                    util.calculate_flow(host=self.build_network.level_3_host[level_3_host_id], eth_name='c%s-eth%s'%(str(level_3_host_id), str(eth_port)), flow_direction='TX', result_path=self.result_path+'flow/'+self.build_network.level_3_host_ip[level_3_host_id])
+
         '''分析'''
-        print("缓存策略： *** %s ***"%(specific_type))
-        print("三级CDN缓存命中率：", self.find_success_number[3] / (self.find_success_number[3] + self.find_fail_number[3]))
-        print("二级CDN缓存命中率：", self.find_success_number[2] / (self.find_success_number[2] + self.find_fail_number[2]))
-        print("一级CDN缓存命中率：", self.find_success_number[1] / (self.find_success_number[1] + self.find_fail_number[1]))
+        print('缓存策略： *** %s ***'%(specific_type))
+        if self.find_success_number[3] + self.find_fail_number[3] > 0:
+            print('三级CDN缓存命中率：', self.find_success_number[3] / (self.find_success_number[3] + self.find_fail_number[3]))
+        else:
+            print('未经过三级CDN缓存')
+
+        if self.find_success_number[2] + self.find_fail_number[2] > 0:
+            print('二级CDN缓存命中率：', self.find_success_number[2] / (self.find_success_number[2] + self.find_fail_number[2]))
+        else:
+            print('未经过二级CDN缓存')
+            
+        if self.find_success_number[1] + self.find_fail_number[1] > 0:
+            print('一级CDN缓存命中率：', self.find_success_number[1] / (self.find_success_number[1] + self.find_fail_number[1]))
+        else:
+            print('未经过一级CDN缓存')
         # print("二级缓存命中数和失效数：", self.find_success_number[2], self.find_fail_number[2])
 
     def PageRank(self):
@@ -191,7 +248,7 @@ class Main:
             self.PageRank()
 
 if __name__ == '__main__':
-    main_program = Main(trace_dir='myk', use_http_server=True)
+    main_program = Main(trace_dir='naive', use_http_server=True)
     main_program.run('FIFO')
-    main_program.run('LRU')
+    # main_program.run('LRU')
     # main_program.run('PageRank')

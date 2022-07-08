@@ -83,6 +83,7 @@ hqETLhg4SEs82bXzqiSOTAd0R3zLZA54gPb9X0vwZQxnqR1XyQoHuzj8KsQnPeVK
 fEOq7niByo0GsG8cvhHz
 -----END CERTIFICATE-----"""
 
+debug_model = False
 
 class SimpleHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
  
@@ -371,7 +372,6 @@ def ssl_cleanup():
         print("Unable to Delete crt.pem")
 
 def test(PORT, HandlerClass = SimpleHTTPRequestHandler, ServerClass = http.server.HTTPServer):
-
     http.server.test(HandlerClass, ServerClass,port=PORT)
  
 if __name__ == '__main__':
@@ -383,6 +383,7 @@ if __name__ == '__main__':
     args = p.parse_args()
 
     try:
+        debug_model = args.debug
         if args.nossl:
             test(args.port, SimpleHTTPRequestHandler, http.server.HTTPServer)
         else:

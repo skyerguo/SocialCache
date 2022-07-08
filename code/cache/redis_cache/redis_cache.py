@@ -9,7 +9,7 @@ import os
 import code.util.util as util
 
 class Redis_cache:
-    def __init__(self, db, mininet_node, cache_size=5, use_priority_queue=True, use_LRU_cache=False):
+    def __init__(self, db, host, cache_size=5, use_priority_queue=True, use_LRU_cache=False, result_path='~/', host_ip=''):
         """初始化
 
         Args:
@@ -58,8 +58,14 @@ class Redis_cache:
         '''设置上一层的redis_cache'''
         self.has_higher_cache = False
 
-        '''设置当前cache对应的mininet_node'''
-        self.mininet_node = mininet_node
+        '''设置当前cache对应的mininet_host'''
+        self.host = host
+
+        '''设置结果存的根目录'''
+        self.result_path = result_path
+
+        '''设置当前cache的IP地址'''
+        self.host_ip = host_ip
 
     def __del__(self):
         '''程序结束后，自动关闭连接，释放资源'''
@@ -88,7 +94,7 @@ class Redis_cache:
         self.redis.delete(remove_key)
 
         if self.data_path != '/dev/null': ## 启用HTTP了
-            util.delete_picture(mininet_node=self.mininet_node, path=self.data_path + str(remove_key)) #删除当前文件，保证硬盘使用率较低
+            util.delete_picture(host=self.host, picture_path=self.data_path+str(remove_key)) #删除当前文件，保证硬盘使用率较低
 
     def insert(self, picture_hash, picture_value, media_size=0, cache_level=3):
         '''如果是LRU，特殊处理'''
@@ -116,22 +122,26 @@ class Redis_cache:
         '''如果需要创建图片，则在路径中创建一个文件'''
         if self.data_path != '/dev/null': ## 启用HTTP了
             if cache_level == 3: ## 最后一层才创建文件
-                util.create_picture(mininet_node=self.mininet_node, picture_size=media_size, path=self.data_path+str(picture_hash))
+                util.create_picture(host=self.host, picture_size=media_size, picture_path=self.data_path+str(picture_hash))
         
         if self.has_higher_cache: ## 如果有上层cache的需要
             if self.data_path != '/dev/null': ## 启用HTTP了
                 remote_IP_address = "10.0.%s.%s"%(str(self.higher_cache_id), str(self.higher_cache_level * 2 - 1))
                 remote_port_number = 4433 + int(self.higher_cache_redis.db)
-                # print('send image %s to %s'%(str(self.data_path + str(picture_hash)), str(remote_IP_address)))                
-                util.HTTP_post(mininet_node=self.mininet_node, path=self.data_path+str(picture_hash), IP_address=str(remote_IP_address), port_number=str(remote_port_number), use_TLS=False)
+                util.HTTP_post(host=self.host, picture_path=self.data_path+str(picture_hash), IP_address=str(remote_IP_address), port_number=str(remote_port_number), use_TLS=False, result_path=self.result_path+'curl/'+self.host_ip)
             self.higher_cache_redis.insert(picture_hash, picture_value, media_size=media_size, cache_level=self.higher_cache_level) ## 递归调用，一层层上传
 
     def find(self, picture_hash):
         value = self.redis.get(name=picture_hash)
         if value:
             value = pickle.loads(value)
+            util.HTTP_get()    
         else:
             value = -1
+            # if self.has_higher_cache:
+            #     if self.data_path != '/dev/null':
+            #         pass
+            #     self.higher_cache_redis.find(picture_hash)
         return value
 
 # if __name__ == '__main__':
