@@ -1,6 +1,8 @@
 import math
 import os
 import shutil
+import time
+from timeit import repeat
 
 def calc_geolocation_distance(loc1, loc2): 
     '''计算两个地理位置的地表距离，返回单位为公里'''
@@ -38,15 +40,30 @@ def reflush_path(path):
         #     os.remove(path)
     os.system('mkdir -p ' + path)
 
-def create_picture(mininet_node, picture_size, path):
-    mininet_node.cmdPrint('head -c %s /dev/zero > %s'%(str(picture_size), path))
+def create_picture(host, picture_size, picture_path):
+    host.cmd('head -c %s /dev/zero > %s'%(str(picture_size), picture_path))
+    for _ in range(5):
+        if not os.path.exists(picture_path):
+            print('文件' + picture_path + '未创建成功，等待一秒')
+            time.sleep(1)
+        else:
+            break
 
-def delete_picture(mininet_node, path):
-    mininet_node.cmdPrint('rm %s'%(str(path)))
+def delete_picture(host, path):
+    host.cmd('rm %s'%(str(path)))
 
 def HTTP_get():
     pass
 
-def HTTP_post(mininet_node, path, IP_address, port_number, use_TLS=False):
-    print('logger: curl -k -i -X POST -F filename=@"%s" -F name=file "http%s://%s:%s"'%(path, 's' if use_TLS==True else '' ,str(IP_address), str(port_number)))
-    mininet_node.cmdPrint('curl -k -i -X POST -F filename=@"%s" -F name=file "http%s://%s:%s"'%(path, 's' if use_TLS==True else '', str(IP_address), str(port_number)))
+def HTTP_post(host, picture_path, IP_address, port_number, use_TLS=False, result_path=''):
+    host.cmd('curl -k -i -X POST -F filename=@"%s" -F name=file "http%s://%s:%s" 1>> %s/curl_log1.txt 2>> %s/curl_log2.txt '%(picture_path, 's' if use_TLS==True else '', str(IP_address), str(port_number), str(result_path), str(result_path)))
+
+def calculate_flow(host, eth_name, flow_direction, result_path=''):
+    '''
+        flow_direction 只能为 RX或者TX
+    '''
+    print("flow_direction: ", flow_direction)
+    if flow_direction != 'RX' and flow_direction != 'TX':
+        return -1
+    export_path = result_path + '/%s_%s.log' % (str(flow_direction), str(eth_name))
+    host.cmdPrint("ifconfig %s | grep %s | grep bytes | awk '{print $5}' > %s"%(str(eth_name), str(flow_direction), str(export_path)))

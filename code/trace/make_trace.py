@@ -6,8 +6,7 @@ import random
 import code.util.util as util
 
 class Make_trace:
-    def __init__(self, dir_name, user_number=1000, edge_create_probability=0.3):
-        ## 1000个用户，随机连边
+    def __init__(self, dir_name, user_number=50, edge_create_probability=0.3):
         self.user_number = user_number
         self.edge_create_probability = edge_create_probability
         self.start_time = 1000000000
