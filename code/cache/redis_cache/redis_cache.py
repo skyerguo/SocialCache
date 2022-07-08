@@ -6,9 +6,10 @@ import queue
 import subprocess
 from collections import OrderedDict, defaultdict
 import os
+import code.util.util as util
 
 class Redis_cache:
-    def __init__(self, db, cache_size=5, use_priority_queue=True, use_LRU_cache=False):
+    def __init__(self, db, mininet_node, cache_size=5, use_priority_queue=True, use_LRU_cache=False):
         """初始化
 
         Args:
@@ -17,8 +18,6 @@ class Redis_cache:
         """
         logging.info("initing redis cache...")
 
-        # '''从config获得参数'''
-        # config = json.load(open('code/cache/redis_cache/config.json', 'r'))
         self.cache_size = int(cache_size)
 
         '''获得本机的IP地址，作为redis IP'''
@@ -26,6 +25,9 @@ class Redis_cache:
         ret = subprocess.Popen("ifconfig eno1 | grep inet | awk '{print $2}' | cut -f 2 -d ':'",shell=True,stdout=subprocess.PIPE)
         self.redis_ip = ret.stdout.read().decode("utf-8").strip('\n')
         ret.stdout.close()
+
+        '''记录db数据'''
+        self.db=db
 
         '''连接池'''
         pool = redis.ConnectionPool(
@@ -56,6 +58,9 @@ class Redis_cache:
         '''设置上一层的redis_cache'''
         self.has_higher_cache = False
 
+        '''设置当前cache对应的mininet_node'''
+        self.mininet_node = mininet_node
+
     def __del__(self):
         '''程序结束后，自动关闭连接，释放资源'''
         self.redis.connection_pool.disconnect()
@@ -82,7 +87,10 @@ class Redis_cache:
                         remove_key = curr_key
         self.redis.delete(remove_key)
 
-    def insert(self, picture_hash, picture_value, media_size=0):
+        if self.data_path != '/dev/null': ## 启用HTTP了
+            util.delete_picture(mininet_node=self.mininet_node, path=self.data_path + str(remove_key)) #删除当前文件，保证硬盘使用率较低
+
+    def insert(self, picture_hash, picture_value, media_size=0, cache_level=3):
         '''如果是LRU，特殊处理'''
         if self.use_LRU_cache: 
             '''若数据已存在，表示命中一次，需要把数据移到缓存队列末端'''
@@ -98,19 +106,25 @@ class Redis_cache:
             '''如果当前cache的空间使用完了，且不是LRU，则按照内在的权值替换'''
             if self.redis.dbsize() >= self.cache_size:
                 self.remove_cache_node()
-            
         
         '''插入redis数据库'''
         self.redis.set(name=picture_hash, value=pickle.dumps(picture_value))
 
         '''如有有使用优先队列，每次插入时需要维护优先队列'''
         if self.use_priority_queue:
-            self.priority_queue.put((picture_value, picture_hash))
-
+            self.priority_queue.put((picture_value, picture_hash)) 
         '''如果需要创建图片，则在路径中创建一个文件'''
-        if media_size != 0:
+        if self.data_path != '/dev/null': ## 启用HTTP了
+            if cache_level == 3: ## 最后一层才创建文件
+                util.create_picture(mininet_node=self.mininet_node, picture_size=media_size, path=self.data_path+str(picture_hash))
+        
+        if self.has_higher_cache: ## 如果有上层cache的需要
             if self.data_path != '/dev/null': ## 启用HTTP了
-                os.system('head -c %s /dev/zero > %s'%(str(media_size), self.data_path + str(picture_hash)))
+                remote_IP_address = "10.0.%s.%s"%(str(self.higher_cache_id), str(self.higher_cache_level * 2 - 1))
+                remote_port_number = 4433 + int(self.higher_cache_redis.db)
+                # print('send image %s to %s'%(str(self.data_path + str(picture_hash)), str(remote_IP_address)))                
+                util.HTTP_post(mininet_node=self.mininet_node, path=self.data_path+str(picture_hash), IP_address=str(remote_IP_address), port_number=str(remote_port_number), use_TLS=False)
+            self.higher_cache_redis.insert(picture_hash, picture_value, media_size=media_size, cache_level=self.higher_cache_level) ## 递归调用，一层层上传
 
     def find(self, picture_hash):
         value = self.redis.get(name=picture_hash)

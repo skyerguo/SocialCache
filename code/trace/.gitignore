@@ -1,0 +1,6 @@
+sample_line/data
+sample_line/result
+*.png
+*.dat
+*.txt
+*.csv
