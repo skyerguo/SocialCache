@@ -1,4 +1,5 @@
 import random
+import media_size_sample.media_size_sample as sp
 import numpy as np
 import pandas as pd
 import networkx as nx
@@ -15,6 +16,7 @@ class gen_trace_data:
         self.lognormal_theta    = 2.366
         self.edge_file  = edge_file
         self.loc_file   = loc_file
+        self.media_size = sp.media_size_sample()
     
     def load_network(self, filename, output_edge_filename="relations.txt", draw=False):
         self.user_net = nx.DiGraph()
@@ -88,9 +90,11 @@ class gen_trace_data:
         print(self.user_df)
     
     def gen_activity_df(self, activity_num):
-        time_list = []
-        loc_list  = []
+        time_list       = []
+        loc_list        = []
+        media_size_list = []
         kind_list = np.random.binomial(1, 0.05, activity_num)
+        media_size_list = self.media_size.sample(activity_num)
         activity_interval = np.random.lognormal(self.lognormal_mu, self.lognormal_theta, activity_num)
         time = 0
         for interval in activity_interval:
@@ -98,10 +102,12 @@ class gen_trace_data:
             time_list.append(time)
             loc_list.append(random.choice(self.location_list))
 
-        return pd.DataFrame(dict(timestamp=time_list, publish=kind_list, location=loc_list))
+
+        
+        return pd.DataFrame(dict(timestamp=time_list, publish=kind_list, media_size=media_size_list, location=loc_list))
 
     def build_user_activity(self):
-        self.df_trace = pd.DataFrame(columns=["timestamp", "publish", "location", "user_id"])
+        self.df_trace = pd.DataFrame(columns=["timestamp", "publish", "media_size", "location", "user_id"])
         for rowidx, row in self.user_df.iterrows():
             df = self.gen_activity_df(int(row["activity_number"]))
             df["user_id"] = int(row["user_id"])
@@ -117,7 +123,7 @@ class gen_trace_data:
         fd = open("all_timeline.txt", "w+")
         post_seq_num = 0
         for rowidx, row in self.df_trace.iterrows():
-            line = str(row["timestamp"]) + "+1" + "+{'lat': '%.2f', 'lon': '%.2f'}" %(row["location"][0], row["location"][1]) + "+" + str(row["user_id"])
+            line = str(row["timestamp"]) + "+" + str(row["media_size"]) + "+{'lat': '%.2f', 'lon': '%.2f'}" %(row["location"][0], row["location"][1]) + "+" + str(row["user_id"])
             if row["publish"] == 1:
                 line += "+" + str(post_seq_num) + "+post"
                 post_seq_num += 1
@@ -129,10 +135,10 @@ class gen_trace_data:
 
     def launch(self):
         self.load_network(self.edge_file, draw=True)
-        # self.load_location(self.loc_file)
-        # self.build_user_df()
-        # self.build_user_activity()
-        # self.trans_trace2timeline()
+        self.load_location(self.loc_file)
+        self.build_user_df()
+        self.build_user_activity()
+        self.trans_trace2timeline()
         
     
 if __name__ == "__main__":

@@ -5,7 +5,7 @@ from mininet.node import CPULimitedHost, Host, Node
 from mininet.node import OVSKernelSwitch, UserSwitch
 from mininet.node import IVSSwitch
 from mininet.cli import CLI
-from mininet.log import setLogLevel, info
+from mininet.log import setLogLevel, info, warning
 from mininet.link import TCLink, Intf
 import copy
 import json
@@ -62,6 +62,11 @@ class Build_network:
             waitConnected=True)
             
     def myNetwork(self):
+        '''
+            Node name: first character from 'a' to 'c', means level 1 to level 3; second character from 0 to n;
+            IP address: for xth cache in y level, the IP address will be 10.0.x.(y*2-1)
+        '''
+
         setLogLevel( 'warning' )
 
         '''将第二个网卡配置清空，为了方便之后重新配置，协助mininet内部节点连接本机'''

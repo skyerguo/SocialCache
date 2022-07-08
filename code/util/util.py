@@ -37,3 +37,16 @@ def reflush_path(path):
         # elif os.path.islink(path):
         #     os.remove(path)
     os.system('mkdir -p ' + path)
+
+def create_picture(mininet_node, picture_size, path):
+    mininet_node.cmdPrint('head -c %s /dev/zero > %s'%(str(picture_size), path))
+
+def delete_picture(mininet_node, path):
+    mininet_node.cmdPrint('rm %s'%(str(path)))
+
+def HTTP_get():
+    pass
+
+def HTTP_post(mininet_node, path, IP_address, port_number, use_TLS=False):
+    print('logger: curl -k -i -X POST -F filename=@"%s" -F name=file "http%s://%s:%s"'%(path, 's' if use_TLS==True else '' ,str(IP_address), str(port_number)))
+    mininet_node.cmdPrint('curl -k -i -X POST -F filename=@"%s" -F name=file "http%s://%s:%s"'%(path, 's' if use_TLS==True else '', str(IP_address), str(port_number)))
