@@ -70,6 +70,8 @@ for line in lines:
 # print(delay_topo)
 # print(bandwidth_topo)
 '''定义每层节点地理位置'''
+user_area = ['us-west4']
+user_id = [map_area2id[x] for x in user_area]
 level_3_area = ['asia-east1', 'australia-southeast2', 'europe-central2', 'northamerica-northeast1', 'southamerica-east1']
 level_3_id = [map_area2id[x] for x in level_3_area]
 level_2_area = ['us-east1', 'asia-northeast1', 'southamerica-west1']
@@ -100,14 +102,16 @@ result = {}
 result['level_3_id'] = level_3_id
 result['level_2_id'] = level_2_id
 result['level_1_id'] = level_1_id
+result['user_id'] = user_id
 result['up_bind_3_2'] = up_bind_3_2
 result['up_bind_2_1'] = up_bind_2_1
 result['delay_topo'] = delay_topo
 result['bandwidth_topo'] = bandwidth_topo
 result['areaid2position'] = areaid2position
-result['cpu_level_1'] = 0.3
-result['cpu_level_2'] = 0.3
 result['cpu_level_3'] = 0.3
+result['cpu_level_2'] = 0.3
+result['cpu_level_1'] = 0.3
+result['cpu_user'] = 1
 
 json_file = 'code/build/topo.json'
 f_out = open(json_file, 'w')

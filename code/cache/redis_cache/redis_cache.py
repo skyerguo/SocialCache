@@ -135,7 +135,7 @@ class Redis_cache:
         value = self.redis.get(name=picture_hash)
         if value:
             value = pickle.loads(value)
-            util.HTTP_get()    
+            # util.HTTP_get()    
         else:
             value = -1
             # if self.has_higher_cache:

@@ -128,7 +128,7 @@ class Main:
         for line in f_in:
             print(cnt_line)
             cnt_line += 1
-            if cnt_line > 3:
+            if cnt_line > 30:
                break 
             current_type = line.split('+')[-1].strip()
             current_location = eval(line.split('+')[2])
@@ -148,18 +148,20 @@ class Main:
 
             elif current_type == "view":
                 post_id = int(line.split('+')[1])
-                if self.build_network.level_3_host[selected_level_3_id].redis_cache.find(post_id) == -1:
-                    self.find_fail_number[3] += 1
-                    if self.build_network.level_2_host[bind_level_2_id].redis_cache.find(post_id) == -1:
-                        self.find_fail_number[2] += 1
-                        if self.build_network.level_1_host[bind_level_1_id].redis_cache.find(post_id) == -1:
-                            self.find_fail_number[1] += 1
-                        else:
-                            self.find_success_number[1] += 1
-                    else:
-                        self.find_success_number[2] += 1
-                else:
-                    self.find_success_number[3] += 1
+                ## 往第三层级插入，后续的调整都由redis内部完成
+                self.build_network.level_3_host[selected_level_3_id].redis_cache.find(post_id)
+                # if self.build_network.level_3_host[selected_level_3_id].redis_cache.find(post_id) == -1:
+                #     self.find_fail_number[3] += 1
+                #     if self.build_network.level_2_host[bind_level_2_id].redis_cache.find(post_id) == -1:
+                #         self.find_fail_number[2] += 1
+                #         if self.build_network.level_1_host[bind_level_1_id].redis_cache.find(post_id) == -1:
+                #             self.find_fail_number[1] += 1
+                #         else:
+                #             self.find_success_number[1] += 1
+                #     else:
+                #         self.find_success_number[2] += 1
+                # else:
+                #     self.find_success_number[3] += 1
             else:
                 print("ERROR!")
         f_in.close()
