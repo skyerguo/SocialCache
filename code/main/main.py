@@ -24,13 +24,7 @@ class Main:
         self.make_trace.run()
 
         self.use_http_server = use_http_server
-
-        '''存储结果数据的文件夹'''
-        self.result_path = '/proj/socnet-PG0/data/' + str(time.strftime("%Y-%m-%d_%H:%M:%S", time.localtime())) + '/'
-        util.reflush_path(self.result_path)
-
-        # self.find_success_number = [0, 0, 0, 0]
-        # self.find_fail_number = [0, 0, 0, 0]
+        
 
     def start_http_server(self, host, db, host_ip, temp_picture_path):
         '''
@@ -48,7 +42,12 @@ class Main:
         host.cmdPrint('cd %s && nohup python3 /users/gtc/SocNet/code/util/simple_httpserver.py -l %s -p %s -n 1>> %s/http_log1.txt 2>> %s/http_log2.txt &'%(temp_picture_path, str(host_ip), str(4433+int(db)), self.result_path+'http/'+host_ip, self.result_path+'http/'+host_ip))
         
 
+    '''更新实验配置，删除上一次实验记录'''
     def reflush_cache(self, use_LRU_cache=False):
+        '''存储结果数据的文件夹'''
+        self.result_path = '/proj/socnet-PG0/data/' + str(time.strftime("%Y-%m-%d_%H:%M:%S", time.localtime())) + '/'
+        util.reflush_path(self.result_path)
+
         os.system("ps -ef |grep simple_httpserver.py | grep -v grep | awk '{print $2}' | xargs sudo kill -9 > /dev/null 2>&1 && sleep 3") ## 删除之前的HTTP_server
         host_all = []
         for level_1_host_id in range(self.build_network.level_1_host_number):
@@ -58,7 +57,8 @@ class Main:
                 cache_size=10000, 
                 use_LRU_cache=use_LRU_cache, 
                 result_path=self.result_path,
-                host_ip=self.build_network.level_1_host_ip[level_1_host_id]
+                host_ip=self.build_network.level_1_host_ip[level_1_host_id],
+                host_port=str(4433+len(host_all))
             )
 
             if self.use_http_server:
@@ -73,7 +73,8 @@ class Main:
                 cache_size=1000, 
                 use_LRU_cache=use_LRU_cache,
                 result_path=self.result_path,
-                host_ip=self.build_network.level_2_host_ip[level_2_host_id]
+                host_ip=self.build_network.level_2_host_ip[level_2_host_id],
+                host_port=str(4433+len(host_all))
             )
 
             if self.use_http_server:
@@ -88,7 +89,8 @@ class Main:
                 cache_size=100, 
                 use_LRU_cache=use_LRU_cache,
                 result_path=self.result_path,
-                host_ip=self.build_network.level_3_host_ip[level_3_host_id]
+                host_ip=self.build_network.level_3_host_ip[level_3_host_id],
+                host_port=str(4433+len(host_all))
             )
 
             if self.use_http_server:
@@ -116,6 +118,7 @@ class Main:
         
         time.sleep(5) ## 等待5秒，让HTTP server启动
 
+
     def Classical(self, specific_type):
         '''read_trace'''
         if specific_type == "LRU":
@@ -124,49 +127,40 @@ class Main:
             self.reflush_cache()
 
         f_in = open("data/traces/" + self.trace_dir + "/all_timeline.txt", "r")
+        f_out = open(self.result_path + 'find_result.txt', 'w')
         cnt_line = 0 
         for line in f_in:
             print(cnt_line)
             cnt_line += 1
-            if cnt_line > 30:
+            if cnt_line > 1000:
                break 
             current_type = line.split('+')[-1].strip()
             current_location = eval(line.split('+')[2])
             current_timestamp = int(line.split('+')[0])
             
             selected_level_3_id = util.find_nearest_location(current_location, self.level_3_area_location)
-            bind_level_2_id = self.topo['up_bind_3_2'][selected_level_3_id]
-            bind_level_1_id = self.topo['up_bind_2_1'][bind_level_2_id]
 
             if current_type == "post":
                 post_id = int(line.split('+')[4])
                 media_size = int(float(line.split('+')[1]))
-                ## 往第三层级插入，后续的调整都由redis内部完成
+                '''往第三层级插入，后续的调整都由redis内部完成'''
                 self.build_network.level_3_host[selected_level_3_id].redis_cache.insert(post_id, current_timestamp, media_size=media_size, cache_level=3)
-                # self.build_network.level_2_host[bind_level_2_id].redis_cache.insert(post_id, current_timestamp)
-                # self.build_network.level_1_host[bind_level_1_id].redis_cache.insert(post_id, current_timestamp)
 
             elif current_type == "view":
                 post_id = int(line.split('+')[1])
-                ## 往第三层级插入，后续的调整都由redis内部完成
-                self.build_network.level_3_host[selected_level_3_id].redis_cache.find(post_id)
-                # if self.build_network.level_3_host[selected_level_3_id].redis_cache.find(post_id) == -1:
-                #     self.find_fail_number[3] += 1
-                #     if self.build_network.level_2_host[bind_level_2_id].redis_cache.find(post_id) == -1:
-                #         self.find_fail_number[2] += 1
-                #         if self.build_network.level_1_host[bind_level_1_id].redis_cache.find(post_id) == -1:
-                #             self.find_fail_number[1] += 1
-                #         else:
-                #             self.find_success_number[1] += 1
-                #     else:
-                #         self.find_success_number[2] += 1
-                # else:
-                #     self.find_success_number[3] += 1
+                '''往第三层级查询，后续的调整都由redis内部完成，这里先假设只有一个user'''
+                result_level = self.build_network.level_3_host[selected_level_3_id].redis_cache.find(picture_hash=post_id, user_host=self.build_network.user_host[0], cache_level=3)
+
+                print(cnt_line, result_level, file=f_out)
+                
+                for temp_level in range(3, result_level, -1):
+                    self.find_fail_number[temp_level] += 1
+                self.find_success_number[result_level] += 1
             else:
                 print("ERROR!")
         f_in.close()
 
-        CLI(self.build_network.net)
+        # CLI(self.build_network.net)
 
         if self.use_http_server == True:
             for level_3_host_id in range(self.build_network.level_3_host_number):
@@ -190,6 +184,7 @@ class Main:
         else:
             print('未经过一级CDN缓存')
         # print("二级缓存命中数和失效数：", self.find_success_number[2], self.find_fail_number[2])
+
 
     def PageRank(self):
         self.reflush_cache()
