@@ -9,7 +9,7 @@ import os
 import code.util.util as util
 
 class Redis_cache:
-    def __init__(self, db, host, cache_size=5, use_priority_queue=True, use_LRU_cache=False, result_path='~/', host_ip=''):
+    def __init__(self, db, host, cache_size=5, use_priority_queue=True, use_LRU_cache=False, result_path='~/', host_ip='', host_port=''):
         """初始化
 
         Args:
@@ -64,8 +64,9 @@ class Redis_cache:
         '''设置结果存的根目录'''
         self.result_path = result_path
 
-        '''设置当前cache的IP地址'''
+        '''设置当前cache的IP地址和HTTP端口'''
         self.host_ip = host_ip
+        self.host_port = host_port
 
     def __del__(self):
         '''程序结束后，自动关闭连接，释放资源'''
@@ -120,29 +121,42 @@ class Redis_cache:
         if self.use_priority_queue:
             self.priority_queue.put((picture_value, picture_hash)) 
         '''如果需要创建图片，则在路径中创建一个文件'''
-        if self.data_path != '/dev/null': ## 启用HTTP了
+        if self.data_path != '/dev/null':
             if cache_level == 3: ## 最后一层才创建文件
                 util.create_picture(host=self.host, picture_size=media_size, picture_path=self.data_path+str(picture_hash))
         
         if self.has_higher_cache: ## 如果有上层cache的需要
-            if self.data_path != '/dev/null': ## 启用HTTP了
-                remote_IP_address = "10.0.%s.%s"%(str(self.higher_cache_id), str(self.higher_cache_level * 2 - 1))
-                remote_port_number = 4433 + int(self.higher_cache_redis.db)
-                util.HTTP_post(host=self.host, picture_path=self.data_path+str(picture_hash), IP_address=str(remote_IP_address), port_number=str(remote_port_number), use_TLS=False, result_path=self.result_path+'curl/'+self.host_ip)
+            if self.data_path != '/dev/null': 
+                remote_IP_address = self.higher_cache_redis.host_ip # "10.0.%s.%s"%(str(self.higher_cache_id), str(self.higher_cache_level * 2 - 1))
+                remote_port_number = self.higher_cache_redis.host_port # 4433 + int(self.higher_cache_redis.db)
+                util.HTTP_POST(host=self.host, picture_path=self.data_path+str(picture_hash), IP_address=remote_IP_address, port_number=remote_port_number, use_TLS=False, result_path=self.result_path+'curl/'+self.host_ip)
             self.higher_cache_redis.insert(picture_hash, picture_value, media_size=media_size, cache_level=self.higher_cache_level) ## 递归调用，一层层上传
 
-    def find(self, picture_hash):
+    def find(self, picture_hash, user_host, cache_level):
         value = self.redis.get(name=picture_hash)
         if value:
+            '''如果找到了'''
             value = pickle.loads(value)
-            # util.HTTP_get()    
+            result_level = cache_level
+
+            '''启用HTTP，从user_host对当前进行HTTP_GET操作'''
+            if self.data_path != '/dev/null': 
+                util.HTTP_GET(host=user_host, picture_hash=picture_hash, IP_address=self.host_ip, port_number=self.host_port, use_TLS=False, result_path=self.result_path+'wget/'+self.host_ip) 
+
+            '''如果不是最低层，使用HTTP_POST向下传递'''
+            if cache_level != 3: 
+                pass
         else:
-            value = -1
+            result_level = 0
+            '''如果没找到，有更高层，向上查询'''
+            if self.has_higher_cache:
+                result_level = self.higher_cache_redis.find(picture_hash, user_host, self.higher_cache_level)
             # if self.has_higher_cache:
             #     if self.data_path != '/dev/null':
             #         pass
             #     self.higher_cache_redis.find(picture_hash)
-        return value
+        ## 返回第几层命中的
+        return result_level
 
 # if __name__ == '__main__':
 #     r = Redis_cache(0)
