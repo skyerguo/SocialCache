@@ -88,16 +88,17 @@ class Redis_cache:
                 min_value = 1e9
                 remove_key = -1
                 for curr_key in self.redis.keys():
-                    curr_value = pickle.loads(self.redis.get(name=curr_key))
+                    curr_value = pickle.loads(self.redis.get(curr_key))['sort_value']
                     if curr_value < min_value:
                         min_value = curr_value
                         remove_key = curr_key
         self.redis.delete(remove_key)
 
         if self.picture_root_path != '/dev/null': ## 启用HTTP了
-            util.delete_picture(host=self.host, picture_path=self.picture_root_path+str(remove_key)) #删除当前文件，保证硬盘使用率较低
+            util.delete_picture(host=self.host, picture_path=self.picture_root_path+str(remove_key)) #在硬盘中删除当前文件，保证硬盘不会存太多垃圾文件
 
-    def insert(self, picture_hash, picture_value, media_size=0, need_uplift=True):
+
+    def insert(self, picture_hash, redis_object, need_uplift=True):
         '''
             need_uplift: True表示向上传播，False表示向下传播
         '''
@@ -110,7 +111,7 @@ class Redis_cache:
             if self.redis.dbsize() >= self.cache_size:
                 self.LRUcache.popitem(last=False)
                 self.remove_cache_node(given_key=next(iter(self.LRUcache)))
-            self.LRUcache[picture_hash] = picture_value
+            self.LRUcache[picture_hash] = redis_object['sort_value']
 
         else:
             '''如果当前cache的空间使用完了，且不是LRU，则按照内在的权值替换'''
@@ -118,37 +119,40 @@ class Redis_cache:
                 self.remove_cache_node()
         
         '''插入redis数据库'''
-        self.redis.set(name=picture_hash, value=pickle.dumps(picture_value))
+        self.redis.set(picture_hash, pickle.dumps(redis_object))
 
         '''如有有使用优先队列，每次插入时需要维护优先队列'''
         if self.use_priority_queue:
-            self.priority_queue.put((picture_value, picture_hash)) 
+            self.priority_queue.put((redis_object['sort_value'], picture_hash)) 
 
         if need_uplift:
             '''需要逐层递归向上传播'''
             if self.picture_root_path != '/dev/null': 
-                
+                '''使用HTTP，相关的数据传输和存储'''
                 if self.cache_level == 3: 
                     '''如果需要创建图片，则在最后一层路径中创建一个文件'''
-                    util.create_picture(host=self.host, picture_size=media_size, picture_path=self.picture_root_path+str(picture_hash))
+                    util.create_picture(host=self.host, picture_size=redis_object['media_size'], picture_path=self.picture_root_path+str(picture_hash))
 
                 elif self.cache_level > 1:
                     '''如果有上层cache的需要，使用HTTP_POST向上传播'''
                     util.HTTP_POST(host=self.host, picture_path=self.picture_root_path+str(picture_hash), IP_address=self.higher_cache_redis.host_ip, port_number=self.higher_cache_redis.host_port, use_TLS=False, result_path=self.result_path+'curl/'+self.host_ip)
-            '''递归调用，一层层上传'''
-            self.higher_cache_redis.insert(picture_hash, picture_value, media_size=media_size) 
+            
+            if self.cache_level > 1:
+                '''递归调用，一层层上传'''
+                self.higher_cache_redis.insert(picture_hash=picture_hash, redis_object=redis_object, need_uplift=need_uplift) 
 
-        elif self.cache_level < 3: 
-            '''如果不是最后一层，而且需要向下传播'''
+        elif self.cache_level > 1: 
+            '''如果不是最后一层，而且需要从上层获取数据传播'''
             if self.picture_root_path != '/dev/null': 
                 '''从该节点对上一层进行HTTP_GET操作。这里保证上层有需要的数据'''
-                util.HTTP_GET(host=self.host, picture_hash=picture_hash, IP_address=self.higher_cache_redis.host_ip, port_number=self.higher_cache_redis.host_port, use_TLS=False, result_path=self.result_path+'wget/'+self.host_ip, picture_path=self.picture_root_path+str(picture_hash))
+                util.HTTP_GET(host=self.host, picture_hash=picture_hash, IP_address=self.higher_cache_redis.host_ip, port_number=self.higher_cache_redis.host_port, use_TLS=False, result_path=self.higher_cache_redis.result_path+'wget/'+self.host_ip, picture_path=self.picture_root_path+str(picture_hash))
+
 
     def find(self, picture_hash, user_host):
-        value = self.redis.get(name=picture_hash)
-        if value:
+        redis_object = self.redis.get(name=picture_hash)
+        if redis_object:
             '''如果找到了'''
-            value = pickle.loads(value)
+            redis_object = pickle.loads(redis_object)
             result_level = self.cache_level
 
             '''启用HTTP，从user_host对当前节点进行HTTP_GET操作'''
@@ -157,14 +161,18 @@ class Redis_cache:
 
         else:
             result_level = 0
+            redis_object = {}
+
             '''如果当前层没找到，有更高层，向上查询'''
             if self.cache_level > 1:
-                result_level = self.higher_cache_redis.find(picture_hash=picture_hash, user_host=user_host)
+                find_result = self.higher_cache_redis.find(picture_hash=picture_hash, user_host=user_host)
+                result_level = find_result[0]
+                redis_object = find_result[1]
 
                 '''上层已经操作完毕。根据上层的结果，当前层获取图片cache'''
                 if result_level != 0: 
                     '''有命中数据'''
-                    self.insert(picture_hash=picture_hash, picture_value=TODO, need_uplift=False)
+                    self.insert(picture_hash=picture_hash, redis_object=redis_object, need_uplift=False)
 
-        '''返回一个list，分别表示[第几层命中的, 这个picture的排序权重value，这个picture的图片大小media_size]'''
-        return result_level
+        '''返回一个list，分别表示[第几层命中的, 查到的redis_object]'''
+        return [result_level, redis_object]
