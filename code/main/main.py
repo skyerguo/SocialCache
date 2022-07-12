@@ -71,7 +71,7 @@ class Main:
             self.build_network.level_2_host[level_2_host_id].redis_cache = Redis_cache(
                 db=len(host_all), 
                 host=self.build_network.level_2_host[level_2_host_id], 
-                cache_size=1000, 
+                cache_size=10, 
                 use_LRU_cache=use_LRU_cache,
                 result_path=self.result_path,
                 host_ip=self.build_network.level_2_host_ip[level_2_host_id],
@@ -88,7 +88,7 @@ class Main:
             self.build_network.level_3_host[level_3_host_id].redis_cache = Redis_cache(
                 db=len(host_all), 
                 host=self.build_network.level_3_host[level_3_host_id], 
-                cache_size=100, 
+                cache_size=2, 
                 use_LRU_cache=use_LRU_cache,
                 result_path=self.result_path,
                 host_ip=self.build_network.level_3_host_ip[level_3_host_id],
@@ -133,26 +133,38 @@ class Main:
         for line in f_in:
             print(cnt_line)
             cnt_line += 1
-            if cnt_line > 1000:
+            if cnt_line > 100:
                break 
             current_type = line.split('+')[-1].strip()
             current_location = eval(line.split('+')[2])
             current_timestamp = int(line.split('+')[0])
-            
+
             selected_level_3_id = util.find_nearest_location(current_location, self.level_3_area_location)
 
             if current_type == "post":
                 post_id = int(line.split('+')[4])
-                media_size = int(float(line.split('+')[1]))
+                    
+                '''记录redis_object，使用json形式保存'''
+                temp_redis_object = {
+                    'sort_value': int(current_timestamp), 
+                    'media_size': int(float(line.split('+')[1]))
+                }
+            
                 '''往第三层级插入，后续的调整都由redis内部完成'''
-                self.build_network.level_3_host[selected_level_3_id].redis_cache.insert(post_id, current_timestamp, media_size=media_size)
+                self.build_network.level_3_host[selected_level_3_id].redis_cache.insert(picture_hash=post_id, redis_object=temp_redis_object, need_uplift=True)
 
             elif current_type == "view":
                 post_id = int(line.split('+')[1])
                 '''往第三层级查询，后续的调整都由redis内部完成，这里先假设只有一个user'''
-                result_level = self.build_network.level_3_host[selected_level_3_id].redis_cache.find(picture_hash=post_id, user_host=self.build_network.user_host[0])
+                find_result = self.build_network.level_3_host[selected_level_3_id].redis_cache.find(picture_hash=post_id, user_host=self.build_network.user_host[0])
+                result_level = find_result[0]
+
+                if result_level == 0:
+                    '''所有level的cache都没有找到'''
+                    continue
 
                 print(cnt_line, result_level, file=f_out)
+                # print(cnt_line, find_result)
                 
                 for temp_level in range(3, result_level, -1):
                     self.find_fail_number[temp_level] += 1

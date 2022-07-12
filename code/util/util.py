@@ -32,12 +32,6 @@ def reflush_path(path):
     if os.path.exists(path):
         if 'temp' in path:
             os.system('rm -rf ' + path)
-        # if os.path.isdir(path):
-        #     shutil.rmtree(path)
-        # elif os.path.isfile(path):
-        #     os.remove(path)
-        # elif os.path.islink(path):
-        #     os.remove(path)
     os.system('mkdir -p ' + path)
 
 def create_picture(host, picture_size, picture_path):
@@ -49,22 +43,24 @@ def create_picture(host, picture_size, picture_path):
         else:
             break
 
-def delete_picture(host, path):
-    host.cmd('rm %s'%(str(path)))
+def delete_picture(host, picture_path):
+    host.cmd('rm %s'%(str(picture_path)))
 
 def HTTP_GET(host, picture_hash, IP_address, port_number, use_TLS=False, result_path='', picture_path='/dev/null'):
     '''如果是user端调用，不需要存储，只需要跑流量，所以把数据结果存到/dev/null即可'''
-    host.cmdPrint('wget http%s://%s:%s/%s -O %s -a %s/wget_log1.txt'%('s' if use_TLS==True else '', IP_address, port_number, picture_hash, picture_path, result_path))
+    '''A wget B, 日志存储到B的对应文件夹中'''
+    host.cmd('wget http%s://%s:%s/%s -O %s -a %s/wget_log1.txt'%('s' if use_TLS==True else '', IP_address, port_number, picture_hash, picture_path, result_path))
 
 def HTTP_POST(host, picture_path, IP_address, port_number, use_TLS=False, result_path=''):
+    '''A curl B, 日志存储到A对应的文件夹中'''
     host.cmd('curl -k -i -X POST -F filename=@"%s" -F name=file "http%s://%s:%s" 1>> %s/curl_log1.txt 2>> %s/curl_log2.txt '%(picture_path, 's' if use_TLS==True else '', IP_address, port_number, result_path, result_path))
 
 def calculate_flow(host, eth_name, flow_direction, result_path=''):
     '''
         flow_direction 只能为 RX或者TX
     '''
-    print("flow_direction: ", flow_direction)
+    # print("flow_direction: ", flow_direction)
     if flow_direction != 'RX' and flow_direction != 'TX':
         return -1
     export_path = result_path + '/%s_%s.log' % (str(flow_direction), str(eth_name))
-    host.cmdPrint("ifconfig %s | grep %s | grep bytes | awk '{print $5}' > %s"%(str(eth_name), str(flow_direction), str(export_path)))
+    host.cmd("ifconfig %s | grep %s | grep bytes | awk '{print $5}' > %s"%(str(eth_name), str(flow_direction), str(export_path)))
