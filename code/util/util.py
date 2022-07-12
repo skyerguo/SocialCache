@@ -52,9 +52,9 @@ def create_picture(host, picture_size, picture_path):
 def delete_picture(host, path):
     host.cmd('rm %s'%(str(path)))
 
-def HTTP_GET(host, picture_hash, IP_address, port_number, use_TLS=False, result_path=''):
-    '''因为不需要存储，只需要跑流量，所以把数据结果存到/dev/null即可'''
-    host.cmdPrint('wget http%s://%s:%s/%s -O /dev/null -a %s/wget_log1.txt'%('s' if use_TLS==True else '', IP_address, port_number, picture_hash, result_path))
+def HTTP_GET(host, picture_hash, IP_address, port_number, use_TLS=False, result_path='', picture_path='/dev/null'):
+    '''如果是user端调用，不需要存储，只需要跑流量，所以把数据结果存到/dev/null即可'''
+    host.cmdPrint('wget http%s://%s:%s/%s -O %s -a %s/wget_log1.txt'%('s' if use_TLS==True else '', IP_address, port_number, picture_hash, picture_path, result_path))
 
 def HTTP_POST(host, picture_path, IP_address, port_number, use_TLS=False, result_path=''):
     host.cmd('curl -k -i -X POST -F filename=@"%s" -F name=file "http%s://%s:%s" 1>> %s/curl_log1.txt 2>> %s/curl_log2.txt '%(picture_path, 's' if use_TLS==True else '', IP_address, port_number, result_path, result_path))
