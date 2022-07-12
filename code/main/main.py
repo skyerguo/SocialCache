@@ -58,12 +58,13 @@ class Main:
                 use_LRU_cache=use_LRU_cache, 
                 result_path=self.result_path,
                 host_ip=self.build_network.level_1_host_ip[level_1_host_id],
-                host_port=str(4433+len(host_all))
+                host_port=str(4433+len(host_all)),
+                cache_level=1
             )
 
             if self.use_http_server:
-                self.build_network.level_1_host[level_1_host_id].redis_cache.data_path = '/proj/socnet-PG0/temp_media_data/' + str(len(host_all)) + '/picture/'
-                self.start_http_server(host=self.build_network.level_1_host[level_1_host_id], db=len(host_all), host_ip=self.build_network.level_1_host_ip[level_1_host_id], temp_picture_path=self.build_network.level_1_host[level_1_host_id].redis_cache.data_path)
+                self.build_network.level_1_host[level_1_host_id].redis_cache.picture_root_path = '/proj/socnet-PG0/temp_media_data/' + str(len(host_all)) + '/picture/'
+                self.start_http_server(host=self.build_network.level_1_host[level_1_host_id], db=len(host_all), host_ip=self.build_network.level_1_host_ip[level_1_host_id], temp_picture_path=self.build_network.level_1_host[level_1_host_id].redis_cache.picture_root_path)
             host_all.append(self.build_network.level_1_host[level_1_host_id])
 
         for level_2_host_id in range(self.build_network.level_2_host_number):
@@ -74,12 +75,13 @@ class Main:
                 use_LRU_cache=use_LRU_cache,
                 result_path=self.result_path,
                 host_ip=self.build_network.level_2_host_ip[level_2_host_id],
-                host_port=str(4433+len(host_all))
+                host_port=str(4433+len(host_all)),
+                cache_level=2
             )
 
             if self.use_http_server:
-                self.build_network.level_2_host[level_2_host_id].redis_cache.data_path = '/proj/socnet-PG0/temp_media_data/' + str(len(host_all)) + '/picture/'
-                self.start_http_server(host=self.build_network.level_2_host[level_2_host_id], db=len(host_all), host_ip=self.build_network.level_2_host_ip[level_2_host_id], temp_picture_path=self.build_network.level_2_host[level_2_host_id].redis_cache.data_path)
+                self.build_network.level_2_host[level_2_host_id].redis_cache.picture_root_path = '/proj/socnet-PG0/temp_media_data/' + str(len(host_all)) + '/picture/'
+                self.start_http_server(host=self.build_network.level_2_host[level_2_host_id], db=len(host_all), host_ip=self.build_network.level_2_host_ip[level_2_host_id], temp_picture_path=self.build_network.level_2_host[level_2_host_id].redis_cache.picture_root_path)
             host_all.append(self.build_network.level_2_host[level_2_host_id])
 
         for level_3_host_id in range(self.build_network.level_3_host_number):
@@ -90,25 +92,24 @@ class Main:
                 use_LRU_cache=use_LRU_cache,
                 result_path=self.result_path,
                 host_ip=self.build_network.level_3_host_ip[level_3_host_id],
-                host_port=str(4433+len(host_all))
+                host_port=str(4433+len(host_all)),
+                cache_level=3
             )
 
             if self.use_http_server:
-                self.build_network.level_3_host[level_3_host_id].redis_cache.data_path = '/proj/socnet-PG0/temp_media_data/' + str(len(host_all)) + '/picture/'
-                self.start_http_server(host=self.build_network.level_3_host[level_3_host_id], db=len(host_all), host_ip=self.build_network.level_3_host_ip[level_3_host_id], temp_picture_path=self.build_network.level_3_host[level_3_host_id].redis_cache.data_path)
+                self.build_network.level_3_host[level_3_host_id].redis_cache.picture_root_path = '/proj/socnet-PG0/temp_media_data/' + str(len(host_all)) + '/picture/'
+                self.start_http_server(host=self.build_network.level_3_host[level_3_host_id], db=len(host_all), host_ip=self.build_network.level_3_host_ip[level_3_host_id], temp_picture_path=self.build_network.level_3_host[level_3_host_id].redis_cache.picture_root_path)
             host_all.append(self.build_network.level_3_host[level_3_host_id])
 
         '''设置层级关系'''
         for level_3_host_id in range(self.build_network.level_3_host_number):
             bind_level_2_id = self.topo['up_bind_3_2'][level_3_host_id]
-            self.build_network.level_3_host[level_3_host_id].redis_cache.has_higher_cache = True
             self.build_network.level_3_host[level_3_host_id].redis_cache.higher_cache_redis = self.build_network.level_2_host[bind_level_2_id].redis_cache
             self.build_network.level_3_host[level_3_host_id].redis_cache.higher_cache_id = bind_level_2_id
             self.build_network.level_3_host[level_3_host_id].redis_cache.higher_cache_level = 2
 
         for level_2_host_id in range(self.build_network.level_2_host_number):
             bind_level_1_id = self.topo['up_bind_2_1'][level_2_host_id]
-            self.build_network.level_2_host[level_2_host_id].redis_cache.has_higher_cache = True
             self.build_network.level_2_host[level_2_host_id].redis_cache.higher_cache_redis = self.build_network.level_1_host[bind_level_1_id].redis_cache
             self.build_network.level_2_host[level_2_host_id].redis_cache.higher_cache_id = bind_level_1_id
             self.build_network.level_2_host[level_2_host_id].redis_cache.higher_cache_level = 1
@@ -144,12 +145,12 @@ class Main:
                 post_id = int(line.split('+')[4])
                 media_size = int(float(line.split('+')[1]))
                 '''往第三层级插入，后续的调整都由redis内部完成'''
-                self.build_network.level_3_host[selected_level_3_id].redis_cache.insert(post_id, current_timestamp, media_size=media_size, cache_level=3)
+                self.build_network.level_3_host[selected_level_3_id].redis_cache.insert(post_id, current_timestamp, media_size=media_size)
 
             elif current_type == "view":
                 post_id = int(line.split('+')[1])
                 '''往第三层级查询，后续的调整都由redis内部完成，这里先假设只有一个user'''
-                result_level = self.build_network.level_3_host[selected_level_3_id].redis_cache.find(picture_hash=post_id, user_host=self.build_network.user_host[0], cache_level=3)
+                result_level = self.build_network.level_3_host[selected_level_3_id].redis_cache.find(picture_hash=post_id, user_host=self.build_network.user_host[0])
 
                 print(cnt_line, result_level, file=f_out)
                 
