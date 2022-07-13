@@ -47,6 +47,7 @@ class Main:
     def reflush_cache(self, use_LRU_cache=False):
         '''存储结果数据的文件夹'''
         self.result_path = '/proj/socnet-PG0/data/' + str(time.strftime("%Y-%m-%d_%H:%M:%S", time.localtime())) + '/'
+        os.system("cp ./code/main/config.json %s"%(self.result_path)) ## 保存config文件，为了之后实验的分析方便
         util.reflush_path(self.result_path)
 
         os.system("ps -ef |grep simple_httpserver.py | grep -v grep | awk '{print $2}' | xargs sudo kill -9 > /dev/null 2>&1 && sleep 3") ## 删除之前的HTTP_server
@@ -55,7 +56,8 @@ class Main:
             self.build_network.level_1_host[level_1_host_id].redis_cache = Redis_cache(
                 db=len(host_all),
                 host=self.build_network.level_1_host[level_1_host_id], 
-                cache_size=10000, 
+                cache_size=CONFIG['cache_size_level_1'], 
+                use_priority_queue=CONFIG['use_priority_queue'],
                 use_LRU_cache=use_LRU_cache, 
                 result_path=self.result_path,
                 host_ip=self.build_network.level_1_host_ip[level_1_host_id],
@@ -72,7 +74,8 @@ class Main:
             self.build_network.level_2_host[level_2_host_id].redis_cache = Redis_cache(
                 db=len(host_all), 
                 host=self.build_network.level_2_host[level_2_host_id], 
-                cache_size=10, 
+                cache_size=CONFIG['cache_size_level_2'], 
+                use_priority_queue=CONFIG['use_priority_queue'],
                 use_LRU_cache=use_LRU_cache,
                 result_path=self.result_path,
                 host_ip=self.build_network.level_2_host_ip[level_2_host_id],
@@ -89,7 +92,8 @@ class Main:
             self.build_network.level_3_host[level_3_host_id].redis_cache = Redis_cache(
                 db=len(host_all), 
                 host=self.build_network.level_3_host[level_3_host_id], 
-                cache_size=2, 
+                cache_size=CONFIG['cache_size_level_3'], 
+                use_priority_queue=CONFIG['use_priority_queue'],
                 use_LRU_cache=use_LRU_cache,
                 result_path=self.result_path,
                 host_ip=self.build_network.level_3_host_ip[level_3_host_id],
@@ -135,9 +139,8 @@ class Main:
         f_out = open(self.result_path + 'find_result.txt', 'w')
         cnt_line = 0 
         for line in f_in:
-            print(cnt_line)
             cnt_line += 1
-            if cnt_line > 100:
+            if CONFIG['max_trace_len'] and cnt_line > CONFIG['max_trace_len']:
                break 
             current_type = line.split('+')[-1].strip()
             current_location = eval(line.split('+')[2])
@@ -265,8 +268,10 @@ class Main:
         self.main(caching_policy=caching_policy)
 
 if __name__ == '__main__':
-    main_program = Main(trace_dir='naive', use_http_server=True)
-    main_program.run('FIFO')
+    CONFIG = json.load(open('./code/main/config.json', 'r'))
+    main_program = Main(trace_dir=CONFIG['trace_dir'], use_http_server=CONFIG['use_http_server'])
+    main_program.run(caching_policy=CONFIG['caching_policy'])
+    # main_program.run(caching_policy='FIFO')
     # main_program.run('RAND')
     # main_program.run('LRU')
     # main_program.run('PageRank')
