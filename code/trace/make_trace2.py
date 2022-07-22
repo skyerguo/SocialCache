@@ -116,7 +116,7 @@ class gen_trace_data:
         
         self.df_trace = self.df_trace.sort_values(by="timestamp").reset_index(drop=True)
         print(self.df_trace)
-        self.df_trace.to_csv("trace.csv")
+        #self.df_trace.to_csv("trace.csv")
     
     def trans_trace2timeline(self):
 
