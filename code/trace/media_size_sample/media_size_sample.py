@@ -5,7 +5,7 @@ import subprocess
 class media_size_sample:
     def __init__(self):
         self.path = path = os.path.split(os.path.realpath(__file__))[0]
-        self.population = self.path + '/' + "population.dat"
+        self.population = self.path + '/' + "population"
 
     def sample(self, num):
         shell_cmd = "shuf %s -n %d" %(self.population, num)

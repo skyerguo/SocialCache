@@ -1,6 +1,5 @@
-sample_line/data
-sample_line/result
-*.png
+media_size_sample/get_media_size_from_urls/data
+media_size_sample/get_media_size_from_urls/result
 *.dat
 *.txt
 *.csv
