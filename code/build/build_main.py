@@ -49,9 +49,10 @@ class Build_network:
 
         '''获得本机的IP地址，作为redis_ip，并获得redis_ip的前缀'''
         # self.redis_ip = "128.105.145.13"
-        ret = subprocess.Popen("ifconfig eno1 | grep inet | awk '{print $2}' | cut -f 2 -d ':'",shell=True,stdout=subprocess.PIPE)
+        ret = subprocess.Popen("ifconfig enp1s0f0 | grep inet | awk '{print $2}' | cut -f 2 -d ':'",shell=True,stdout=subprocess.PIPE)
         self.redis_ip = ret.stdout.read().decode("utf-8").strip('\n')
         ret.stdout.close()
+        print("redis_ip: ", self.redis_ip)
 
         self.redis_ip_subnet = str(self.redis_ip.split('.')[0]) + '.' + \
                                 str(self.redis_ip.split('.')[1]) + '.' + \
@@ -73,7 +74,7 @@ class Build_network:
         setLogLevel( 'warning' )
 
         '''将第二个网卡配置清空，为了方便之后重新配置，协助mininet内部节点连接本机'''
-        os.system('ifconfig eno2 0')
+        os.system('ifconfig enp1s0f1 0')
 
         print('*** Add switches\n')
         for switch_id in range(self.switch_number):
@@ -87,7 +88,7 @@ class Build_network:
         for switch_id in range(self.switch_number):
             self.switch[switch_id].cmd('sysctl -w net.ipv4.ip_forward=1')
 
-        '''将最后1个switch和网卡eno2相连，并获取网关地址'''
+        '''将最后1个switch和网卡enp1s0f1相连，并获取网关地址'''
         print("sudo ifconfig sw%s 10.0.%s.15/24"%(str(self.switch_number-1), str(100)))
         ret = subprocess.Popen("sudo ifconfig sw%s 10.0.%s.15/24"%(str(self.switch_number-1), str(100)), shell=True,stdout=subprocess.PIPE)
         data=ret.communicate() 
