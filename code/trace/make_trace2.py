@@ -8,14 +8,21 @@ from sklearn.cluster import KMeans
 
 class gen_trace_data:
     def __init__(self, edge_file="edges.dat", loc_file="loc.dat"):
+        # The number of clusters that users are divided into using the K-means algorithm
         self.cluster    = 7
+
+        # Parameters of zipf distribution of user activities
         self.zipf_A     = 1.765
         self.zipf_size  = 10000
-        self.pub_ratio  = 0.05
+        
+        # Inter-activity time distribution
         self.lognormal_mu       = 1.789
         self.lognormal_theta    = 2.366
+
+        self.pub_ratio  = 0.05
         self.edge_file  = edge_file
         self.loc_file   = loc_file
+
         self.media_size = sp.media_size_sample()
     
     def load_network(self, filename, output_edge_filename="relations.txt", draw=False):
@@ -55,11 +62,14 @@ class gen_trace_data:
     def load_location(self, filename):
         self.country_location = pd.read_csv(filename)
         self.location_list = []
+        self.locations     = []
 
         for rowidx, row in self.country_location.iterrows():
             repeat = [(row["longtitude"], row["latitude"])]*int(row["count"])
             self.location_list.extend(repeat)
+            self.locations.append((row["longtitude"], row["latitude"]))
         #print(self.location_list)
+        print(self.locations)
 
     def build_user_df(self):
         # calculate pagerank of user
@@ -101,36 +111,118 @@ class gen_trace_data:
             time += int(interval * 10)
             time_list.append(time)
             loc_list.append(random.choice(self.location_list))
-
-
         
-        return pd.DataFrame(dict(timestamp=time_list, publish=kind_list, media_size=media_size_list, location=loc_list))
+        return pd.DataFrame(dict(timestamp=time_list, publish=kind_list, media_size=media_size_list, location=loc_list)), time
 
     def build_user_activity(self):
+        user_act_dict = {}
+        self.user_postline_dict = {}
+        max_duration = 0
         self.df_trace = pd.DataFrame(columns=["timestamp", "publish", "media_size", "location", "user_id"])
         for rowidx, row in self.user_df.iterrows():
-            df = self.gen_activity_df(int(row["activity_number"]))
-            df["user_id"] = int(row["user_id"])
+            user_id = int(row["user_id"])
+            df, duration = self.gen_activity_df(int(row["activity_number"]))
+            df["user_id"] = user_id
             #print(df)
+            user_act_dict[user_id] = df
+            max_duration = max(max_duration, duration)
             self.df_trace = pd.concat([self.df_trace, df])
         
+        # shift timestamp of users' activity sequence 
         self.df_trace = self.df_trace.sort_values(by="timestamp").reset_index(drop=True)
-        print(self.df_trace)
         #self.df_trace.to_csv("trace.csv")
     
     def trans_trace2timeline(self):
+        # init data
+        print("trans trace data to all_timeline")
+        user_postline_dict  = {}
+        position_post_dict  = {}
+        user_adjlist_dict   = {}
+
+        for user in self.user_net.nodes:
+            user_postline_dict[user] = []
+            adjlist = []
+            [adjlist.append(adj) for adj in self.user_net[user]]
+            user_adjlist_dict[user] = adjlist
+            print("user %d adjcent :" %user , adjlist)
+
+        for loc in self.locations:
+            position_post_dict[loc] = []
 
         fd = open("all_timeline.txt", "w+")
-        post_seq_num = 0
-        for rowidx, row in self.df_trace.iterrows():
-            line = str(row["timestamp"]) + "+" + str(row["media_size"]) + "+{'lat': '%.2f', 'lon': '%.2f'}" %(row["location"][0], row["location"][1]) + "+" + str(row["user_id"])
-            if row["publish"] == 1:
-                line += "+" + str(post_seq_num) + "+post"
-                post_seq_num += 1
-            else:
-                line += "+view"
-            fd.write(line + '\n')
+        post_seq_num = -1
+        last_view_id = -1
+        last_user_id = -1
 
+        for rowidx, row in self.df_trace.iterrows():
+            item_line = str(row["timestamp"])
+            curr_user_id = row["user_id"]
+            #line = str(row["timestamp"]) + "+" + str(row["media_size"]) + "+{'lat': '%.2f', 'lon': '%.2f'}" %(row["location"][0], row["location"][1]) + "+" + str(row["user_id"])
+
+            if row["publish"] == 1:
+                # get a post item
+                print("Get a post item")
+                post_seq_num += 1
+
+                user_postline_dict[curr_user_id].append(post_seq_num)
+                position_post_dict[row["location"]].append(post_seq_num)
+                item_line += "+%s+{'lat': '%.2f', 'lon': '%.2f'}+%d+%d+post"\
+                            %(str(row["media_size"] // 1024),\
+                            row["location"][0], row["location"][1],\
+                            curr_user_id,\
+                            post_seq_num)
+
+                print("user %d current postline : " %curr_user_id, user_postline_dict[curr_user_id])
+            else:
+                # get a view item
+                print("Get a view item")
+                viewid  = -1
+
+                coin = random.randint(1, 10)
+                if coin == 1:
+                    # nearby view
+                    # item_line += "+nearby"
+                    loc_post_list = position_post_dict[row["location"]]
+                    print("loc", row["location"], "post line:", loc_post_list)
+                    if loc_post_list:
+                        viewid = loc_post_list[-1]
+                else:
+                    # friend view
+                    # item_line += "+friend"
+                    viewadj = -1
+                    adjlist = user_adjlist_dict[curr_user_id]
+                    while adjlist:
+                        # random pick an adjcent
+                        print("current adjlist : ", adjlist)
+                        adj_idx = random.choice(adjlist)
+                        user_post_list = user_postline_dict[adj_idx]
+
+                        print("choose adj%d, postline :" %adj_idx, user_post_list)
+                        if user_post_list:
+                            viewadj = adj_idx
+
+                            # to prevent the situation that the same user always views the same post
+                            for i in range(len(user_post_list)):
+                                viewid = user_post_list[-(i+1)]
+                                if not (viewid == last_view_id and curr_user_id == last_user_id):
+                                    break
+                            last_view_id = viewid
+                            last_user_id = curr_user_id
+                            break
+                        
+                        print("user %d adj%d's postline is empty ")
+                        adjlist.remove(adj_idx)
+
+                if viewid != -1:
+                    # valid view
+                    item_line += "+%d+{'lat': '%.2f', 'lon': '%.2f'}+%d+view"\
+                            %(viewid, \
+                            row["location"][0], row["location"][1], \
+                            curr_user_id)
+                else:
+                    # ignore invalid view
+                    continue
+            fd.write(item_line + '\n')
         fd.close()
 
     def launch(self):
@@ -144,4 +236,3 @@ class gen_trace_data:
 if __name__ == "__main__":
     trace_data = gen_trace_data("../../data/traces/myk/edges.dat", "../../data/traces/myk/user_country.csv")
     trace_data.launch()
-
