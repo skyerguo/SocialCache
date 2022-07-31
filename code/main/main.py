@@ -8,11 +8,14 @@ import json
 import os
 import time
 import random
+
 class Main:
-    def __init__(self, trace_dir, use_http_server=False):
+    def __init__(self, trace_dir, use_http_server=False, if_debug=False):
+
+        self.if_debug = if_debug
 
         self.build_network = Build_network()
-        self.build_network.run()
+        self.build_network.run(self.if_debug)
 
         self.topo = json.load(open('code/build/topo.json', 'r'))
         level_3_area_id = self.topo['level_3_id']
@@ -47,9 +50,9 @@ class Main:
     def reflush_cache(self, use_LRU_cache=False):
         '''存储结果数据的文件夹'''
         self.result_path = '/proj/socnet-PG0/data/' + str(time.strftime("%Y-%m-%d_%H:%M:%S", time.localtime())) + '/'
-        os.system("cp ./code/main/config.json %s"%(self.result_path)) ## 保存config文件，为了之后实验的分析方便
         util.reflush_path(self.result_path)
-
+        os.system("cp ./code/main/config.json %s"%(self.result_path)) ## 保存config文件，为了之后实验的分析方便
+        
         os.system("ps -ef |grep simple_httpserver.py | grep -v grep | awk '{print $2}' | xargs sudo kill -9 > /dev/null 2>&1 && sleep 3") ## 删除之前的HTTP_server
         host_all = []
         for level_1_host_id in range(self.build_network.level_1_host_number):
@@ -164,7 +167,13 @@ class Main:
                     'sort_value': sort_value,
                     'media_size': int(float(line.split('+')[1]))
                 }
-            
+
+                if self.if_debug:
+                    print("post_id: ", post_id)
+                    print("user_id: ", user_id)
+                    print("selected_level_3_id: ", selected_level_3_id)
+                    print("temp_redis_object: ", temp_redis_object)
+                
                 '''往第三层级插入，后续的调整都由redis内部完成'''
                 self.build_network.level_3_host[selected_level_3_id].redis_cache.insert(picture_hash=post_id, redis_object=temp_redis_object, need_uplift=True)
 
@@ -216,5 +225,5 @@ class Main:
 
 if __name__ == '__main__':
     CONFIG = json.load(open('./code/main/config.json', 'r'))
-    main_program = Main(trace_dir=CONFIG['trace_dir'], use_http_server=CONFIG['use_http_server'])
+    main_program = Main(trace_dir=CONFIG['trace_dir'], use_http_server=CONFIG['use_http_server'], if_debug=CONFIG['mode']=='debug')
     main_program.run(caching_policy=CONFIG['caching_policy'])

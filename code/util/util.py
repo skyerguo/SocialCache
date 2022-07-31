@@ -35,7 +35,7 @@ def reflush_path(path):
     os.system('mkdir -p ' + path)
 
 def create_picture(host, picture_size, picture_path):
-    host.cmd('head -c %s /dev/zero > %s'%(str(picture_size), picture_path))
+    host.cmdPrint('head -c %s /dev/zero > %s'%(str(picture_size), picture_path))
     for _ in range(5):
         if not os.path.exists(picture_path):
             print('文件' + picture_path + '未创建成功，等待一秒')
@@ -49,11 +49,11 @@ def delete_picture(host, picture_path):
 def HTTP_GET(host, picture_hash, IP_address, port_number, use_TLS=False, result_path='', picture_path='/dev/null'):
     '''如果是user端调用，不需要存储，只需要跑流量，所以把数据结果存到/dev/null即可'''
     '''A wget B, 日志存储到B的对应文件夹中'''
-    host.cmd('wget http%s://%s:%s/%s -O %s -a %s/wget_log1.txt'%('s' if use_TLS==True else '', IP_address, port_number, picture_hash, picture_path, result_path))
+    host.cmdPrint('wget http%s://%s:%s/%s -O %s -a %s/wget_log1.txt'%('s' if use_TLS==True else '', IP_address, port_number, picture_hash, picture_path, result_path))
 
 def HTTP_POST(host, picture_path, IP_address, port_number, use_TLS=False, result_path=''):
     '''A curl B, 日志存储到A对应的文件夹中'''
-    host.cmd('curl -k -i -X POST -F filename=@"%s" -F name=file "http%s://%s:%s" 1>> %s/curl_log1.txt 2>> %s/curl_log2.txt '%(picture_path, 's' if use_TLS==True else '', IP_address, port_number, result_path, result_path))
+    host.cmdPrint('curl -k -i -X POST -F filename=@"%s" -F name=file "http%s://%s:%s" 1>> %s/curl_log1.txt 2>> %s/curl_log2.txt '%(picture_path, 's' if use_TLS==True else '', IP_address, port_number, result_path, result_path))
 
 def calculate_flow(host, eth_name, flow_direction, result_path=''):
     '''
