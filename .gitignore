@@ -1,3 +1,4 @@
 data/traces/naive
 *.png
 *.pyc
+*__/pycache__/

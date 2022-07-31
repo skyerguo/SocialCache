@@ -179,7 +179,6 @@ class Main:
                     continue
 
                 print(cnt_line, result_level, file=f_out)
-                # print(cnt_line, find_result)
                 
                 for temp_level in range(3, result_level, -1):
                     self.find_fail_number[temp_level] += 1
@@ -211,58 +210,6 @@ class Main:
             print('一级CDN缓存命中率：', self.find_success_number[1] / (self.find_success_number[1] + self.find_fail_number[1]))
         else:
             print('未经过一级CDN缓存')
-        # print("二级缓存命中数和失效数：", self.find_success_number[2], self.find_fail_number[2])
-
-
-    # def PageRank(self):
-    #     self.reflush_cache()
-    #     '''计算PageRank'''
-    #     page_rank_metrics = eg.functions.not_sorted.pagerank(self.make_trace.G)
-    #     # print("page_rank_metrics: ", page_rank_metrics)
-
-    #     '''read_trace'''
-    #     f_in = open("data/traces/" + self.trace_dir + "/all_timeline.txt", "r")
-    #     for line in f_in:
-    #         # print(line)
-    #         current_type = line.split('+')[-1].strip()
-    #         current_location = eval(line.split('+')[2])
-    #         current_timestamp = int(line.split('+')[0])
-            
-    #         selected_level_3_id = util.find_nearest_location(current_location, self.level_3_area_location)
-    #         bind_level_2_id = self.topo['up_bind_3_2'][selected_level_3_id]
-    #         bind_level_1_id = self.topo['up_bind_2_1'][bind_level_2_id]
-
-    #         if current_type == "post":
-    #             post_id = int(line.split('+')[4])
-    #             user_id = int(line.split('+')[3])
-    #             media_size = int(float(line.split('+')[1]) * 1000)
-    #             self.build_network.level_3_host[selected_level_3_id].redis_cache.insert(post_id, int( * 10000),media_size=media_size)
-    #             self.build_network.level_2_host[bind_level_2_id].redis_cache.insert(post_id, int(page_rank_metrics[str(user_id)] * 10000))
-    #             self.build_network.level_1_host[bind_level_1_id].redis_cache.insert(post_id, int(page_rank_metrics[str(user_id)] * 10000))
-
-    #         elif current_type == "view":
-    #             post_id = int(line.split('+')[1])
-    #             if self.build_network.level_3_host[selected_level_3_id].redis_cache.find(post_id) == -1:
-    #                 self.find_fail_number[3] += 1
-    #                 if self.build_network.level_2_host[bind_level_2_id].redis_cache.find(post_id) == -1:
-    #                     self.find_fail_number[2] += 1
-    #                     if self.build_network.level_1_host[bind_level_1_id].redis_cache.find(post_id) == -1:
-    #                         self.find_fail_number[1] += 1
-    #                     else:
-    #                         self.find_success_number[1] += 1
-    #                 else:
-    #                     self.find_success_number[2] += 1
-    #             else:
-    #                 self.find_success_number[3] += 1
-    #         else:
-    #             print("ERROR!")
-    #     f_in.close()
-
-    #     '''分析'''
-    #     print("缓存策略： *** PageRank ***")
-    #     print("三级CDN缓存命中率：", self.find_success_number[3] / (self.find_success_number[3] + self.find_fail_number[3]))
-    #     print("二级CDN缓存命中率：", self.find_success_number[2] / (self.find_success_number[2] + self.find_fail_number[2]))
-    #     print("一级CDN缓存命中率：", self.find_success_number[1] / (self.find_success_number[1] + self.find_fail_number[1]))
 
     def run(self, caching_policy):
         self.main(caching_policy=caching_policy)
@@ -271,7 +218,3 @@ if __name__ == '__main__':
     CONFIG = json.load(open('./code/main/config.json', 'r'))
     main_program = Main(trace_dir=CONFIG['trace_dir'], use_http_server=CONFIG['use_http_server'])
     main_program.run(caching_policy=CONFIG['caching_policy'])
-    # main_program.run(caching_policy='FIFO')
-    # main_program.run('RAND')
-    # main_program.run('LRU')
-    # main_program.run('PageRank')
