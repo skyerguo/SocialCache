@@ -133,7 +133,7 @@ class Redis_cache:
                     '''如果需要创建图片，则在最后一层路径中创建一个文件'''
                     util.create_picture(host=self.host, picture_size=redis_object['media_size'], picture_path=self.picture_root_path+str(picture_hash))
 
-                elif self.cache_level > 1:
+                if self.cache_level > 1:
                     '''如果有上层cache的需要，使用HTTP_POST向上传播'''
                     util.HTTP_POST(host=self.host, picture_path=self.picture_root_path+str(picture_hash), IP_address=self.higher_cache_redis.host_ip, port_number=self.higher_cache_redis.host_port, use_TLS=False, result_path=self.result_path+'curl/'+self.host_ip)
             

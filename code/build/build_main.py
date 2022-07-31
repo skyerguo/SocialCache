@@ -5,7 +5,7 @@ from mininet.node import CPULimitedHost, Host, Node
 from mininet.node import OVSKernelSwitch, UserSwitch
 from mininet.node import IVSSwitch
 from mininet.cli import CLI
-from mininet.log import setLogLevel, info, warning
+from mininet.log import setLogLevel
 from mininet.link import TCLink, Intf
 import copy
 import json
@@ -248,11 +248,12 @@ class Build_network:
         '''等待30秒，保证网络构建完成'''
         time.sleep(30) 
 
-    def run(self):
+    def run(self, if_debug=False):
         '''构建网络拓扑'''
         self.myNetwork()
 
-        setLogLevel( 'info' )
+        if if_debug:
+            setLogLevel( 'info' )
 
         # CLI(self.net)
 
