@@ -1,10 +1,10 @@
 {
-    "trace_dir": "myk2",
+    "trace_dir": "myk3",
     "caching_policy": "LRU",
     "use_http_server": true,
     "use_priority_queue": true,
     "cache_size_level_3": 100,
     "cache_size_level_2": 1000,
     "cache_size_level_1": 100000,
-    "max_trace_len": 10000
+    "max_trace_len": 1000
 }

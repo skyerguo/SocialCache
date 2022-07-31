@@ -64,6 +64,10 @@ echo "gtc            hard    nproc           330603" | sudo tee -a /etc/security
 echo "gtc            soft    nofile          102400" | sudo tee -a /etc/security/limits.conf
 echo "gtc            hard    nofile          102400" | sudo tee -a /etc/security/limits.conf
 
+
+# install networkx
+pip3 install networkx
+
 # ## cache相关
 # deb http://us.archive.ubuntu.com/ubuntu/ trusty main restricted universe multiverse
 # deb-src http://us.archive.ubuntu.com/ubuntu/ trusty main restricted universe multiverse
