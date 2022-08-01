@@ -133,7 +133,7 @@ class Main:
         if caching_policy == "LRU":
             self.reflush_cache(use_LRU_cache=True)
         else:
-            self.reflush_cache()
+            self.reflush_cache(use_LRU_cache=False)
         
         if caching_policy == 'PageRank':
             page_rank_metrics = eg.functions.not_sorted.pagerank(self.make_trace.G)
