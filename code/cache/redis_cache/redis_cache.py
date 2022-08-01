@@ -106,11 +106,14 @@ class Redis_cache:
         if self.use_LRU_cache: 
             '''若数据已存在，表示命中一次，需要把数据移到缓存队列末端'''
             if picture_hash in self.LRUcache:
+                # print("picture_hash: ", picture_hash)
                 self.LRUcache.move_to_end(picture_hash)
             '''若缓存已满，则需要淘汰最早没有使用的数据'''
+            # print("self.redis.dbsize(): ", self.redis.dbsize())
+            # print("self.cache_size: ", self.cache_size)
             if self.redis.dbsize() >= self.cache_size:
-                self.LRUcache.popitem(last=False)
                 self.remove_cache_node(given_key=next(iter(self.LRUcache)))
+                self.LRUcache.popitem(last=False)
             self.LRUcache[picture_hash] = redis_object['sort_value']
 
         else:
@@ -120,6 +123,8 @@ class Redis_cache:
         
         '''插入redis数据库'''
         self.redis.set(picture_hash, pickle.dumps(redis_object))
+
+        # print(picture_hash, self.db, [key for key in self.redis.keys()], self.LRUcache)
 
         '''如有有使用优先队列，每次插入时需要维护优先队列'''
         if self.use_priority_queue:

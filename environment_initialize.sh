@@ -25,7 +25,7 @@ pip3 install --upgrade pip setuptools
 pip3 install shapely geopandas matplotlib redis Python-EasyGraph
 
 ## 安装apt
-sudo apt-get -yqq install wondershaper nload iftop zip unzip htop
+sudo apt-get -yqq install wondershaper nload iftop zip unzip htop jq
 
 ## 安装iperf3
 cd ~

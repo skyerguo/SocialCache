@@ -1,11 +1,11 @@
 {
-    "trace_dir": "myk3",
-    "caching_policy": "LRU",
-    "use_http_server": true,
-    "use_priority_queue": true,
-    "cache_size_level_3": 100,
-    "cache_size_level_2": 1000,
-    "cache_size_level_1": 100000,
-    "max_trace_len": 100,
-    "mode": "normal"
+  "trace_dir": "myk3",
+  "caching_policy": "RAND",
+  "use_http_server": true,
+  "use_priority_queue": true,
+  "cache_size_level_3": 100,
+  "cache_size_level_2": 1000,
+  "cache_size_level_1": 100000,
+  "max_trace_len": null,
+  "mode": "normal"
 }
