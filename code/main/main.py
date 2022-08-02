@@ -139,7 +139,8 @@ class Main:
             page_rank_metrics = eg.functions.not_sorted.pagerank(self.make_trace.G)
 
         f_in = open("data/traces/" + self.trace_dir + "/all_timeline.txt", "r")
-        f_out = open(self.result_path + 'find_result.txt', 'w')
+        f_out_find = open(self.result_path + 'find_log.txt', 'w')
+        f_out_insert = open(self.result_path + 'insert_log.txt', 'w')
         cnt_line = 0 
         for line in f_in:
             cnt_line += 1
@@ -156,7 +157,7 @@ class Main:
                 user_id = int(line.split('+')[3])
 
                 if caching_policy == 'RAND':
-                    sort_value = random.randint()
+                    sort_value = random.randint(0, 100)
                 elif caching_policy == 'FIFO' or caching_policy == 'LRU':
                     sort_value = int(current_timestamp)
                 elif caching_policy == 'PageRank':
@@ -167,6 +168,8 @@ class Main:
                     'sort_value': sort_value,
                     'media_size': int(float(line.split('+')[1]))
                 }
+
+                print(cnt_line, selected_level_3_id, temp_redis_object, file=f_out_insert)
 
                 if self.if_debug:
                     print("post_id: ", post_id)
@@ -187,7 +190,7 @@ class Main:
                     '''所有level的cache都没有找到'''
                     continue
 
-                print(cnt_line, result_level, file=f_out)
+                print(cnt_line, selected_level_3_id, result_level, find_result[1], file=f_out_find)
                 
                 for temp_level in range(3, result_level, -1):
                     self.find_fail_number[temp_level] += 1
@@ -195,6 +198,8 @@ class Main:
             else:
                 print("ERROR!")
         f_in.close()
+        f_out_insert.close()
+        f_out_find.close()
 
         # CLI(self.build_network.net)
 

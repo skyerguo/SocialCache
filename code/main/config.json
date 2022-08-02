@@ -1,7 +1,7 @@
 {
   "trace_dir": "myk3",
-  "caching_policy": "RAND",
-  "use_http_server": true,
+  "caching_policy": "FIFO",
+  "use_http_server": false,
   "use_priority_queue": true,
   "cache_size_level_3": 100,
   "cache_size_level_2": 1000,
