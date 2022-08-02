@@ -205,8 +205,17 @@ class Main:
 
         if self.use_http_server == True:
             for level_3_host_id in range(self.build_network.level_3_host_number):
-                for eth_port in range(self.build_network.level_2_host_number):
+                for eth_port in range(self.build_network.level_2_host_number): # 对应第二层的每一个节点
                     util.calculate_flow(host=self.build_network.level_3_host[level_3_host_id], eth_name='c%s-eth%s'%(str(level_3_host_id), str(eth_port)), flow_direction='TX', result_path=self.result_path+'flow/'+self.build_network.level_3_host_ip[level_3_host_id])
+
+            for level_2_host_id in range(self.build_network.level_2_host_number):
+                for eth_port in range(self.build_network.level_1_host_number + 1): # 对应第一层的每一个节点，以及自己的switch
+                    util.calculate_flow(host=self.build_network.level_2_host[level_2_host_id], eth_name='b%s-eth%s'%(str(level_2_host_id), str(eth_port)), flow_direction='TX', result_path=self.result_path+'flow/'+self.build_network.level_2_host_ip[level_2_host_id])
+
+            for level_1_host_id in range(self.build_network.level_1_host_number):
+                for eth_port in range(1): # 对应自己的switch
+                    util.calculate_flow(host=self.build_network.level_1_host[level_1_host_id], eth_name='a%s-eth%s'%(str(level_1_host_id), str(eth_port)), flow_direction='TX', result_path=self.result_path+'flow/'+self.build_network.level_1_host_ip[level_1_host_id])
+
 
         '''分析'''
         print('缓存策略： *** %s ***'%(caching_policy))
