@@ -19,14 +19,14 @@ def calc_geolocation_distance(loc1, loc2):
     r = 6371 # 地球平均半径，单位为公里
     return c * r
 
-def find_nearest_location(loc1, loc_list):
+def find_nearest_location(loc1, loc_list) -> list:
     nearest_distance = 6371 * 2
     nearest_id = -1
     for loc_id in range(len(loc_list)):
         if calc_geolocation_distance(loc1, loc_list[loc_id]) < nearest_distance:
             nearest_distance = calc_geolocation_distance(loc1, loc_list[loc_id])
             nearest_id = loc_id
-    return nearest_id
+    return [nearest_id, nearest_distance]
 
 def reflush_path(path):
     if os.path.exists(path):

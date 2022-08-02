@@ -150,23 +150,27 @@ class Main:
             current_location = eval(line.split('+')[2])
             current_timestamp = int(line.split('+')[0])
 
-            selected_level_3_id = util.find_nearest_location(current_location, self.level_3_area_location)
+            [selected_level_3_id, nearest_distance] = util.find_nearest_location(current_location, self.level_3_area_location)
 
             if current_type == "post":
                 post_id = int(line.split('+')[4])
                 user_id = int(line.split('+')[3])
+                media_size = int(float(line.split('+')[1]))
 
                 if caching_policy == 'RAND':
                     sort_value = random.randint(0, 100)
                 elif caching_policy == 'FIFO' or caching_policy == 'LRU':
                     sort_value = int(current_timestamp)
                 elif caching_policy == 'PageRank':
-                    sort_value = page_rank_metrics[str(user_id)]
+                    sort_value = int(current_timestamp) * CONFIG['params'][0] + \
+                                page_rank_metrics[str(user_id)] * CONFIG['params'][1] + \
+                                int(nearest_distance) * CONFIG['params'][2] + \
+                                media_size * CONFIG['params'][3]
                     
                 '''记录redis_object，使用json形式保存'''
                 temp_redis_object = {
                     'sort_value': sort_value,
-                    'media_size': int(float(line.split('+')[1]))
+                    'media_size': media_size
                 }
 
                 print(cnt_line, selected_level_3_id, temp_redis_object, file=f_out_insert)
