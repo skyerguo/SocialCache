@@ -42,6 +42,7 @@ class Main:
         os.system('mkdir -p ' + self.result_path + 'curl/' + host_ip)
         os.system('mkdir -p ' + self.result_path + 'wget/' + host_ip)
         os.system('mkdir -p ' + self.result_path + 'flow/' + host_ip)
+        os.system('mkdir -p ' + self.result_path + 'mediaSize/' + host_ip)
         
         host.cmdPrint('cd %s && nohup python3 /users/gtc/SocNet/code/util/simple_httpserver.py -l %s -p %s -n 1>> %s/http_log1.txt 2>> %s/http_log2.txt &'%(temp_picture_path, str(host_ip), str(4433+int(db)), self.result_path+'http/'+host_ip, self.result_path+'http/'+host_ip))
         
@@ -167,6 +168,8 @@ class Main:
                     #             int(nearest_distance) * CONFIG['params'][2] + \
                     #             media_size * CONFIG['params'][3]
                     sort_value = int(current_timestamp) + page_rank_metrics[str(user_id)] * media_size
+                # elif caching_policy == "LRU-social":
+                #     sort_value = 0
                     
                 '''记录redis_object，使用json形式保存'''
                 temp_redis_object = {

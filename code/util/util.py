@@ -64,3 +64,6 @@ def calculate_flow(host, eth_name, flow_direction, result_path=''):
         return -1
     export_path = result_path + '/%s_%s.log' % (str(flow_direction), str(eth_name))
     host.cmd("ifconfig %s | grep %s | grep bytes | awk '{print $5}' > %s"%(str(eth_name), str(flow_direction), str(export_path)))
+
+def SIRModel(user_id, beta, gamma=1):
+    pass
