@@ -162,10 +162,11 @@ class Main:
                 elif caching_policy == 'FIFO' or caching_policy == 'LRU':
                     sort_value = int(current_timestamp)
                 elif caching_policy == 'PageRank':
-                    sort_value = int(current_timestamp) * CONFIG['params'][0] + \
-                                page_rank_metrics[str(user_id)] * CONFIG['params'][1] + \
-                                int(nearest_distance) * CONFIG['params'][2] + \
-                                media_size * CONFIG['params'][3]
+                    # sort_value = int(current_timestamp) * CONFIG['params'][0] + \
+                    #             page_rank_metrics[str(user_id)] * CONFIG['params'][1] + \
+                    #             int(nearest_distance) * CONFIG['params'][2] + \
+                    #             media_size * CONFIG['params'][3]
+                    sort_value = int(current_timestamp) + page_rank_metrics[str(user_id)] * media_size
                     
                 '''记录redis_object，使用json形式保存'''
                 temp_redis_object = {
