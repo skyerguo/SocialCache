@@ -1,12 +1,17 @@
 {
   "trace_dir": "myk3",
-  "caching_policy": "PageRank",
+  "caching_policy": "FIFO",
   "use_http_server": true,
   "use_priority_queue": true,
-  "cache_size_level_3": 10,
-  "cache_size_level_2": 100,
-  "cache_size_level_1": 100000,
-  "max_trace_len": 300,
+  "cache_size_level_3": 50,
+  "cache_size_level_2": 500,
+  "cache_size_level_1": 50000,
+  "max_trace_len": null,
   "mode": "normal",
-  "params": [0,1,0,0]
+  "params": [
+    0,
+    1,
+    0,
+    0
+  ]
 }

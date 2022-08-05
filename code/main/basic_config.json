@@ -3,9 +3,9 @@
     "caching_policy": "LRU",
     "use_http_server": true,
     "use_priority_queue": true,
-    "cache_size_level_3": 100,
-    "cache_size_level_2": 1000,
-    "cache_size_level_1": 100000,
+    "cache_size_level_3": 50,
+    "cache_size_level_2": 500,
+    "cache_size_level_1": 50000,
     "max_trace_len": null,
     "mode": "normal",
     "params": [0,1,0,0]
