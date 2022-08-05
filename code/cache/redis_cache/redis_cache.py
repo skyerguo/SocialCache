@@ -63,6 +63,8 @@ class Redis_cache:
 
         '''设置结果存的根目录'''
         self.result_path = result_path
+        self.file_insert_media_size = open(self.result_path + 'mediaSize/' + self.host_ip + '/all.txt', 'w')
+        self.file_find_media_size = open(self.result_path + 'mediaSize/' + self.host_ip + '/all.txt', 'w')
 
         '''设置当前cache的IP地址和HTTP端口'''
         self.host_ip = host_ip
@@ -141,9 +143,10 @@ class Redis_cache:
                 if self.cache_level > 1:
                     '''如果有上层cache的需要，使用HTTP_POST向上传播'''
                     util.HTTP_POST(host=self.host, picture_path=self.picture_root_path+str(picture_hash), IP_address=self.higher_cache_redis.host_ip, port_number=self.higher_cache_redis.host_port, use_TLS=False, result_path=self.result_path+'curl/'+self.host_ip)
-            
+
             if self.cache_level > 1:
                 '''递归调用，一层层上传'''
+                print(redis_object['media_size'], file=self.file_insert_media_size)
                 self.higher_cache_redis.insert(picture_hash=picture_hash, redis_object=redis_object, need_uplift=need_uplift) 
 
         elif self.cache_level > 1: 
@@ -151,6 +154,7 @@ class Redis_cache:
             if self.picture_root_path != '/dev/null': 
                 '''从该节点对上一层进行HTTP_GET操作。这里保证上层有需要的数据'''
                 util.HTTP_GET(host=self.host, picture_hash=picture_hash, IP_address=self.higher_cache_redis.host_ip, port_number=self.higher_cache_redis.host_port, use_TLS=False, result_path=self.higher_cache_redis.result_path+'wget/'+self.host_ip, picture_path=self.picture_root_path+str(picture_hash))
+            print(redis_object['media_size'], file=self.higher_cache_redis.file_insert_media_size)
 
 
     def find(self, picture_hash, user_host):
@@ -163,6 +167,7 @@ class Redis_cache:
             '''启用HTTP，从user_host对当前节点进行HTTP_GET操作'''
             if self.picture_root_path != '/dev/null': 
                 util.HTTP_GET(host=user_host, picture_hash=picture_hash, IP_address=self.host_ip, port_number=self.host_port, use_TLS=False, result_path=self.result_path+'wget/'+self.host_ip, picture_path='/dev/null') 
+            print(redis_object['media_size'], file=self.file_find_media_size)
 
         else:
             result_level = 0
