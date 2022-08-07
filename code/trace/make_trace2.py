@@ -65,9 +65,11 @@ class gen_trace_data:
         self.locations     = []
 
         for rowidx, row in self.country_location.iterrows():
-            repeat = [(row["longtitude"], row["latitude"])]*int(row["count"])
+            longtitude  = float(row["longtitude"])
+            latitude    = float(row["latitude"])
+            repeat = [(longtitude, latitude)]*int(row["count"])
             self.location_list.extend(repeat)
-            self.locations.append((row["longtitude"], row["latitude"]))
+            self.locations.append((longtitude, latitude))
         #print(self.location_list)
         print(self.locations)
 
@@ -234,5 +236,5 @@ class gen_trace_data:
         
     
 if __name__ == "__main__":
-    trace_data = gen_trace_data("../../data/traces/myk/edges.dat", "../../data/traces/myk/user_country.csv")
+    trace_data = gen_trace_data("../../data/traces/myk/edges.dat", "../../data/static/user_country.csv")
     trace_data.launch()
