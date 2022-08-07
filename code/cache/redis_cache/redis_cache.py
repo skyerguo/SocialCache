@@ -60,15 +60,16 @@ class Redis_cache:
 
         '''设置当前cache对应的mininet_host'''
         self.host = host
-
-        '''设置结果存的根目录'''
-        self.result_path = result_path
-        self.file_insert_media_size = open(self.result_path + 'mediaSize/' + self.host_ip + '/all.txt', 'w')
-        self.file_find_media_size = open(self.result_path + 'mediaSize/' + self.host_ip + '/all.txt', 'w')
-
+        
         '''设置当前cache的IP地址和HTTP端口'''
         self.host_ip = host_ip
         self.host_port = host_port
+
+        '''设置结果存的根目录'''
+        self.result_path = result_path
+        os.system('mkdir -p ' + self.result_path + 'mediaSize/' + self.host_ip)
+        self.file_insert_media_size = open(self.result_path + 'mediaSize/' + self.host_ip + '/all.txt', 'w')
+        self.file_find_media_size = open(self.result_path + 'mediaSize/' + self.host_ip + '/all.txt', 'w')
 
     def __del__(self):
         '''程序结束后，自动关闭连接，释放资源'''
