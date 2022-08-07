@@ -20,5 +20,6 @@ for ip_address in os.listdir(media_size_path):
     curr_path = media_size_path + ip_address + '/'
     for file_name in os.listdir(curr_path):
         for line in open(curr_path + file_name, 'r'):
-            total_media_size += int(line)
+            if line.strip():
+                total_media_size += int(line.strip())
 print(total_media_size)

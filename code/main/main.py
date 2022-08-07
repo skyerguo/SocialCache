@@ -8,6 +8,7 @@ import json
 import os
 import time
 import random
+import numpy as np
 
 class Main:
     def __init__(self, trace_dir, use_http_server=False, if_debug=False):
@@ -42,7 +43,6 @@ class Main:
         os.system('mkdir -p ' + self.result_path + 'curl/' + host_ip)
         os.system('mkdir -p ' + self.result_path + 'wget/' + host_ip)
         os.system('mkdir -p ' + self.result_path + 'flow/' + host_ip)
-        os.system('mkdir -p ' + self.result_path + 'mediaSize/' + host_ip)
         
         host.cmdPrint('cd %s && nohup python3 /users/gtc/SocNet/code/util/simple_httpserver.py -l %s -p %s -n 1>> %s/http_log1.txt 2>> %s/http_log2.txt &'%(temp_picture_path, str(host_ip), str(4433+int(db)), self.result_path+'http/'+host_ip, self.result_path+'http/'+host_ip))
         
@@ -139,6 +139,11 @@ class Main:
         if caching_policy == 'PageRank':
             page_rank_metrics = eg.functions.not_sorted.pagerank(self.make_trace.G)
 
+        if caching_policy == "LRU-social":
+            degree_dict = self.make_trace.G.degree()
+            parameter_k = np.mean(list(degree_dict.values()))
+            epidemic_threshold = parameter_k / (parameter_k * parameter_k - parameter_k)
+
         f_in = open("data/traces/" + self.trace_dir + "/all_timeline.txt", "r")
         f_out_find = open(self.result_path + 'find_log.txt', 'w')
         f_out_insert = open(self.result_path + 'insert_log.txt', 'w')
@@ -167,7 +172,8 @@ class Main:
                     #             page_rank_metrics[str(user_id)] * CONFIG['params'][1] + \
                     #             int(nearest_distance) * CONFIG['params'][2] + \
                     #             media_size * CONFIG['params'][3]
-                    sort_value = int(current_timestamp) + page_rank_metrics[str(user_id)] * media_size
+                    sort_value = int(current_timestamp) + page_rank_metrics[str(user_id)] * media_size * 10
+                    # print(sort_value, page_rank_metrics[str(user_id)] * media_size * 10)
                 # elif caching_policy == "LRU-social":
                 #     sort_value = 0
                     
