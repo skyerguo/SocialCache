@@ -1,6 +1,6 @@
 {
   "trace_dir": "myk3",
-  "caching_policy": "LRU",
+  "caching_policy": "PageRank",
   "use_http_server": false,
   "use_priority_queue": true,
   "cache_size_level_3": 10,
