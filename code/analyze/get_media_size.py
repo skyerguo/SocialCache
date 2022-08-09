@@ -37,4 +37,4 @@ print(total_media_size)
 if args.detailOutput:
     print("caching_policy: ", caching_policy)
     for i in range(3):
-        print("level %s flow %s"%(str(i), media_size_each_level[i]))
+        print("level %i; media szie: %s"%(i + 1, media_size_each_level[i]))
