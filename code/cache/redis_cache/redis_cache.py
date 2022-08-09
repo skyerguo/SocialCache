@@ -7,6 +7,7 @@ import subprocess
 from collections import OrderedDict, defaultdict
 import os
 import code.util.util as util
+import copy
 
 class Redis_cache:
     def __init__(self, db, host, cache_size=5, use_priority_queue=True, use_LRU_cache=False, result_path='~/', host_ip='', host_port='', cache_level=0):
@@ -68,8 +69,8 @@ class Redis_cache:
         '''设置结果存的根目录'''
         self.result_path = result_path
         os.system('mkdir -p ' + self.result_path + 'mediaSize/' + self.host_ip)
-        self.file_insert_media_size = open(self.result_path + 'mediaSize/' + self.host_ip + '/all.txt', 'w')
-        self.file_find_media_size = open(self.result_path + 'mediaSize/' + self.host_ip + '/all.txt', 'w')
+        self.file_insert_media_size = open(self.result_path + 'mediaSize/' + self.host_ip + '/insert_all.txt', 'a')
+        # self.file_find_media_size = open(self.result_path + 'mediaSize/' + self.host_ip + '/find_all.txt', 'a')
 
     def __del__(self):
         '''程序结束后，自动关闭连接，释放资源'''
@@ -101,10 +102,9 @@ class Redis_cache:
             util.delete_picture(host=self.host, picture_path=self.picture_root_path+str(remove_key)) #在硬盘中删除当前文件，保证硬盘不会存太多垃圾文件
 
 
-    def insert(self, picture_hash, redis_object, need_uplift=True):
-        '''
-            need_uplift: True表示向上传播，False表示向下传播
-        '''
+    def modify_cache_node(self, picture_hash, redis_object):
+        '''修改cache里面的节点，一般为插入或者调整'''
+
         '''如果是LRU，特殊处理'''
         if self.use_LRU_cache: 
             '''若数据已存在，表示命中一次，需要把数据移到缓存队列末端'''
@@ -131,6 +131,14 @@ class Redis_cache:
         if self.use_priority_queue:
             self.priority_queue.put((redis_object['sort_value'], picture_hash)) 
 
+
+    def insert(self, picture_hash, redis_object, need_uplift=True):
+        '''
+            need_uplift: True表示向上传播，False表示向下传播
+        '''
+
+        self.modify_cache_node(picture_hash=picture_hash, redis_object=redis_object)
+
         if need_uplift:
             '''需要逐层递归向上传播'''
             if self.picture_root_path != '/dev/null': 
@@ -156,17 +164,27 @@ class Redis_cache:
             print(redis_object['media_size'], file=self.higher_cache_redis.file_insert_media_size)
 
 
-    def find(self, picture_hash, user_host):
+    def find(self, picture_hash, user_host, current_timestamp, need_update_cache=False):
         redis_object = self.redis.get(name=picture_hash)
         if redis_object:
             '''如果找到了'''
             redis_object = pickle.loads(redis_object)
             result_level = self.cache_level
+            new_redis_object= copy.deepcopy(redis_object)
+
+            if need_update_cache:
+                last_timestamp = redis_object['timestamp']
+                new_sort_value = redis_object['sort_value'] - last_timestamp + current_timestamp
+                new_redis_object['sort_value'] = new_sort_value
+                self.modify_cache_node(picture_hash=picture_hash, redis_object=new_redis_object)
 
             '''启用HTTP，从user_host对当前节点进行HTTP_GET操作'''
             if self.picture_root_path != '/dev/null': 
-                util.HTTP_GET(host=user_host, picture_hash=picture_hash, IP_address=self.host_ip, port_number=self.host_port, use_TLS=False, result_path=self.result_path+'wget/'+self.host_ip, picture_path='/dev/null') 
-            print(redis_object['media_size'], file=self.file_find_media_size)
+                util.HTTP_GET(host=user_host, picture_hash=picture_hash, IP_address=self.host_ip, port_number=self.host_port, use_TLS=False, result_path=self.result_path+'wget/'+self.host_ip, picture_path='/dev/null')            
+            # print(redis_object['media_size'], file=self.file_find_media_size)
+
+            '''返回一个list，分别表示[第几层命中的, 查到的redis_object]'''
+            return [result_level, new_redis_object]
 
         else:
             result_level = 0
@@ -174,7 +192,7 @@ class Redis_cache:
 
             '''如果当前层没找到，有更高层，向上查询'''
             if self.cache_level > 1:
-                find_result = self.higher_cache_redis.find(picture_hash=picture_hash, user_host=user_host)
+                find_result = self.higher_cache_redis.find(picture_hash=picture_hash, user_host=user_host, current_timestamp=current_timestamp, need_update_cache=need_update_cache)
                 result_level = find_result[0]
                 redis_object = find_result[1]
 
@@ -182,6 +200,7 @@ class Redis_cache:
                 if result_level != 0: 
                     '''有命中数据'''
                     self.insert(picture_hash=picture_hash, redis_object=redis_object, need_uplift=False)
+            
+            '''返回一个list，分别表示[第几层命中的, 查到的redis_object]'''
+            return [result_level, redis_object]
 
-        '''返回一个list，分别表示[第几层命中的, 查到的redis_object]'''
-        return [result_level, redis_object]

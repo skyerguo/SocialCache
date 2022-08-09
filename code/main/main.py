@@ -136,6 +136,11 @@ class Main:
         else:
             self.reflush_cache(use_LRU_cache=False)
         
+        if caching_policy == "FIFO" or caching_policy == "RAND":
+            need_update_cache = False
+        else:
+            need_update_cache = True
+        
         if caching_policy == 'PageRank':
             page_rank_metrics = eg.functions.not_sorted.pagerank(self.make_trace.G)
 
@@ -147,6 +152,9 @@ class Main:
         f_in = open("data/traces/" + self.trace_dir + "/all_timeline.txt", "r")
         f_out_find = open(self.result_path + 'find_log.txt', 'w')
         f_out_insert = open(self.result_path + 'insert_log.txt', 'w')
+        f_out_time = open(self.result_path + 'time_log.txt', 'w')
+        start_time = time.time()
+        print("start_time: %f"%(start_time), file=f_out_time)
         cnt_line = 0 
         for line in f_in:
             cnt_line += 1
@@ -166,21 +174,19 @@ class Main:
                 if caching_policy == 'RAND':
                     sort_value = random.randint(0, 100)
                 elif caching_policy == 'FIFO' or caching_policy == 'LRU':
-                    sort_value = int(current_timestamp)
+                    sort_value = current_timestamp
                 elif caching_policy == 'PageRank':
                     # sort_value = int(current_timestamp) * CONFIG['params'][0] + \
                     #             page_rank_metrics[str(user_id)] * CONFIG['params'][1] + \
                     #             int(nearest_distance) * CONFIG['params'][2] + \
                     #             media_size * CONFIG['params'][3]
-                    sort_value = int(current_timestamp) + page_rank_metrics[str(user_id)] * media_size * 10
-                    # print(sort_value, page_rank_metrics[str(user_id)] * media_size * 10)
-                # elif caching_policy == "LRU-social":
-                #     sort_value = 0
+                    sort_value = current_timestamp + page_rank_metrics[str(user_id)] * media_size * 10
                     
                 '''记录redis_object，使用json形式保存'''
                 temp_redis_object = {
                     'sort_value': sort_value,
-                    'media_size': media_size
+                    'media_size': media_size,
+                    'timestamp': current_timestamp
                 }
 
                 print(cnt_line, selected_level_3_id, temp_redis_object, file=f_out_insert)
@@ -195,9 +201,10 @@ class Main:
                 self.build_network.level_3_host[selected_level_3_id].redis_cache.insert(picture_hash=post_id, redis_object=temp_redis_object, need_uplift=True)
 
             elif current_type == "view":
+                current_timestamp = int(line.split('+')[0])
                 post_id = int(line.split('+')[1])
                 '''往第三层级查询，后续的调整都由redis内部完成，这里先假设只有一个user'''
-                find_result = self.build_network.level_3_host[selected_level_3_id].redis_cache.find(picture_hash=post_id, user_host=self.build_network.user_host[0])
+                find_result = self.build_network.level_3_host[selected_level_3_id].redis_cache.find(picture_hash=post_id, user_host=self.build_network.user_host[0], current_timestamp=current_timestamp, need_update_cache=need_update_cache)
                 result_level = find_result[0]
 
                 if result_level == 0:
@@ -211,9 +218,13 @@ class Main:
                 self.find_success_number[result_level] += 1
             else:
                 print("ERROR!")
+        end_time = time.time()
+        print("end_time: %f"%(end_time), file=f_out_time)
+        print("time_duration: %f"%(end_time - start_time), file=f_out_time)
         f_in.close()
         f_out_insert.close()
         f_out_find.close()
+        f_out_time.close()
 
         # CLI(self.build_network.net)
 
