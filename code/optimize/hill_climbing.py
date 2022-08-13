@@ -21,9 +21,9 @@ class hill_climb_optimize():
         self.optimal_altitude   = self.init_altitude
 
         # define step length
-        self.step_len0 = 0.1        # timestamp
+        self.step_len0 = 0.2        # timestamp
         self.step_len1 = 5          # pagerank * media_size
-        self.step_len2 = 0.2        # nearest
+        self.step_len2 = 0.4        # nearest
 
         # debug switch
         self.debug = False
