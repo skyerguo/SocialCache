@@ -2,7 +2,9 @@ from code.build.build_main import Build_network
 from code.trace.make_trace import Make_trace
 from code.cache.redis_cache.redis_cache import Redis_cache
 import easygraph as eg
+import networkx
 import code.util.util as util
+import code.util.SIR as SIR
 from mininet.cli import CLI
 import json
 import os
@@ -148,8 +150,13 @@ class Main:
             degree_dict = self.make_trace.G.degree()
             parameter_k = np.mean(list(degree_dict.values()))
             epidemic_threshold = parameter_k / (parameter_k * parameter_k - parameter_k)
-            print("epidemic_threshold: ", epidemic_threshold)
-            exit(0)
+            adj_matrix = util.generate_adj_matrix_graph("data/traces/" + self.make_trace.dir_name + "/relations.txt", len(self.make_trace.G.nodes))
+            
+            spreading_power_list = [0 for _ in range(len(self.make_trace.G.nodes))]
+            networkx_graph = networkx.DiGraph(adj_matrix)
+            for i in range(len(self.make_trace.G.nodes)):
+                spreading_power_list[i] = SIR.SIR_network(networkx_graph, [i] , epidemic_threshold, 1, 10)
+            # print(spreading_power_list)
 
         f_in = open("data/traces/" + self.trace_dir + "/all_timeline.txt", "r")
         f_out_find = open(self.result_path + 'find_log.txt', 'w')
@@ -160,6 +167,7 @@ class Main:
         cnt_line = 0 
         for line in f_in:
             cnt_line += 1
+            # print("cnt_line: ", cnt_line)
             if CONFIG['max_trace_len'] and cnt_line > CONFIG['max_trace_len']:
                break 
             current_type = line.split('+')[-1].strip()
@@ -173,15 +181,15 @@ class Main:
                 user_id = int(line.split('+')[3])
                 media_size = int(float(line.split('+')[1]))
 
+                sort_value = 0
                 if caching_policy == 'RAND':
-                    sort_value = random.randint(0, 100)
+                    sort_value = random.randint(0, 1000)
                 elif caching_policy == 'FIFO' or caching_policy == 'LRU':
                     sort_value = current_timestamp
                 elif caching_policy == 'PageRank':
                     sort_value = current_timestamp * CONFIG['params'][0] + \
                                 page_rank_metrics[str(user_id)] * media_size * CONFIG['params'][1] + \
                                 int(nearest_distance) * CONFIG['params'][2]
-                    # sort_value = current_timestamp + page_rank_metrics[str(user_id)] * media_size * 10
                     
                 '''记录redis_object，使用json形式保存'''
                 temp_redis_object = {
@@ -199,7 +207,7 @@ class Main:
                     print("temp_redis_object: ", temp_redis_object)
                 
                 '''往第三层级插入，后续的调整都由redis内部完成'''
-                self.build_network.level_3_host[selected_level_3_id].redis_cache.insert(picture_hash=post_id, redis_object=temp_redis_object, need_uplift=True, use_LRU_social=caching_policy == "LRU_social", first_insert=True)
+                self.build_network.level_3_host[selected_level_3_id].redis_cache.insert(picture_hash=post_id, redis_object=temp_redis_object, need_uplift=True, use_LRU_social=caching_policy == "LRU_social", first_insert=True, lru_social_parameter_sp=spreading_power_list[user_id])
 
             elif current_type == "view":
                 current_timestamp = int(line.split('+')[0])

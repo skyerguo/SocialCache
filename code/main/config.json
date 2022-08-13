@@ -2,7 +2,7 @@
     "trace_dir": "myk3",
     "caching_policy": "LRU_social",
     "use_http_server": false,
-    "use_priority_queue": true,
+    "use_priority_queue": false,
     "cache_size_level_3": 10,
     "cache_size_level_2": 100,
     "cache_size_level_1": 100000,

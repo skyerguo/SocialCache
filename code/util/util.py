@@ -3,6 +3,7 @@ import os
 import shutil
 import time
 from timeit import repeat
+import numpy as np
 
 def calc_geolocation_distance(loc1, loc2): 
     '''计算两个地理位置的地表距离，返回单位为公里'''
@@ -65,5 +66,12 @@ def calculate_flow(host, eth_name, flow_direction, result_path=''):
     export_path = result_path + '/%s_%s.log' % (str(flow_direction), str(eth_name))
     host.cmd("ifconfig %s | grep %s | grep bytes | awk '{print $5}' > %s"%(str(eth_name), str(flow_direction), str(export_path)))
 
-def SIRModel(user_id, beta, gamma=1):
-    pass
+'''生成临接表'''
+def generate_adj_matrix_graph(relation_file_path, nodes_number):
+    A = np.zeros((nodes_number, nodes_number), int)
+    f_in = open(relation_file_path, "r")
+    for line in f_in:
+        A[int(line.strip().split(' ')[1])][int(line.strip().split(' ')[0])] = 1
+    f_in.close()
+
+    return A
