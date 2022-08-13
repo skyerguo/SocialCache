@@ -130,12 +130,39 @@ class Redis_cache:
         '''如有有使用优先队列，每次插入时需要维护优先队列'''
         if self.use_priority_queue:
             self.priority_queue.put((redis_object['sort_value'], picture_hash)) 
+        
+    def get_lru_social_parameter_s(self) -> int:
+        res = 0
+        for curr_key in self.redis.keys():
+            curr_value = pickle.loads(self.redis.get(curr_key))['sort_value']
+            if curr_value > self.cache_size:
+                res += 1
+        return res
 
+    def decrement_lru_social(self, lowerest_threshold=0):
+        for curr_key in self.redis.keys():
+            temp_redis_object = pickle.loads(self.redis.get(curr_key))
+            curr_value = temp_redis_object['sort_value']
+            if curr_value > lowerest_threshold:
+                temp_redis_object['sort_value'] = curr_value - 1
+                self.redis.set(curr_key, pickle.dumps(temp_redis_object))
+                if self.use_priority_queue:
+                    self.priority_queue.put((temp_redis_object['sort_value'], curr_key)) 
 
-    def insert(self, picture_hash, redis_object, need_uplift=True):
+    def insert(self, picture_hash, redis_object, need_uplift=True, use_LRU_social=False, first_insert=False):
         '''
             need_uplift: True表示向上传播，False表示向下传播
         '''
+
+        if use_LRU_social:
+            lru_social_parameter_c = self.cache_size
+            lru_social_parameter_s = self.get_lru_social_parameter_s()
+            if first_insert:
+                # TODO set the sort_value as SPu * C
+                pass
+            else:
+                '''set label as C-S'''
+                redis_object['sort_value'] = lru_social_parameter_c - lru_social_parameter_s
 
         self.modify_cache_node(picture_hash=picture_hash, redis_object=redis_object)
 
@@ -154,7 +181,7 @@ class Redis_cache:
             if self.cache_level > 1:
                 '''递归调用，一层层上传'''
                 print(redis_object['media_size'], file=self.file_insert_media_size)
-                self.higher_cache_redis.insert(picture_hash=picture_hash, redis_object=redis_object, need_uplift=need_uplift) 
+                self.higher_cache_redis.insert(picture_hash=picture_hash, redis_object=redis_object, need_uplift=need_uplift, use_LRU_social=use_LRU_social, first_insert=first_insert) 
 
         elif self.cache_level > 1: 
             '''如果不是最后一层，而且需要从上层获取数据传播'''
@@ -164,7 +191,7 @@ class Redis_cache:
             print(redis_object['media_size'], file=self.higher_cache_redis.file_insert_media_size)
 
 
-    def find(self, picture_hash, user_host, current_timestamp, need_update_cache=False):
+    def find(self, picture_hash, user_host, current_timestamp, need_update_cache=False, use_LRU_social=False):
         redis_object = self.redis.get(name=picture_hash)
         if redis_object:
             '''如果找到了'''
@@ -172,16 +199,28 @@ class Redis_cache:
             result_level = self.cache_level
             new_redis_object= copy.deepcopy(redis_object)
 
+            '''查询需要更新cache'''
             if need_update_cache:
-                last_timestamp = redis_object['timestamp']
-                new_sort_value = redis_object['sort_value'] - last_timestamp + current_timestamp
-                new_redis_object['sort_value'] = new_sort_value
+                if use_LRU_social:
+                    lru_social_parameter_c = self.cache_size
+                    lru_social_parameter_s = self.get_lru_social_parameter_s()
+                    result_label = redis_object['sort_value']
+                    if result_label > lru_social_parameter_c:
+                        self.decrement_lru_social(lowerest_threshold=lru_social_parameter_c)
+                    else:
+                        self.decrement_lru_social(lowerest_threshold=result_label)
+                    new_sort_value = lru_social_parameter_c - lru_social_parameter_s
+                    new_redis_object['sort_value'] = new_sort_value
+                else:
+                    last_timestamp = redis_object['timestamp']
+                    new_sort_value = redis_object['sort_value'] - last_timestamp + current_timestamp
+                    new_redis_object['sort_value'] = new_sort_value
+
                 self.modify_cache_node(picture_hash=picture_hash, redis_object=new_redis_object)
 
             '''启用HTTP，从user_host对当前节点进行HTTP_GET操作'''
             if self.picture_root_path != '/dev/null': 
                 util.HTTP_GET(host=user_host, picture_hash=picture_hash, IP_address=self.host_ip, port_number=self.host_port, use_TLS=False, result_path=self.result_path+'wget/'+self.host_ip, picture_path='/dev/null')            
-            # print(redis_object['media_size'], file=self.file_find_media_size)
 
             '''返回一个list，分别表示[第几层命中的, 查到的redis_object]'''
             return [result_level, new_redis_object]

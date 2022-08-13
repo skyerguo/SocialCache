@@ -144,10 +144,12 @@ class Main:
         if caching_policy == 'PageRank':
             page_rank_metrics = eg.functions.not_sorted.pagerank(self.make_trace.G)
 
-        if caching_policy == "LRU-social":
+        if caching_policy == "LRU_social":
             degree_dict = self.make_trace.G.degree()
             parameter_k = np.mean(list(degree_dict.values()))
             epidemic_threshold = parameter_k / (parameter_k * parameter_k - parameter_k)
+            print("epidemic_threshold: ", epidemic_threshold)
+            exit(0)
 
         f_in = open("data/traces/" + self.trace_dir + "/all_timeline.txt", "r")
         f_out_find = open(self.result_path + 'find_log.txt', 'w')
@@ -197,13 +199,14 @@ class Main:
                     print("temp_redis_object: ", temp_redis_object)
                 
                 '''往第三层级插入，后续的调整都由redis内部完成'''
-                self.build_network.level_3_host[selected_level_3_id].redis_cache.insert(picture_hash=post_id, redis_object=temp_redis_object, need_uplift=True)
+                self.build_network.level_3_host[selected_level_3_id].redis_cache.insert(picture_hash=post_id, redis_object=temp_redis_object, need_uplift=True, use_LRU_social=caching_policy == "LRU_social", first_insert=True)
 
             elif current_type == "view":
                 current_timestamp = int(line.split('+')[0])
                 post_id = int(line.split('+')[1])
+                # user_id = int(line.split('+')[3])
                 '''往第三层级查询，后续的调整都由redis内部完成，这里先假设只有一个user'''
-                find_result = self.build_network.level_3_host[selected_level_3_id].redis_cache.find(picture_hash=post_id, user_host=self.build_network.user_host[0], current_timestamp=current_timestamp, need_update_cache=need_update_cache)
+                find_result = self.build_network.level_3_host[selected_level_3_id].redis_cache.find(picture_hash=post_id, user_host=self.build_network.user_host[0], current_timestamp=current_timestamp, need_update_cache=need_update_cache, use_LRU_social=caching_policy == "LRU_social")
                 result_level = find_result[0]
 
                 if result_level == 0:

@@ -1,0 +1,181 @@
+redis_ip:  128.105.145.18
+*** Add switches
+
+sudo ifconfig sw5 10.0.100.15/24
+*** Post configure switches and hosts
+
+switch_gw:  10.0.100.15
+switch_gw_pre3:  10.0.100
+*** Add hosts
+
+*** Add links
+
+*** Config Networks
+
+*** Starting switches
+
+*** Starting network
+
+缓存策略： *** PageRank ***
+三级CDN缓存命中率： 0.9202366248456088
+二级CDN缓存命中率： 0.3556098886172236
+一级CDN缓存命中率： 1.0
+redis_ip:  128.105.145.18
+*** Add switches
+
+sudo ifconfig sw5 10.0.100.15/24
+*** Post configure switches and hosts
+
+switch_gw:  10.0.100.15
+switch_gw_pre3:  10.0.100
+*** Add hosts
+
+*** Add links
+
+*** Config Networks
+
+*** Starting switches
+
+*** Starting network
+
+缓存策略： *** PageRank ***
+三级CDN缓存命中率： 0.9201716180198921
+二级CDN缓存命中率： 0.3561346362649294
+一级CDN缓存命中率： 1.0
+redis_ip:  128.105.145.18
+*** Add switches
+
+sudo ifconfig sw5 10.0.100.15/24
+*** Post configure switches and hosts
+
+switch_gw:  10.0.100.15
+switch_gw_pre3:  10.0.100
+*** Add hosts
+
+*** Add links
+
+*** Config Networks
+
+*** Starting switches
+
+*** Starting network
+
+缓存策略： *** PageRank ***
+三级CDN缓存命中率： 0.917007941715501
+二级CDN缓存命中率： 0.3563249727371865
+一级CDN缓存命中率： 1.0
+redis_ip:  128.105.145.18
+*** Add switches
+
+sudo ifconfig sw5 10.0.100.15/24
+*** Post configure switches and hosts
+
+switch_gw:  10.0.100.15
+switch_gw_pre3:  10.0.100
+*** Add hosts
+
+*** Add links
+
+*** Config Networks
+
+*** Starting switches
+
+*** Starting network
+
+缓存策略： *** PageRank ***
+三级CDN缓存命中率： 0.9165929052903928
+二级CDN缓存命中率： 0.3572789115646258
+一级CDN缓存命中率： 1.0
+redis_ip:  128.105.145.18
+*** Add switches
+
+sudo ifconfig sw5 10.0.100.15/24
+*** Post configure switches and hosts
+
+switch_gw:  10.0.100.15
+switch_gw_pre3:  10.0.100
+*** Add hosts
+
+*** Add links
+
+*** Config Networks
+
+*** Starting switches
+
+*** Starting network
+
+缓存策略： *** PageRank ***
+三级CDN缓存命中率： 0.9203016316713255
+二级CDN缓存命中率： 0.355084284937466
+一级CDN缓存命中率： 1.0
+redis_ip:  128.105.145.18
+*** Add switches
+
+sudo ifconfig sw5 10.0.100.15/24
+*** Post configure switches and hosts
+
+switch_gw:  10.0.100.15
+switch_gw_pre3:  10.0.100
+*** Add hosts
+
+*** Add links
+
+*** Config Networks
+
+*** Starting switches
+
+*** Starting network
+
+缓存策略： *** PageRank ***
+三级CDN缓存命中率： 0.9203016316713255
+二级CDN缓存命中率： 0.355084284937466
+一级CDN缓存命中率： 1.0
+redis_ip:  128.105.145.18
+*** Add switches
+
+sudo ifconfig sw5 10.0.100.15/24
+*** Post configure switches and hosts
+
+switch_gw:  10.0.100.15
+switch_gw_pre3:  10.0.100
+*** Add hosts
+
+*** Add links
+
+*** Config Networks
+
+*** Starting switches
+
+*** Starting network
+
+缓存策略： *** PageRank ***
+三级CDN缓存命中率： 0.9203016316713255
+二级CDN缓存命中率： 0.355084284937466
+一级CDN缓存命中率： 1.0
+******* run simulator with config:
+ {'trace_dir': 'myk3', 'caching_policy': 'PageRank', 'use_http_server': False, 'use_priority_queue': True, 'cache_size_level_3': 10, 'cache_size_level_2': 100, 'cache_size_level_1': 100000, 'max_trace_len': None, 'mode': 'normal', 'params': [1.6, 100, -0.1]}
+******* simulator done, get res  1399835
+start find way up, current altitude :  1399835
+near ways:  [(1.7000000000000002, 105, 0.1), (1.7000000000000002, 105, -0.30000000000000004), (1.7000000000000002, 95, 0.1), (1.7000000000000002, 95, -0.30000000000000004), (1.5, 105, 0.1), (1.5, 105, -0.30000000000000004), (1.5, 95, 0.1), (1.5, 95, -0.30000000000000004)]
+******* run simulator with config:
+ {'trace_dir': 'myk3', 'caching_policy': 'PageRank', 'use_http_server': False, 'use_priority_queue': True, 'cache_size_level_3': 10, 'cache_size_level_2': 100, 'cache_size_level_1': 100000, 'max_trace_len': None, 'mode': 'normal', 'params': [1.7000000000000002, 105, 0.1]}
+******* simulator done, get res  0
+find altitude :  0
+******* run simulator with config:
+ {'trace_dir': 'myk3', 'caching_policy': 'PageRank', 'use_http_server': False, 'use_priority_queue': True, 'cache_size_level_3': 10, 'cache_size_level_2': 100, 'cache_size_level_1': 100000, 'max_trace_len': None, 'mode': 'normal', 'params': [1.7000000000000002, 105, -0.30000000000000004]}
+******* simulator done, get res  0
+find altitude :  0
+******* run simulator with config:
+ {'trace_dir': 'myk3', 'caching_policy': 'PageRank', 'use_http_server': False, 'use_priority_queue': True, 'cache_size_level_3': 10, 'cache_size_level_2': 100, 'cache_size_level_1': 100000, 'max_trace_len': None, 'mode': 'normal', 'params': [1.7000000000000002, 95, 0.1]}
+******* simulator done, get res  0
+find altitude :  0
+******* run simulator with config:
+ {'trace_dir': 'myk3', 'caching_policy': 'PageRank', 'use_http_server': False, 'use_priority_queue': True, 'cache_size_level_3': 10, 'cache_size_level_2': 100, 'cache_size_level_1': 100000, 'max_trace_len': None, 'mode': 'normal', 'params': [1.7000000000000002, 95, -0.30000000000000004]}
+******* simulator done, get res  0
+find altitude :  0
+******* run simulator with config:
+ {'trace_dir': 'myk3', 'caching_policy': 'PageRank', 'use_http_server': False, 'use_priority_queue': True, 'cache_size_level_3': 10, 'cache_size_level_2': 100, 'cache_size_level_1': 100000, 'max_trace_len': None, 'mode': 'normal', 'params': [1.5, 105, 0.1]}
+******* simulator done, get res  0
+find altitude :  0
+******* run simulator with config:
+ {'trace_dir': 'myk3', 'caching_policy': 'PageRank', 'use_http_server': False, 'use_priority_queue': True, 'cache_size_level_3': 10, 'cache_size_level_2': 100, 'cache_size_level_1': 100000, 'max_trace_len': None, 'mode': 'normal', 'params': [1.5, 105, -0.30000000000000004]}
