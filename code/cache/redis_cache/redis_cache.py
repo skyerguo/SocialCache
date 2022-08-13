@@ -125,8 +125,6 @@ class Redis_cache:
         '''插入redis数据库'''
         self.redis.set(picture_hash, pickle.dumps(redis_object))
 
-        # print(picture_hash, self.db, [key for key in self.redis.keys()], self.LRUcache)
-
         '''如有有使用优先队列，每次插入时需要维护优先队列'''
         if self.use_priority_queue:
             self.priority_queue.put((redis_object['sort_value'], picture_hash)) 
@@ -142,14 +140,14 @@ class Redis_cache:
     def decrement_lru_social(self, lowerest_threshold=0):
         for curr_key in self.redis.keys():
             temp_redis_object = pickle.loads(self.redis.get(curr_key))
-            curr_value = temp_redis_object['sort_value']
+            curr_value = int(temp_redis_object['sort_value'])
             if curr_value > lowerest_threshold:
                 temp_redis_object['sort_value'] = curr_value - 1
                 self.redis.set(curr_key, pickle.dumps(temp_redis_object))
                 if self.use_priority_queue:
-                    self.priority_queue.put((temp_redis_object['sort_value'], curr_key)) 
+                    self.priority_queue.put((temp_redis_object['sort_value'], int.from_bytes(curr_key, byteorder='big'))) 
 
-    def insert(self, picture_hash, redis_object, need_uplift=True, use_LRU_social=False, first_insert=False):
+    def insert(self, picture_hash, redis_object, need_uplift=True, use_LRU_social=False, first_insert=False, lru_social_parameter_sp=0):
         '''
             need_uplift: True表示向上传播，False表示向下传播
         '''
@@ -158,8 +156,8 @@ class Redis_cache:
             lru_social_parameter_c = self.cache_size
             lru_social_parameter_s = self.get_lru_social_parameter_s()
             if first_insert:
-                # TODO set the sort_value as SPu * C
-                pass
+                '''set the sort_value as SPu * C'''
+                redis_object['sort_value'] = lru_social_parameter_sp * lru_social_parameter_c
             else:
                 '''set label as C-S'''
                 redis_object['sort_value'] = lru_social_parameter_c - lru_social_parameter_s
@@ -189,7 +187,6 @@ class Redis_cache:
                 '''从该节点对上一层进行HTTP_GET操作。这里保证上层有需要的数据'''
                 util.HTTP_GET(host=self.host, picture_hash=picture_hash, IP_address=self.higher_cache_redis.host_ip, port_number=self.higher_cache_redis.host_port, use_TLS=False, result_path=self.higher_cache_redis.result_path+'wget/'+self.host_ip, picture_path=self.picture_root_path+str(picture_hash))
             print(redis_object['media_size'], file=self.higher_cache_redis.file_insert_media_size)
-
 
     def find(self, picture_hash, user_host, current_timestamp, need_update_cache=False, use_LRU_social=False):
         redis_object = self.redis.get(name=picture_hash)
