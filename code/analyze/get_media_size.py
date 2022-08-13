@@ -38,3 +38,6 @@ if args.detailOutput:
     print("caching_policy: ", caching_policy)
     for i in range(3):
         print("level %i; media szie: %s"%(i + 1, media_size_each_level[i]))
+
+def return_result():
+    return total_media_size
