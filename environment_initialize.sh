@@ -27,7 +27,7 @@ pip3 install flask scrapy beautifulsoup4 dnspython gunicorn supervisor numpy
 pip3 install shapely geopandas matplotlib redis Python-EasyGraph
 
 ## 安装apt
-sudo apt-get -yqq install wondershaper nload iftop zip unzip htop
+sudo apt-get -yqq install wondershaper nload iftop zip unzip htop jq
 
 ## 安装iperf3
 cd ~
@@ -45,6 +45,14 @@ git clone https://github.com/mininet/mininet.git
 cd ~/mininet
 util/install.sh -nv
 
+## 语言环境 
+echo "export PYTHONIOENCONDING=utf8" >> ~/.zshrc 
+echo "export LC_ALL=en_US.UTF-8" >> ~/.zshrc 
+echo "export LANG=en_US.UTF-8" >> ~/.zshrc 
+echo "export PYTHONWARNINGS=ignore" >> ~/.zshrc 
+echo "export PYTHONPATH=$PYTHONPATH:$HOME/mininet" >> ~/.zshrc 
+source ~/.zshrc
+
 ## 设置进程限制
 echo 530603 | sudo tee /sys/fs/cgroup/pids/user.slice/user-${UID}.slice/pids.max 
 sudo sed -i 's/#UserTasksMax=33%/UserTasksMax=infinity/g' /etc/systemd/logind.conf
@@ -58,13 +66,9 @@ echo "gtc            hard    nproc           330603" | sudo tee -a /etc/security
 echo "gtc            soft    nofile          102400" | sudo tee -a /etc/security/limits.conf
 echo "gtc            hard    nofile          102400" | sudo tee -a /etc/security/limits.conf
 
-## 语言环境 
-echo "export PYTHONIOENCONDING=utf8" >> ~/.zshrc 
-echo "export LC_ALL=en_US.UTF-8" >> ~/.zshrc 
-echo "export LANG=en_US.UTF-8" >> ~/.zshrc 
-echo "export PYTHONWARNINGS=ignore" >> ~/.zshrc 
-echo "export PYTHONPATH=$PYTHONPATH:$HOME/mininet" >> ~/.zshrc 
-source ~/.zshrc
+
+# install networkx
+pip3 install networkx
 
 # ## cache相关
 # deb http://us.archive.ubuntu.com/ubuntu/ trusty main restricted universe multiverse
