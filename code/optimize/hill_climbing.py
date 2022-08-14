@@ -4,6 +4,8 @@ import subprocess
 import random
 import os
 import time
+import pandas as pd
+import matplotlib.pyplot as plt
 
 CONFIG_FILE_PATH="./code/main/config.json"
 SIMULATION_CMD="sudo python3 -m code.main.main"
@@ -21,9 +23,9 @@ class hill_climb_optimize():
         self.optimal_altitude   = self.init_altitude
 
         # define step length
-        self.step_len0 = 0.2        # timestamp
+        self.step_len0 = 0.1        # timestamp
         self.step_len1 = 5          # pagerank * media_size
-        self.step_len2 = 0.4        # nearest
+        self.step_len2 = 0.1        # nearest
 
         # debug switch
         self.debug = False
@@ -31,6 +33,9 @@ class hill_climb_optimize():
         # init logfile
         with open(LOG_FILENAME, "w") as logfd:
             logfd.write("\n")
+        
+        # init log dataframe
+        self.log_df = pd.DataFrame(columns=["optimal", "average"])
 
 
     def run_simulator(self, config):
@@ -106,6 +111,7 @@ class hill_climb_optimize():
         self.optimal_altitude   = self.init_altitude
 
     def record(self):
+        # save to log file
         log_str = "\n"*2
         log_str += "="*21 + " round " + "="*21 + "\n"
         log_str += "start :" + self.start_time + "\n"
@@ -114,11 +120,17 @@ class hill_climb_optimize():
         log_str += "optimize params  : " + str([round(x, 2) for x in self.optimal_config["params"]]) + "\n"
 
         step = 0
+        sum_altitude = 0
         for footprint in self.climb_path:
             step+=1
             log_str += "\n------ [step%d] ------\n" %step
             log_str += "params  :" + str([round(x, 2) for x in footprint["params"]]) + "\n"
             log_str += "traffic :" + str(footprint["traffic"]) + "\n"
+
+            sum_altitude += footprint["traffic"]
+        
+        self.average_altitude = sum_altitude // step
+        self.log_df = self.log_df.append(dict(optimal=self.optimal_altitude, average=self.average_altitude), ignore_index=True)
 
         with open(LOG_FILENAME, "a") as log_fd:
             log_fd.write(log_str)
@@ -139,7 +151,14 @@ class hill_climb_optimize():
 
             # record
             self.record()
+    
+    def visualize(self):
+        print("ploting result")
+        plt.figure()
+        self.log_df.plot.line(xlabel="iterations", ylabel="traffic",title="hill-climbing optimization", grid=True)
+        plt.savefig("./figures/hill_climbing/opt_%s.png" %self.end_time)
 
 if __name__ == "__main__":
     optimize = hill_climb_optimize()
     optimize.hill_climb()
+    optimize.visualize()
