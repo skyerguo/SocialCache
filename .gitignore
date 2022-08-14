@@ -1,1 +1,5 @@
-data/traces/
+data/traces/naive
+*.png
+*.pyc
+*__/pycache__/
+code/main/config.json

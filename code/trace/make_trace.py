@@ -6,8 +6,7 @@ import random
 import code.util.util as util
 
 class Make_trace:
-    def __init__(self, dir_name, user_number=1000, edge_create_probability=0.3,):
-        ## 100个用户，随机连边
+    def __init__(self, dir_name, user_number=50, edge_create_probability=0.3):
         self.user_number = user_number
         self.edge_create_probability = edge_create_probability
         self.start_time = 1000000000
@@ -66,7 +65,7 @@ class Make_trace:
 
     def binary_search_latest(self, timestamp):
         '''找到timestamp之前的最后一个post的id'''
-        low_id = 0; high_id = len(self.posts_timeline); 
+        low_id = 0; high_id = len(self.posts_timeline) - 1; 
         while low_id < high_id:
             mid_id = int((low_id+high_id+1)/2)
             if int(self.posts_timeline[mid_id].split("+")[0]) < timestamp:
@@ -113,7 +112,7 @@ class Make_trace:
                 posts_all.append(line.strip()+'+'+file_name.split(".")[0])
             f_in.close()
 
-        '''每条信息为a+b+c+d+e+f，a为时间戳，b为媒体文件大小，c为发布地理位置，d为用户id，e为post_id, f为post标记'''
+        '''每条信息为0+1+2+3+4+5，0为时间戳，1为媒体文件大小，2为发布地理位置，3为用户id，4为post_id, 5为post标记'''
         posts_all.sort(key=lambda x:x.split("+")[0])
         for post_id in range(len(posts_all)):
             posts_all[post_id] = posts_all[post_id] + '+' + str(post_id) + '+' + 'post'
@@ -154,7 +153,7 @@ class Make_trace:
                     else:
                         views_all.append(str(current_view_time) + '+' + str(views_friend[views_order[view_step]]) + '+' + str(user_location) + '+' + str(user_id) + '+' + 'view')
             f_in.close()
-        '''每条信息为a+b+c+d+e，a为时间戳，b为post_id，c为checkin的地理位置, d为用户id，e为view标记'''
+        '''每条信息为0+1+2+3+4，0为时间戳，1为post_id，2为checkin的地理位置, 3为用户id，4为view标记'''
         views_all.sort(key=lambda x:x.split("+")[0])
         return views_all
 
@@ -192,7 +191,7 @@ class Make_trace:
         # self.make_posts()
         # self.make_checkins()
         self.G.add_edges_from_file("data/traces/" + self.dir_name + "/relations.txt")
-        self.synthesis_timeline()
+        # self.synthesis_timeline()
 
 # if __name__ == '__main__':
 #     m = Make_trace('naive')
