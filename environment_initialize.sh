@@ -21,7 +21,9 @@ sudo service redis-server restart
 ## pip包的安装
 sudo apt-get install -yqq python3-distutils python3-pip
 pip3 install --upgrade pip setuptools
-# pip3 install flask scrapy beautifulsoup4 dnspython gunicorn supervisor numpy
+
+pip3 install flask scrapy beautifulsoup4 dnspython gunicorn supervisor numpy
+
 pip3 install shapely geopandas matplotlib redis Python-EasyGraph
 
 ## 安装apt
