@@ -2,10 +2,21 @@
 
 # 基本环境配置
 
+## 安装zsh
+
+```
+sudo apt install -yqq zsh
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
+sudo usermod -s /bin/zsh gtc
+```
+
+
+
 ## 导入github的仓库
 
 ```
-sudo apt-get update && sudo apt-get -yqq install git
+sudo apt-get update
+sudo apt-get -yqq install git
 cd ~/.ssh && ssh-keygen -C gtc -f id_rsa -t rsa -N ''
 cat id_rsa.pub
 ```
@@ -17,10 +28,7 @@ git config --global user.name skyerguo97 && git config --global user.email skyer
 cd ~ && git clone git@github.com:skyerguo/SocNet.git
 ```
 
-## 安装zsh
 
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
-sudo usermod -s /bin/zsh gtc
 
 ## 安装必要的库
 
