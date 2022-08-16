@@ -151,6 +151,12 @@ class Main:
             '''To use it, remember the key is str type, and the value is bool'''
             degree_metrics = self.make_trace.G.in_degree()
 
+        elif caching_policy == "BetweennessCentrality":
+            betweenness_centrality_metrics = eg.functions.centrality.betweenness.betweenness_centrality(self.make_trace.G)
+
+        elif caching_policy == "LaplacianCentrality":
+            laplacian_centrality_metrics = eg.functions.not_sorted.laplacian(self.make_trace.G)
+
         elif caching_policy == "LRU_social":
             degree_dict = self.make_trace.G.degree()
             parameter_k = np.mean(list(degree_dict.values()))
@@ -199,9 +205,24 @@ class Main:
                     # print(CONFIG['params'][0], CONFIG['params'][1], CONFIG['params'][2])
 
                 elif caching_policy == "Degree":
+                    # print(degree_metrics[str(user_id)])
                     sort_value = current_timestamp * CONFIG['params'][0] + \
                                 degree_metrics[str(user_id)] * media_size * CONFIG['params'][1] + \
                                 int(nearest_distance) * CONFIG['params'][2]
+
+                elif caching_policy == "BetweennessCentrality":
+                    # print(betweenness_centrality_metrics[str(user_id)])
+                    sort_value = current_timestamp * CONFIG['params'][0] + \
+                                betweenness_centrality_metrics[str(user_id)] * media_size * CONFIG['params'][1] + \
+                                int(nearest_distance) * CONFIG['params'][2]
+                    
+                
+                elif caching_policy == "LaplacianCentrality":
+                    # print(laplacian_centrality_metrics[str(user_id)])
+                    sort_value = current_timestamp * CONFIG['params'][0] + \
+                                laplacian_centrality_metrics[str(user_id)] * media_size * CONFIG['params'][1] + \
+                                int(nearest_distance) * CONFIG['params'][2]
+                    
             
                 elif caching_policy == "LRU-social":
                     '''LRU-social can adjust the sort_value automatically'''
