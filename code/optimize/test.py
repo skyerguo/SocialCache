@@ -1,7 +1,8 @@
-import subprocess
+import pandas as pd
 
-sub = int(subprocess.getoutput("python3 -m code.analyze.get_media_size -n 0"))
-print(sub)
-# sub.wait()
-# res = sub.stdout.read()
-# print("******* simulator done, get res ", res)
+log_df = pd.DataFrame(columns=["optimal", "average"])
+print(log_df)
+
+log_df = log_df.append(dict(optimal=1366600, average=1489999), ignore_index=True)
+
+print(log_df)

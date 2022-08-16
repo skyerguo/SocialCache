@@ -114,6 +114,7 @@ class Redis_cache:
                 '''若缓存已满，则需要淘汰最早没有使用的数据'''
                 self.remove_cache_node(given_key=next(iter(self.LRUcache)))
                 self.LRUcache.popitem(last=False)
+            # TODO, 输出LRU cache看看
             self.LRUcache[picture_hash] = redis_object['sort_value']
 
         else:
@@ -188,7 +189,7 @@ class Redis_cache:
                 util.HTTP_GET(host=self.host, picture_hash=picture_hash, IP_address=self.higher_cache_redis.host_ip, port_number=self.higher_cache_redis.host_port, use_TLS=False, result_path=self.higher_cache_redis.result_path+'wget/'+self.host_ip, picture_path=self.picture_root_path+str(picture_hash))
             print(redis_object['media_size'], file=self.higher_cache_redis.file_insert_media_size)
 
-    def find(self, picture_hash, user_host, current_timestamp, need_update_cache=False, use_LRU_social=False):
+    def find(self, picture_hash, user_host, current_timestamp, need_update_cache=False, config_timestamp=1, use_LRU_social=False):
         redis_object = self.redis.get(name=picture_hash)
         if redis_object:
             '''如果找到了'''
@@ -210,9 +211,12 @@ class Redis_cache:
                     new_redis_object['sort_value'] = new_sort_value
                 else:
                     last_timestamp = redis_object['timestamp']
-                    new_sort_value = redis_object['sort_value'] - last_timestamp + current_timestamp
+                    new_sort_value = redis_object['sort_value'] + (current_timestamp - last_timestamp) * config_timestamp
+                    new_redis_object['timestamp'] = current_timestamp
                     new_redis_object['sort_value'] = new_sort_value
-
+                
+                # print("redis_object: ", redis_object)
+                # print("new_redis_object: ", new_redis_object)
                 self.modify_cache_node(picture_hash=picture_hash, redis_object=new_redis_object)
 
             '''启用HTTP，从user_host对当前节点进行HTTP_GET操作'''

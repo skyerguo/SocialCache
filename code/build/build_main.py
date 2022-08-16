@@ -246,7 +246,7 @@ class Build_network:
             self.user_host[user_host_id].cmdPrint("route del -net 10.0.0.0 netmask 255.0.0.0")
 
         '''等待30秒，保证网络构建完成'''
-        time.sleep(30) 
+        time.sleep(20) 
 
     def run(self, if_debug=False):
         '''构建网络拓扑'''
