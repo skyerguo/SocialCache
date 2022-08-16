@@ -10,6 +10,7 @@ p.add_argument('-d', '--detailoutput', default=False, dest="detailOutput", actio
 p.add_argument('-m', '--mediasize', default=False, dest="mediaSize", action="store_true", help="whether output media size")
 p.add_argument('-e', '--executiontime', default=False, dest="executionTime", action="store_true", help="whether output execution time")
 p.add_argument('-f', '--flow', default=False, dest="flow", action="store_true", help="whether output flow")
+p.add_argument('-c', '--cachehitration', default=False, dest="cacheHitRatio", action="store_true", help="whether output cache hit ratio")
 args = p.parse_args()
 
 data_root = '/proj/socnet-PG0/data/'
@@ -23,6 +24,7 @@ else:
 media_size_path = experiment_path + '/mediaSize/'
 execution_time_path = experiment_path + '/time_log.txt'
 flow_path = experiment_path + '/flow/'
+cache_hit_ratio_path = experiment_path + '/find_log.txt'
 config_path = experiment_path + '/config.json'
 caching_policy = json.load(open(config_path, 'r'))['caching_policy']
 
@@ -51,6 +53,7 @@ def get_execution_time():
         if 'time_duration' in line:
             time_duration = float(line.split(" ")[-1].strip())
     print("time_duration: ", time_duration)
+    f_in.close()
 
 def get_flow():
     total_flow = 0
@@ -68,9 +71,41 @@ def get_flow():
         for i in range(3):
             print("level %s flow %s"%(str(i), flow_each_level[i]))
 
+def get_cache_hit_ratio():
+    #  print(cnt_line, selected_level_3_id, result_level, find_result[1], file=f_out_find)
+    find_success_number = [0, 0, 0, 0]
+    find_fail_number = [0, 0, 0, 0]
+    f_in = open(cache_hit_ratio_path, 'r')
+    for line in f_in:
+        result_level = int(line.split(" ")[2].strip())
+        for temp_level in range(3, result_level, -1):
+            find_fail_number[temp_level] += 1
+        find_success_number[result_level] += 1
+    f_in.close()
+
+    if find_success_number[3] + find_fail_number[3] > 0:
+        print('三级CDN缓存命中率：', find_success_number[3] / (find_success_number[3] + find_fail_number[3]))
+    else:
+        print('未经过三级CDN缓存')
+
+    if find_success_number[2] + find_fail_number[2] > 0:
+        print('二级CDN缓存命中率：', find_success_number[2] / (find_success_number[2] + find_fail_number[2]))
+    else:
+        print('未经过二级CDN缓存')
+        
+    if find_success_number[1] + find_fail_number[1] > 0:
+        print('一级CDN缓存命中率：', find_success_number[1] / (find_success_number[1] + find_fail_number[1]))
+    else:
+        print('未经过一级CDN缓存')
+
+
 if __name__ == '__main__':
     print("caching_policy: ", caching_policy)
     print("------")
+
+    if args.cacheHitRatio:
+        get_cache_hit_ratio()
+        print("------")
 
     if args.mediaSize:
         get_media_size()
