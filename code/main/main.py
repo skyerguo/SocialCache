@@ -143,10 +143,15 @@ class Main:
         else:
             need_update_cache = True
         
+        '''SocCache + social network metrics'''
         if caching_policy == 'PageRank':
             page_rank_metrics = eg.functions.not_sorted.pagerank(self.make_trace.G)
 
-        if caching_policy == "LRU_social":
+        elif caching_policy == "Degree":
+            '''To use it, remember the key is str type, and the value is bool'''
+            degree_metrics = self.make_trace.G.in_degree()
+
+        elif caching_policy == "LRU_social":
             degree_dict = self.make_trace.G.degree()
             parameter_k = np.mean(list(degree_dict.values()))
             epidemic_threshold = parameter_k / (parameter_k * parameter_k - parameter_k)
@@ -181,15 +186,28 @@ class Main:
                 user_id = int(line.split('+')[3])
                 media_size = int(float(line.split('+')[1]))
 
-                sort_value = 0
                 if caching_policy == 'RAND':
                     sort_value = random.randint(0, 1000)
+
                 elif caching_policy == 'FIFO' or caching_policy == 'LRU':
                     sort_value = current_timestamp
+
                 elif caching_policy == 'PageRank':
                     sort_value = current_timestamp * CONFIG['params'][0] + \
                                 page_rank_metrics[str(user_id)] * media_size * CONFIG['params'][1] + \
                                 int(nearest_distance) * CONFIG['params'][2]
+                    # print(CONFIG['params'][0], CONFIG['params'][1], CONFIG['params'][2])
+
+                elif caching_policy == "Degree":
+                    sort_value = current_timestamp * CONFIG['params'][0] + \
+                                degree_metrics[str(user_id)] * media_size * CONFIG['params'][1] + \
+                                int(nearest_distance) * CONFIG['params'][2]
+            
+                elif caching_policy == "LRU-social":
+                    '''LRU-social can adjust the sort_value automatically'''
+                    sort_value = 0
+
+                # print(sort_value, current_timestamp)
                     
                 '''记录redis_object，使用json形式保存'''
                 temp_redis_object = {
@@ -207,18 +225,25 @@ class Main:
                     print("temp_redis_object: ", temp_redis_object)
                 
                 '''往第三层级插入，后续的调整都由redis内部完成'''
-                self.build_network.level_3_host[selected_level_3_id].redis_cache.insert(picture_hash=post_id, redis_object=temp_redis_object, need_uplift=True, use_LRU_social=caching_policy == "LRU_social", first_insert=True, lru_social_parameter_sp=spreading_power_list[user_id])
+                if caching_policy == "LRU_social":
+                    self.build_network.level_3_host[selected_level_3_id].redis_cache.insert(picture_hash=post_id, redis_object=temp_redis_object, need_uplift=True, use_LRU_social=True, first_insert=True, lru_social_parameter_sp=spreading_power_list[user_id])
+                else:
+                    self.build_network.level_3_host[selected_level_3_id].redis_cache.insert(picture_hash=post_id, redis_object=temp_redis_object, need_uplift=True, use_LRU_social=False)
 
             elif current_type == "view":
                 current_timestamp = int(line.split('+')[0])
                 post_id = int(line.split('+')[1])
                 # user_id = int(line.split('+')[3])
                 '''往第三层级查询，后续的调整都由redis内部完成，这里先假设只有一个user'''
-                find_result = self.build_network.level_3_host[selected_level_3_id].redis_cache.find(picture_hash=post_id, user_host=self.build_network.user_host[0], current_timestamp=current_timestamp, need_update_cache=need_update_cache, use_LRU_social=caching_policy == "LRU_social")
+                if caching_policy == "LRU_social":
+                    find_result = self.build_network.level_3_host[selected_level_3_id].redis_cache.find(picture_hash=post_id, user_host=self.build_network.user_host[0], current_timestamp=current_timestamp, need_update_cache=need_update_cache, config_timestamp=CONFIG['params'][0], use_LRU_social=True)
+                else:
+                    find_result = self.build_network.level_3_host[selected_level_3_id].redis_cache.find(picture_hash=post_id, user_host=self.build_network.user_host[0], current_timestamp=current_timestamp, need_update_cache=need_update_cache, config_timestamp=CONFIG['params'][0], use_LRU_social=False)
                 result_level = find_result[0]
 
                 if result_level == 0:
                     '''所有level的cache都没有找到'''
+                    print("!!!! ", cnt_line)
                     continue
 
                 print(cnt_line, selected_level_3_id, result_level, find_result[1], file=f_out_find)

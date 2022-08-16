@@ -23,9 +23,10 @@ class hill_climb_optimize():
         self.optimal_altitude   = self.init_altitude
 
         # define step length
-        self.step_len0 = 0.1        # timestamp
-        self.step_len1 = 5          # pagerank * media_size
-        self.step_len2 = 0.1        # nearest
+        self.step_len0 = 1        # timestamp
+        self.step_len1 = 10          # pagerank * media_size
+        self.step_len2 = 1        # nearest
+        self.step_list = [self.step_len0, self.step_len1, self.step_len2]
 
         # debug switch
         self.debug = False
@@ -59,10 +60,16 @@ class hill_climb_optimize():
     def get_near_ways(self, params):
         near_params = []
 
-        for p0 in [self.step_len0, -self.step_len0]:
-            for p1 in [self.step_len1, -self.step_len1]:
-                for p2 in [self.step_len2, -self.step_len2]:
-                    near_params.append((params[0] + p0, params[1] + p1, params[2] + p2))
+        # method1
+        #for p0 in [self.step_len0, -self.step_len0, self.step_len0/2, -self.step_len0/2]:
+        #    for p1 in [self.step_len1, -self.step_len1, self.step_len1/2, -self.step_len1/2]:
+        #        for p2 in [self.step_len2, -self.step_len2, self.step_len2/2, -self.step_len2/2]:
+        #            near_params.append((params[0] + p0, params[1] + p1, params[2] + p2))
+        #
+
+        # method2
+        for i in range(3):
+            near_params.extend([params[i] + self.step_list[i], params[i] - self.step_list[i]])
         
         print("near ways: ", near_params)
         return near_params
@@ -100,9 +107,9 @@ class hill_climb_optimize():
         self.visited.clear()
 
         # init status
-        param0 = round(random.uniform(0, 2), 1)
-        param1 = random.randint(0, 100)
-        param2 = round(random.uniform(-2, 2), 1)
+        param0 = round(random.uniform(-10, 10), 1)
+        param1 = random.randint(-100, 100)
+        param2 = round(random.uniform(-10, 10), 1)
 
         self.init_config["params"]  = [param0, param1, param2]
         self.init_altitude          = self.run_simulator(self.init_config)
