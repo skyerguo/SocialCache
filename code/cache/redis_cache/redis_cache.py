@@ -56,7 +56,7 @@ class Redis_cache:
         '''设置实际数据文件存储路径'''
         self.picture_root_path = '/dev/null'
 
-        '''设置上一层的redis_cache'''
+        '''设置当前层的redis_cache'''
         self.cache_level = cache_level
 
         '''设置当前cache对应的mininet_host'''
@@ -96,6 +96,7 @@ class Redis_cache:
                     if curr_value < min_value:
                         min_value = curr_value
                         remove_key = curr_key
+        # print("remove_key: ", remove_key)
         self.redis.delete(remove_key)
 
         if self.picture_root_path != '/dev/null': ## 启用HTTP了
@@ -120,11 +121,29 @@ class Redis_cache:
         else:
             '''如果当前cache的空间使用完了，且不是LRU，则按照内在的权值替换'''
             if self.redis.dbsize() >= self.cache_size:
+                ## TODO 检查问题
+                
                 if not self.redis.get(picture_hash) and self.redis.dbsize() == self.cache_size:
+                    # print("xx before xx", self.redis.dbsize())
                     self.remove_cache_node()
+                    # print("xx after xx", self.redis.dbsize())
+                # else:
+                #     if self.redis.get(picture_hash):
+                #         print("????", pickle.loads(self.redis.get(picture_hash)), not self.redis.get(picture_hash), self.redis.dbsize(), self.cache_size)
+                #     else:
+                #         print(not self.redis.get(picture_hash), self.redis.dbsize(), self.cache_size)
         
         '''插入redis数据库'''
+        # print("!!before!!", self.redis.dbsize(), self.cache_size)
+        # for curr_key in self.redis.keys():
+        #     print(curr_key, pickle.loads(self.redis.get(curr_key)))
         self.redis.set(picture_hash, pickle.dumps(redis_object))
+        # print("!!after!!", self.redis.dbsize(), self.cache_size)
+        # for curr_key in self.redis.keys():
+        #     print(curr_key, pickle.loads(self.redis.get(curr_key)))
+        if self.redis.dbsize() > self.cache_size:
+            print(picture_hash, pickle.loads(self.redis.get(picture_hash)))
+            exit(0)
 
         '''如有有使用优先队列，每次插入时需要维护优先队列'''
         if self.use_priority_queue:
@@ -193,6 +212,11 @@ class Redis_cache:
         redis_object = self.redis.get(name=picture_hash)
         if redis_object:
             '''如果找到了'''
+            # if self.cache_level == 3:
+            #     for curr_key in self.redis.keys():
+            #         print(curr_key, pickle.loads(self.redis.get(curr_key)))
+            #     print(self.cache_size)
+            #     print('-------')
             redis_object = pickle.loads(redis_object)
             result_level = self.cache_level
             new_redis_object= copy.deepcopy(redis_object)
