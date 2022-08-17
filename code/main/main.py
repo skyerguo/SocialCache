@@ -10,6 +10,7 @@ import json
 import os
 import time
 import random
+import math
 import numpy as np
 
 class Main:
@@ -158,16 +159,21 @@ class Main:
             laplacian_centrality_metrics = eg.functions.not_sorted.laplacian(self.make_trace.G)
 
         elif caching_policy == "Constraint":
-            constraint_metrics = eg.functions.structural_holes.evaluation.constraint(self.make_trace.biG)
+            adj_matrix = util.generate_adj_matrix_graph("data/traces/" + self.make_trace.dir_name + "/relations.txt", len(self.make_trace.G.nodes))
+            networkx_graph = networkx.DiGraph(adj_matrix)
+            '''easygraph的constraint只能针对无向图，networkx的constraint可以针对有向图'''
+            # constraint_metrics = eg.functions.structural_holes.evaluation.constraint(self.make_trace.biG) 
+            constraint_metrics = networkx.constraint(networkx_graph)
 
         elif caching_policy == "LRU_social":
             degree_dict = self.make_trace.G.degree()
             parameter_k = np.mean(list(degree_dict.values()))
             epidemic_threshold = parameter_k / (parameter_k * parameter_k - parameter_k)
+
             adj_matrix = util.generate_adj_matrix_graph("data/traces/" + self.make_trace.dir_name + "/relations.txt", len(self.make_trace.G.nodes))
+            networkx_graph = networkx.DiGraph(adj_matrix)
             
             spreading_power_list = [0 for _ in range(len(self.make_trace.G.nodes))]
-            networkx_graph = networkx.DiGraph(adj_matrix)
             for i in range(len(self.make_trace.G.nodes)):
                 spreading_power_list[i] = SIR.SIR_network(networkx_graph, [i] , epidemic_threshold, 1, 10)
             # print(spreading_power_list)
@@ -226,9 +232,11 @@ class Main:
                                 int(nearest_distance) * CONFIG['params'][2]
 
                 elif caching_policy == "Constraint":
-                    # print(constraint_metrics[str(user_id)])
+                    if math.isnan(constraint_metrics[user_id]):
+                        constraint_metrics[user_id] = 0
+                    # print(constraint_metrics[user_id])
                     sort_value = current_timestamp * CONFIG['params'][0] + \
-                                constraint_metrics[str(user_id)] * media_size * CONFIG['params'][1] + \
+                                constraint_metrics[user_id] * media_size * CONFIG['params'][1] + \
                                 int(nearest_distance) * CONFIG['params'][2]    
                     
                 elif caching_policy == "LRU-social":

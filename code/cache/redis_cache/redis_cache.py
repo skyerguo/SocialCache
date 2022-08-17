@@ -141,8 +141,9 @@ class Redis_cache:
         # print("!!after!!", self.redis.dbsize(), self.cache_size)
         # for curr_key in self.redis.keys():
         #     print(curr_key, pickle.loads(self.redis.get(curr_key)))
+        '''留个检测，以防出现bug'''
         if self.redis.dbsize() > self.cache_size:
-            print(picture_hash, pickle.loads(self.redis.get(picture_hash)))
+            print("Error to check!!!", picture_hash, pickle.loads(self.redis.get(picture_hash)))
             exit(0)
 
         '''如有有使用优先队列，每次插入时需要维护优先队列'''
