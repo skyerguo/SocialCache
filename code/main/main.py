@@ -157,6 +157,9 @@ class Main:
         elif caching_policy == "LaplacianCentrality":
             laplacian_centrality_metrics = eg.functions.not_sorted.laplacian(self.make_trace.G)
 
+        elif caching_policy == "Constraint":
+            constraint_metrics = eg.functions.structural_holes.evaluation.constraint(self.make_trace.biG)
+
         elif caching_policy == "LRU_social":
             degree_dict = self.make_trace.G.degree()
             parameter_k = np.mean(list(degree_dict.values()))
@@ -216,14 +219,18 @@ class Main:
                                 betweenness_centrality_metrics[str(user_id)] * media_size * CONFIG['params'][1] + \
                                 int(nearest_distance) * CONFIG['params'][2]
                     
-                
                 elif caching_policy == "LaplacianCentrality":
                     # print(laplacian_centrality_metrics[str(user_id)])
                     sort_value = current_timestamp * CONFIG['params'][0] + \
                                 laplacian_centrality_metrics[str(user_id)] * media_size * CONFIG['params'][1] + \
                                 int(nearest_distance) * CONFIG['params'][2]
+
+                elif caching_policy == "Constraint":
+                    # print(constraint_metrics[str(user_id)])
+                    sort_value = current_timestamp * CONFIG['params'][0] + \
+                                constraint_metrics[str(user_id)] * media_size * CONFIG['params'][1] + \
+                                int(nearest_distance) * CONFIG['params'][2]    
                     
-            
                 elif caching_policy == "LRU-social":
                     '''LRU-social can adjust the sort_value automatically'''
                     sort_value = 0
@@ -261,6 +268,9 @@ class Main:
                 else:
                     find_result = self.build_network.level_3_host[selected_level_3_id].redis_cache.find(picture_hash=post_id, user_host=self.build_network.user_host[0], current_timestamp=current_timestamp, need_update_cache=need_update_cache, config_timestamp=CONFIG['params'][0], use_LRU_social=False)
                 result_level = find_result[0]
+                
+                if self.if_debug:
+                    print(result_level)
 
                 if result_level == 0:
                     '''所有level的cache都没有找到'''
@@ -296,7 +306,6 @@ class Main:
             for level_1_host_id in range(self.build_network.level_1_host_number):
                 for eth_port in range(1): # 对应自己的switch
                     util.calculate_flow(host=self.build_network.level_1_host[level_1_host_id], eth_name='a%s-eth%s'%(str(level_1_host_id), str(eth_port)), flow_direction='TX', result_path=self.result_path+'flow/'+self.build_network.level_1_host_ip[level_1_host_id])
-
 
         '''分析'''
         print('缓存策略： *** %s ***'%(caching_policy))

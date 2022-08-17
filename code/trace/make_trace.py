@@ -13,6 +13,7 @@ class Make_trace:
         self.end_time = 1000010000
         self.dir_name = dir_name
         self.G = eg.DiGraph()
+        self.biG = eg.Graph()
     
     def make_friend_relations(self):
         '''建立好友关系连边'''
@@ -191,6 +192,7 @@ class Make_trace:
         # self.make_posts()
         # self.make_checkins()
         self.G.add_edges_from_file("data/traces/" + self.dir_name + "/relations.txt")
+        self.biG.add_edges_from_file("data/traces/" + self.dir_name + "/relations.txt")
         # self.synthesis_timeline()
 
 # if __name__ == '__main__':
