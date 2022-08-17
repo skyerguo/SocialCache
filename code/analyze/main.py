@@ -11,6 +11,7 @@ p.add_argument('-m', '--mediasize', default=False, dest="mediaSize", action="sto
 p.add_argument('-e', '--executiontime', default=False, dest="executionTime", action="store_true", help="whether output execution time")
 p.add_argument('-f', '--flow', default=False, dest="flow", action="store_true", help="whether output flow")
 p.add_argument('-c', '--cachehitration', default=False, dest="cacheHitRatio", action="store_true", help="whether output cache hit ratio")
+p.add_argument('-p', '--parameters', default=False, dest="parameters", action="store_true", help="whether output cache parameters")
 args = p.parse_args()
 
 data_root = '/proj/socnet-PG0/data/'
@@ -26,7 +27,7 @@ execution_time_path = experiment_path + '/time_log.txt'
 flow_path = experiment_path + '/flow/'
 cache_hit_ratio_path = experiment_path + '/find_log.txt'
 config_path = experiment_path + '/config.json'
-caching_policy = json.load(open(config_path, 'r'))['caching_policy']
+config_json = json.load(open(config_path, 'r'))
 
 def get_media_size():
     total_media_size = 0
@@ -100,7 +101,9 @@ def get_cache_hit_ratio():
 
 
 if __name__ == '__main__':
-    print("caching_policy: ", caching_policy)
+    print("caching_policy: ", config_json['caching_policy'])
+    if args.parameters:
+        print("parameters: ", config_json['params'])
     print("------")
 
     if args.cacheHitRatio:
