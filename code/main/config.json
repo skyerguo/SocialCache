@@ -1,1 +1,1 @@
-{"trace_dir": "myk3", "caching_policy": "Constraint", "use_http_server": false, "use_priority_queue": false, "cache_size_level_3": 10, "cache_size_level_2": 100, "cache_size_level_1": 100000, "max_trace_len": null, "mode": "normal", "params": [1, 100, 0]}
+{"trace_dir": "myk3", "caching_policy": "EffectiveSize", "use_http_server": false, "use_priority_queue": false, "cache_size_level_3": 10, "cache_size_level_2": 100, "cache_size_level_1": 100000, "max_trace_len": null, "mode": "normal", "params": [-5.6, -74, -5.8]}

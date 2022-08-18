@@ -158,12 +158,12 @@ class Main:
         elif caching_policy == "LaplacianCentrality":
             laplacian_centrality_metrics = eg.functions.not_sorted.laplacian(self.make_trace.G)
 
-        elif caching_policy == "Constraint":
+        elif caching_policy == "EffectiveSize":
             adj_matrix = util.generate_adj_matrix_graph("data/traces/" + self.make_trace.dir_name + "/relations.txt", len(self.make_trace.G.nodes))
             networkx_graph = networkx.DiGraph(adj_matrix)
             '''easygraph的constraint只能针对无向图，networkx的constraint可以针对有向图'''
             # constraint_metrics = eg.functions.structural_holes.evaluation.constraint(self.make_trace.biG) 
-            constraint_metrics = networkx.constraint(networkx_graph)
+            effective_size_metrics = networkx.effective_size(networkx_graph)
 
         elif caching_policy == "LRU_social":
             degree_dict = self.make_trace.G.degree()
@@ -231,12 +231,12 @@ class Main:
                                 laplacian_centrality_metrics[str(user_id)] * media_size * CONFIG['params'][1] + \
                                 int(nearest_distance) * CONFIG['params'][2]
 
-                elif caching_policy == "Constraint":
-                    if math.isnan(constraint_metrics[user_id]):
-                        constraint_metrics[user_id] = 0
+                elif caching_policy == "EffectiveSize":
+                    if math.isnan(effective_size_metrics[user_id]):
+                        effective_size_metrics[user_id] = 0
                     # print(constraint_metrics[user_id])
                     sort_value = current_timestamp * CONFIG['params'][0] + \
-                                constraint_metrics[user_id] * media_size * CONFIG['params'][1] + \
+                                effective_size_metrics[user_id] * media_size * CONFIG['params'][1] + \
                                 int(nearest_distance) * CONFIG['params'][2]    
                     
                 elif caching_policy == "LRU-social":
