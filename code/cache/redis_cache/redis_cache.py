@@ -66,11 +66,12 @@ class Redis_cache:
         self.host_ip = host_ip
         self.host_port = host_port
 
+        self.hash_table = {}
+
         '''设置结果存的根目录'''
         self.result_path = result_path
         os.system('mkdir -p ' + self.result_path + 'mediaSize/' + self.host_ip)
         self.file_insert_media_size = open(self.result_path + 'mediaSize/' + self.host_ip + '/insert_all.txt', 'a')
-        # self.file_find_media_size = open(self.result_path + 'mediaSize/' + self.host_ip + '/find_all.txt', 'a')
 
     def __del__(self):
         '''程序结束后，自动关闭连接，释放资源'''
@@ -85,9 +86,17 @@ class Redis_cache:
         else:
             '''否则寻找权值最小的key'''
             if self.use_priority_queue:
+                '''在优先队列中找到值最小的元素删除，同时要保证这个元素是有效的'''
                 a = self.priority_queue.get() ## 取出并在priority_queue中去掉该元素
-                min_value = a[0]
                 remove_key = a[1]
+                
+                # print("!!!", remove_key, a)
+                while not self.priority_queue.empty() and (not self.redis.exists(remove_key) or self.hash_table[remove_key] != a[0]):
+                    a = self.priority_queue.get() ## 取出并在priority_queue中去掉该元素
+                    remove_key = a[1]
+                # for curr_key in self.redis.keys():
+                #     print(curr_key, pickle.loads(self.redis.get(curr_key)))
+                # print("-----------")
             else:
                 min_value = 1e9
                 remove_key = -1
@@ -102,7 +111,6 @@ class Redis_cache:
         if self.picture_root_path != '/dev/null': ## 启用HTTP了
             util.delete_picture(host=self.host, picture_path=self.picture_root_path+str(remove_key)) #在硬盘中删除当前文件，保证硬盘不会存太多垃圾文件
 
-
     def modify_cache_node(self, picture_hash, redis_object):
         '''修改cache里面的节点，一般为插入或者调整'''
 
@@ -115,14 +123,11 @@ class Redis_cache:
                 '''若缓存已满，则需要淘汰最早没有使用的数据'''
                 self.remove_cache_node(given_key=next(iter(self.LRUcache)))
                 self.LRUcache.popitem(last=False)
-            # TODO, 输出LRU cache看看
             self.LRUcache[picture_hash] = redis_object['sort_value']
 
         else:
             '''如果当前cache的空间使用完了，且不是LRU，则按照内在的权值替换'''
             if self.redis.dbsize() >= self.cache_size:
-                ## TODO 检查问题
-                
                 if not self.redis.get(picture_hash) and self.redis.dbsize() == self.cache_size:
                     # print("xx before xx", self.redis.dbsize())
                     self.remove_cache_node()
@@ -146,9 +151,10 @@ class Redis_cache:
             print("Error to check!!!", picture_hash, pickle.loads(self.redis.get(picture_hash)))
             exit(0)
 
-        '''如有有使用优先队列，每次插入时需要维护优先队列'''
+        '''如有有使用优先队列，每次插入时需要维护优先队列。使用第一关键字为sort_value，第二关键字为timestamp。保证timestamp互不相同，从而保证了key的唯一'''
         if self.use_priority_queue:
-            self.priority_queue.put((redis_object['sort_value'], picture_hash)) 
+            self.hash_table[picture_hash] = (redis_object['sort_value'], redis_object['timestamp'])
+            self.priority_queue.put(((redis_object['sort_value'], redis_object['timestamp']), picture_hash))  
         
     def get_lru_social_parameter_s(self) -> int:
         res = 0
@@ -165,8 +171,9 @@ class Redis_cache:
             if curr_value > lowerest_threshold:
                 temp_redis_object['sort_value'] = curr_value - 1
                 self.redis.set(curr_key, pickle.dumps(temp_redis_object))
-                if self.use_priority_queue:
-                    self.priority_queue.put((temp_redis_object['sort_value'], int.from_bytes(curr_key, byteorder='big'))) 
+                '''lru-social就不要管priority_queue了'''
+                # if self.use_priority_queue:
+                    # self.priority_queue.put((temp_redis_object['sort_value'], int.from_bytes(curr_key, byteorder='big'))) 
 
     def insert(self, picture_hash, redis_object, need_uplift=True, use_LRU_social=False, first_insert=False, lru_social_parameter_sp=0):
         '''

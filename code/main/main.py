@@ -185,6 +185,7 @@ class Main:
         start_time = time.time()
         print("start_time: %f"%(start_time), file=f_out_time)
         cnt_line = 0 
+        last_timestamp = -1
         for line in f_in:
             cnt_line += 1
             # print("cnt_line: ", cnt_line)
@@ -192,7 +193,10 @@ class Main:
                break 
             current_type = line.split('+')[-1].strip()
             current_location = eval(line.split('+')[2])
-            current_timestamp = int(line.split('+')[0])
+            current_timestamp = float(line.split('+')[0])
+            if math.floor(current_timestamp) == math.floor(last_timestamp):
+                current_timestamp = last_timestamp + 0.001
+            last_timestamp = current_timestamp
 
             [selected_level_3_id, nearest_distance] = util.find_nearest_location(current_location, self.level_3_area_location)
 
@@ -267,7 +271,6 @@ class Main:
                     self.build_network.level_3_host[selected_level_3_id].redis_cache.insert(picture_hash=post_id, redis_object=temp_redis_object, need_uplift=True, use_LRU_social=False)
 
             elif current_type == "view":
-                current_timestamp = int(line.split('+')[0])
                 post_id = int(line.split('+')[1])
                 # user_id = int(line.split('+')[3])
                 '''往第三层级查询，后续的调整都由redis内部完成，这里先假设只有一个user'''
