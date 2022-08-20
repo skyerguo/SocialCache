@@ -146,7 +146,7 @@ class gen_trace_data:
             adjlist = []
             [adjlist.append(adj) for adj in self.user_net[user]]
             user_adjlist_dict[user] = adjlist
-            print("user %d adjcent :" %user , adjlist)
+            #print("user %d adjcent :" %user , adjlist)
 
         for loc in self.locations:
             position_post_dict[loc] = []
@@ -174,7 +174,7 @@ class gen_trace_data:
                             curr_user_id,\
                             post_seq_num)
 
-                print("user %d current postline : " %curr_user_id, user_postline_dict[curr_user_id])
+                #print("user %d current postline : " %curr_user_id, user_postline_dict[curr_user_id])
             else:
                 # get a view item
                 print("Get a view item")
@@ -185,7 +185,7 @@ class gen_trace_data:
                     # nearby view
                     # item_line += "+nearby"
                     loc_post_list = position_post_dict[row["location"]]
-                    print("loc", row["location"], "post line:", loc_post_list)
+                    #print("loc", row["location"], "post line:", loc_post_list)
                     if loc_post_list:
                         viewid = loc_post_list[-1]
                 else:
@@ -195,11 +195,11 @@ class gen_trace_data:
                     adjlist = user_adjlist_dict[curr_user_id]
                     while adjlist:
                         # random pick an adjcent
-                        print("current adjlist : ", adjlist)
+                        #print("current adjlist : ", adjlist)
                         adj_idx = random.choice(adjlist)
                         user_post_list = user_postline_dict[adj_idx]
 
-                        print("choose adj%d, postline :" %adj_idx, user_post_list)
+                        #print("choose adj%d, postline :" %adj_idx, user_post_list)
                         if user_post_list:
                             viewadj = adj_idx
 
@@ -212,7 +212,7 @@ class gen_trace_data:
                             last_user_id = curr_user_id
                             break
                         
-                        print("user %d adj%d's postline is empty ")
+                        #print("user %d adj%d's postline is empty ")
                         adjlist.remove(adj_idx)
 
                 if viewid != -1:
@@ -228,13 +228,12 @@ class gen_trace_data:
         fd.close()
 
     def launch(self):
-        self.load_network(self.edge_file, draw=True)
+        self.load_network(self.edge_file, draw=False)
         self.load_location(self.loc_file)
         self.build_user_df()
         self.build_user_activity()
         self.trans_trace2timeline()
-        
     
 if __name__ == "__main__":
-    trace_data = gen_trace_data("../../data/traces/myk/edges.dat", "../../data/static/user_country.csv")
+    trace_data = gen_trace_data("./twitter_combined.txt", "../../data/static/user_country.csv")
     trace_data.launch()
