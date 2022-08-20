@@ -22,6 +22,8 @@ class hill_climb_optimize():
         self.optimal_config     = self.init_config
         self.optimal_altitude   = self.init_altitude
 
+        self.iteration_time = 0
+
         # define step length
         self.step_len0 = 1        # timestamp
         self.step_len1 = 10          # pagerank * media_size
@@ -36,7 +38,7 @@ class hill_climb_optimize():
             logfd.write("\n")
         
         # init log dataframe
-        self.log_df = pd.DataFrame(columns=["optimal", "average"])
+        self.log_df = pd.DataFrame()
 
 
     def run_simulator(self, config):
@@ -69,7 +71,12 @@ class hill_climb_optimize():
 
         # method2
         for i in range(3):
-            near_params.extend([params[i] + self.step_list[i], params[i] - self.step_list[i]])
+            new_params = params
+            new_params[i] += self.step_list[i]
+            near_params.append(tuple(new_params))
+            new_params = params
+            new_params[i] -= self.step_list[i]
+            near_params.append(tuple(new_params))
         
         print("near ways: ", near_params)
         return near_params
@@ -79,7 +86,6 @@ class hill_climb_optimize():
         self.climb_path.append(dict(params=self.optimal_config["params"], traffic=self.optimal_altitude))
 
         near_list = self.get_near_ways(self.optimal_config["params"])
-        move = False
 
         for way in near_list:
             if way in self.visited:
@@ -96,26 +102,30 @@ class hill_climb_optimize():
             if self.optimal_altitude > new_altitude:
                 self.optimal_altitude   = new_altitude
                 self.optimal_config     = new_config
-                move = True
-        
-        if move:
-            self.start_climb()
+                self.start_climb()
+            
 
-    def reset(self):
-        # clear cache
+    def reset(self, params=None):
+        # clear cache  werwer
         self.climb_path = []
         self.visited.clear()
 
-        # init status
-        param0 = round(random.uniform(-10, 10), 1)
-        param1 = random.randint(-100, 100)
-        param2 = round(random.uniform(-10, 10), 1)
+        if not params:
+            # randomly init status
+            param0 = round(random.uniform(-10, 10), 1)
+            param1 = random.randint(-100, 100)
+            param2 = round(random.uniform(-10, 10), 1)
 
-        self.init_config["params"]  = [param0, param1, param2]
+            self.init_config["params"]  = [param0, param1, param2]
+        else:
+            self.init_config["params"]  = params
+
         self.init_altitude          = self.run_simulator(self.init_config)
-
         self.optimal_config     = self.init_config
         self.optimal_altitude   = self.init_altitude
+
+        self.iteration_time += 1
+
 
     def record(self):
         # save to log file
@@ -127,20 +137,17 @@ class hill_climb_optimize():
         log_str += "optimize params  : " + str([round(x, 2) for x in self.optimal_config["params"]]) + "\n"
 
         step = 0
-        sum_altitude = 0
         for footprint in self.climb_path:
             step+=1
             log_str += "\n------ [step%d] ------\n" %step
             log_str += "params  :" + str([round(x, 2) for x in footprint["params"]]) + "\n"
             log_str += "traffic :" + str(footprint["traffic"]) + "\n"
-
-            sum_altitude += footprint["traffic"]
         
-        self.average_altitude = sum_altitude // step
-        self.log_df = self.log_df.append(dict(optimal=self.optimal_altitude, average=self.average_altitude), ignore_index=True)
-
         with open(LOG_FILENAME, "a") as log_fd:
             log_fd.write(log_str)
+
+        # save to dataframe
+        self.log_df = pd.concat([self.log_df, pd.Series([x['traffic'] for x in self.climb_path], name="iter%d" %self.iteration_time)], axis=1)
 
     def hill_climb(self):
         for i in range(10):
@@ -158,8 +165,30 @@ class hill_climb_optimize():
 
             # record
             self.record()
+
+    def hill_climb_specific_point(self, params_list):
+        for params in params_list:
+            # reset status
+            self.reset(params)
+
+            # start time
+            self.start_time = time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
+
+            # start hill climbing
+            self.start_climb()
+
+            # end time
+            self.end_time   = time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
+
+            # record
+            self.record()
     
+    def savelog(self):
+        self.log_df.to_csv("./optimze.csv")
+
     def visualize(self):
+        print(self.log_df)
+        #fig_df = log_df
         print("ploting result")
         plt.figure()
         self.log_df.plot.line(xlabel="iterations", ylabel="traffic",title="hill-climbing optimization", grid=True)
@@ -167,5 +196,7 @@ class hill_climb_optimize():
 
 if __name__ == "__main__":
     optimize = hill_climb_optimize()
-    optimize.hill_climb()
+    optimize.hill_climb_specific_point([[1, 100, 0]])
+    #optimize.hill_climb()
     optimize.visualize()
+    optimize.savelog()
