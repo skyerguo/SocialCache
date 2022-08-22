@@ -149,8 +149,8 @@ class Main:
         '''SocCache + social network metrics'''
         if caching_policy == 'PageRank':
             curr_social_metric_path = self.social_metric_dict_path + 'PageRank.pkl'
-            if os.exist(curr_social_metric_path):
-                page_rank_metrics = pickle.load(open(curr_social_metric_path, "rb")).item() 
+            if os.path.exists(curr_social_metric_path):
+                page_rank_metrics = pickle.load(open(curr_social_metric_path, "rb"))
             else:
                 page_rank_metrics = eg.functions.not_sorted.pagerank(self.make_trace.G)
                 pickle.dump(page_rank_metrics, open(curr_social_metric_path, "wb"))
@@ -192,6 +192,7 @@ class Main:
         start_time = time.time()
         print("start_time: %f"%(start_time), file=f_out_time)
         cnt_line = 0 
+        print("cnt_line: ", cnt_line)
         last_timestamp = -1
         for line in f_in:
             cnt_line += 1
