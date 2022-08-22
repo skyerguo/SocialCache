@@ -1,3 +1,4 @@
+from asyncio import FastChildWatcher
 import json
 import shlex
 import subprocess
@@ -34,8 +35,9 @@ class hill_climb_optimize():
         self.debug = False
 
         # init logfile
-        with open(LOG_FILENAME, "w") as logfd:
-            logfd.write("\n")
+        self.log_filename = LOG_FILENAME + "%s" %time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
+        with open(self.log_filename, "w") as log_fd:
+            log_fd.write("\n")
         
         # init log dataframe
         self.log_df = pd.DataFrame()
@@ -100,6 +102,8 @@ class hill_climb_optimize():
             # if find a higher altitude, then refresh the optimal params,
             # here higher altitude means lower traffic
             if self.optimal_altitude > new_altitude:
+                self.search_depth += 1
+                print("*** Find better config, current depth %d" %self.search_depth)
                 self.optimal_altitude   = new_altitude
                 self.optimal_config     = new_config
                 self.start_climb()
@@ -109,6 +113,7 @@ class hill_climb_optimize():
         # clear cache  werwer
         self.climb_path = []
         self.visited.clear()
+        self.search_depth = 0
 
         if not params:
             # randomly init status
@@ -143,7 +148,7 @@ class hill_climb_optimize():
             log_str += "params  :" + str([round(x, 2) for x in footprint["params"]]) + "\n"
             log_str += "traffic :" + str(footprint["traffic"]) + "\n"
         
-        with open(LOG_FILENAME, "a") as log_fd:
+        with open(self.log_filename, "a") as log_fd:
             log_fd.write(log_str)
 
         # save to dataframe
@@ -197,6 +202,6 @@ class hill_climb_optimize():
 if __name__ == "__main__":
     optimize = hill_climb_optimize()
     optimize.hill_climb_specific_point([[1, 100, 0]])
-    #optimize.hill_climb()
+    optimize.hill_climb()
     optimize.visualize()
     optimize.savelog()
