@@ -12,6 +12,7 @@ import time
 import random
 import math
 import numpy as np
+import pickle
 
 class Main:
     def __init__(self, trace_dir, use_http_server=False, if_debug=False):
@@ -32,7 +33,8 @@ class Main:
         self.make_trace.run()
 
         self.use_http_server = use_http_server
-        
+
+        self.social_metric_dict_path = 'data/social_metric_dict/' + self.trace_dir + '/'
 
     def start_http_server(self, host, db, host_ip, temp_picture_path):
         '''
@@ -146,7 +148,12 @@ class Main:
         
         '''SocCache + social network metrics'''
         if caching_policy == 'PageRank':
-            page_rank_metrics = eg.functions.not_sorted.pagerank(self.make_trace.G)
+            curr_social_metric_path = self.social_metric_dict_path + 'PageRank.pkl'
+            if os.exist(curr_social_metric_path):
+                page_rank_metrics = pickle.load(open(curr_social_metric_path, "rb")).item() 
+            else:
+                page_rank_metrics = eg.functions.not_sorted.pagerank(self.make_trace.G)
+                pickle.dump(page_rank_metrics, open(curr_social_metric_path, "wb"))
 
         elif caching_policy == "Degree":
             '''To use it, remember the key is str type, and the value is bool'''
@@ -188,7 +195,8 @@ class Main:
         last_timestamp = -1
         for line in f_in:
             cnt_line += 1
-            # print("cnt_line: ", cnt_line)
+            if cnt_line % 10000 == 0:
+                print("cnt_line: ", cnt_line)
             if CONFIG['max_trace_len'] and cnt_line > CONFIG['max_trace_len']:
                break 
             current_type = line.split('+')[-1].strip()

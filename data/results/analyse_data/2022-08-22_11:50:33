@@ -1,0 +1,17 @@
+caching_policy:  FIFO
+parameters:  [1, 680, 0]
+dataset:  myk4
+------
+三级CDN缓存命中率： 0.17669773931961144
+二级CDN缓存命中率： 0.05572203204073698
+一级CDN缓存命中率： 1.0
+总缓存命中率： 0.38450765645280616
+二三级缓存命中率： 0.12207181391054656
+------
+total_media_size:  201837418
+level 1; media szie: 86603630
+level 2; media szie: 103427828
+level 3; media szie: 11805960
+------
+time_duration:  1448.979625
+------
