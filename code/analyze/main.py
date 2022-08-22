@@ -2,24 +2,31 @@ import argparse
 import os
 import json
 import math
+import sys
 
 p = argparse.ArgumentParser(description='Analyze the result')
 p.add_argument('-t', '--timestamp', type=str, default="", dest="timestamp", action="store", help="the timestamp of data file")
 p.add_argument('-n', '--nearnumber', type=int, default=0, dest="nearNumber", action="store", help="the number of nearest timestamp")
-p.add_argument('-d', '--detailoutput', default=False, dest="detailOutput", action="store_true", help="give more detail outputs")
+p.add_argument('-l', '--detailoutput', default=False, dest="detailOutput", action="store_true", help="give more detail outputs")
 p.add_argument('-m', '--mediasize', default=False, dest="mediaSize", action="store_true", help="whether output media size")
 p.add_argument('-e', '--executiontime', default=False, dest="executionTime", action="store_true", help="whether output execution time")
 p.add_argument('-f', '--flow', default=False, dest="flow", action="store_true", help="whether output flow")
 p.add_argument('-c', '--cachehitration', default=False, dest="cacheHitRatio", action="store_true", help="whether output cache hit ratio")
 p.add_argument('-p', '--parameters', default=False, dest="parameters", action="store_true", help="whether output cache parameters")
+p.add_argument('-d', '--dataset', default=False, dest="dataset", action="store_true", help="whether output dataset")
+p.add_argument('-z', '--outputFile', default=False, dest="outputFile", action="store_true", help="whether output the result into files")
+
 args = p.parse_args()
 
 data_root = '/proj/socnet-PG0/data/'
+
 if args.timestamp:
+    result_data_path = args.timestamp
     experiment_path = data_root + args.timestamp
 else:
     files = os.listdir(data_root)
     files = sorted(files, reverse=True)
+    result_data_path = files[args.nearNumber]
     experiment_path = data_root + files[args.nearNumber]
 
 media_size_path = experiment_path + '/mediaSize/'
@@ -85,25 +92,34 @@ def get_cache_hit_ratio():
     f_in.close()
 
     if find_success_number[3] + find_fail_number[3] > 0:
-        print('三级CDN缓存命中率：', find_success_number[3] / (find_success_number[3] + find_fail_number[3]))
+        print('三级CDN缓存命中率: ', find_success_number[3] / (find_success_number[3] + find_fail_number[3]))
     else:
         print('未经过三级CDN缓存')
 
     if find_success_number[2] + find_fail_number[2] > 0:
-        print('二级CDN缓存命中率：', find_success_number[2] / (find_success_number[2] + find_fail_number[2]))
+        print('二级CDN缓存命中率: ', find_success_number[2] / (find_success_number[2] + find_fail_number[2]))
     else:
         print('未经过二级CDN缓存')
         
     if find_success_number[1] + find_fail_number[1] > 0:
-        print('一级CDN缓存命中率：', find_success_number[1] / (find_success_number[1] + find_fail_number[1]))
+        print('一级CDN缓存命中率: ', find_success_number[1] / (find_success_number[1] + find_fail_number[1]))
     else:
         print('未经过一级CDN缓存')
 
+    print("总缓存命中率：", (find_success_number[3] + find_success_number[2] + find_success_number[1]) / (find_success_number[3] + find_success_number[2] + find_success_number[1] + find_fail_number[3] + find_fail_number[2] + find_fail_number[1]))
+
+    print("二三级缓存命中率：", (find_success_number[3] + find_success_number[2]) / (find_success_number[3] + find_success_number[2] + find_fail_number[3] + find_fail_number[2]))
 
 if __name__ == '__main__':
+    if args.outputFile:
+        f_out = open('./data/results/analyse_data/' + result_data_path, 'w+')
+        sys.stdout = f_out
+        pass
     print("caching_policy: ", config_json['caching_policy'])
     if args.parameters:
         print("parameters: ", config_json['params'])
+    if args.dataset:
+        print("dataset: ", config_json['trace_dir'])
     print("------")
 
     if args.cacheHitRatio:
