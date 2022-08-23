@@ -106,9 +106,9 @@ def get_cache_hit_ratio():
     else:
         print('未经过一级CDN缓存')
 
-    print("总缓存命中率：", (find_success_number[3] + find_success_number[2] + find_success_number[1]) / (find_success_number[3] + find_success_number[2] + find_success_number[1] + find_fail_number[3] + find_fail_number[2] + find_fail_number[1]))
+    print("总缓存命中率: ", (find_success_number[3] + find_success_number[2] + find_success_number[1]) / (find_success_number[3] + find_success_number[2] + find_success_number[1] + find_fail_number[3] + find_fail_number[2] + find_fail_number[1]))
 
-    print("二三级缓存命中率：", (find_success_number[3] + find_success_number[2]) / (find_success_number[3] + find_success_number[2] + find_fail_number[3] + find_fail_number[2]))
+    print("二三级缓存命中率: ", (find_success_number[3] + find_success_number[2]) / (find_success_number[3] + find_success_number[2] + find_fail_number[3] + find_fail_number[2]))
 
 if __name__ == '__main__':
     if args.outputFile:
@@ -116,6 +116,9 @@ if __name__ == '__main__':
         sys.stdout = f_out
         pass
     print("caching_policy: ", config_json['caching_policy'])
+    print("cache_size_level_3: ", config_json['cache_size_level_3'])
+    print("cache_size_level_2: ", config_json['cache_size_level_2'])
+    print("cache_size_level_1: ", config_json['cache_size_level_1'])
     if args.parameters:
         print("parameters: ", config_json['params'])
     if args.dataset:
