@@ -1,0 +1,17 @@
+caching_policy:  LRU
+parameters:  [1, 680, 0]
+dataset:  myk4
+------
+三级CDN缓存命中率:  0.33365163855862123
+二级CDN缓存命中率:  0.5100989759859129
+一级CDN缓存命中率:  1.0
+总缓存命中率： 0.5018082393793061
+二三级缓存命中率： 0.40421035058788024
+------
+total_media_size:  133772036
+level 1; media szie: 35986053
+level 2; media szie: 85980023
+level 3; media szie: 11805960
+------
+time_duration:  942.075911
+------
