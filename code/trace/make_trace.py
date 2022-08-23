@@ -194,7 +194,3 @@ class Make_trace:
         self.G.add_edges_from_file("data/traces/" + self.dir_name + "/relations.txt")
         self.biG.add_edges_from_file("data/traces/" + self.dir_name + "/relations.txt")
         # self.synthesis_timeline()
-
-# if __name__ == '__main__':
-#     m = Make_trace('naive')
-#     m.run()
