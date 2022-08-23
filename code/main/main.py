@@ -160,17 +160,32 @@ class Main:
             degree_metrics = self.make_trace.G.in_degree()
 
         elif caching_policy == "BetweennessCentrality":
-            betweenness_centrality_metrics = eg.functions.centrality.betweenness.betweenness_centrality(self.make_trace.G)
+            curr_social_metric_path = self.social_metric_dict_path + 'BetweennessCentrality.pkl'
+            if os.path.exists(curr_social_metric_path):
+                betweenness_centrality_metrics = pickle.load(open(curr_social_metric_path, "rb"))
+            else:
+                betweenness_centrality_metrics = eg.functions.centrality.betweenness.betweenness_centrality(self.make_trace.G)
+                pickle.dump(betweenness_centrality_metrics, open(curr_social_metric_path, "wb"))
 
         elif caching_policy == "LaplacianCentrality":
-            laplacian_centrality_metrics = eg.functions.not_sorted.laplacian(self.make_trace.G)
+            curr_social_metric_path = self.social_metric_dict_path + 'LaplacianCentrality.pkl'
+            if os.path.exists(curr_social_metric_path):
+                laplacian_centrality_metrics = pickle.load(open(curr_social_metric_path, "rb"))
+            else:
+                laplacian_centrality_metrics = eg.functions.not_sorted.laplacian(self.make_trace.G)
+                pickle.dump(laplacian_centrality_metrics, open(curr_social_metric_path, "wb"))
 
         elif caching_policy == "EffectiveSize":
-            adj_matrix = util.generate_adj_matrix_graph("data/traces/" + self.make_trace.dir_name + "/relations.txt", len(self.make_trace.G.nodes))
-            networkx_graph = networkx.DiGraph(adj_matrix)
-            '''easygraph的constraint只能针对无向图，networkx的constraint可以针对有向图'''
-            # constraint_metrics = eg.functions.structural_holes.evaluation.constraint(self.make_trace.biG) 
-            effective_size_metrics = networkx.effective_size(networkx_graph)
+            curr_social_metric_path = self.social_metric_dict_path + 'LaplacianCentrality.pkl'
+            if os.path.exists(curr_social_metric_path):
+                effective_size_metrics = pickle.load(open(curr_social_metric_path, "rb"))
+            else:
+                adj_matrix = util.generate_adj_matrix_graph("data/traces/" + self.make_trace.dir_name + "/relations.txt", len(self.make_trace.G.nodes))
+                networkx_graph = networkx.DiGraph(adj_matrix)
+                '''easygraph的constraint只能针对无向图，networkx的constraint可以针对有向图'''
+                # constraint_metrics = eg.functions.structural_holes.evaluation.constraint(self.make_trace.biG) 
+                effective_size_metrics = networkx.effective_size(networkx_graph)
+                pickle.dump(effective_size_metrics, open(curr_social_metric_path, "wb"))
 
         elif caching_policy == "LRU_social":
             degree_dict = self.make_trace.G.degree()
