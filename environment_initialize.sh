@@ -24,7 +24,7 @@ pip3 install --upgrade pip setuptools
 
 pip3 install flask scrapy beautifulsoup4 dnspython gunicorn supervisor numpy
 
-pip3 install shapely geopandas matplotlib redis Python-EasyGraph
+pip3 install shapely geopandas matplotlib redis Python-EasyGraph networkx seaborn
 
 ## 安装apt
 sudo apt-get -yqq install wondershaper nload iftop zip unzip htop jq
@@ -65,10 +65,6 @@ echo "gtc            soft    nproc           330603" | sudo tee -a /etc/security
 echo "gtc            hard    nproc           330603" | sudo tee -a /etc/security/limits.conf
 echo "gtc            soft    nofile          102400" | sudo tee -a /etc/security/limits.conf
 echo "gtc            hard    nofile          102400" | sudo tee -a /etc/security/limits.conf
-
-
-# install networkx
-pip3 install networkx
 
 # ## cache相关
 # deb http://us.archive.ubuntu.com/ubuntu/ trusty main restricted universe multiverse

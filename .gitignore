@@ -1,4 +1,5 @@
 *.png
+*.jpg
 *.pyc
-*__/pycache__/
+*__pycache__/*
 code/main/config.json
