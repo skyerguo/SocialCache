@@ -1,0 +1,17 @@
+caching_policy:  EffectiveSize
+parameters:  [1, 680, 0]
+dataset:  myk3
+------
+三级CDN缓存命中率:  0.1193308630739561
+二级CDN缓存命中率:  0.1894345750701245
+一级CDN缓存命中率:  1.0
+总缓存命中率： 0.3854293684333606
+二三级缓存命中率： 0.15215863395974236
+------
+total_media_size:  6604460
+level 1; media szie: 2321237
+level 2; media szie: 3883529
+level 3; media szie: 399694
+------
+time_duration:  74.018953
+------

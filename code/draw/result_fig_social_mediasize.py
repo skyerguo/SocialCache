@@ -19,10 +19,10 @@ raw_data = {
         'Degree', 'PageRank', 'Laplacian Centrality', 'Betweenness Centrality', 'Effective Size'
     ],
     'Media File Size': [
-        1, 1, 1, 1, 1, 
-        1, 1, 1, 1, 1, 
-        1, 1, 1, 1, 1, 
-        1, 1, 1, 1, 1
+        6604517, 4028162, 4021697, 4358568, 6604460, 
+        399694, 399694, 399694, 399694, 399694, 
+        3901250, 2936652, 2972601, 3256040, 3883529, 
+        2303573, 691816, 649402, 702834, 2321237
     ]
 }
 result_path = './figures/results/result_fig_social_mediasize.pdf'
