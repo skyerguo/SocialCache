@@ -1,0 +1,20 @@
+caching_policy:  RAND
+cache_size_level_3:  5
+cache_size_level_2:  50
+cache_size_level_1:  1000000
+parameters:  [1, 680, 0]
+dataset:  myk4
+------
+三级CDN缓存命中率:  0.02683036649681472
+二级CDN缓存命中率:  0.004912627247765176
+一级CDN缓存命中率:  1.0
+总缓存命中率:  0.3399558492205111
+二三级缓存命中率:  0.016020511170617042
+------
+total_media_size:  239302861
+level 1; media szie: 107579639
+level 2; media szie: 119917262
+level 3; media szie: 11805960
+------
+time_duration:  1677.797103
+------
