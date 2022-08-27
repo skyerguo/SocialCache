@@ -185,10 +185,16 @@ class Redis_cache:
             lru_social_parameter_s = self.get_lru_social_parameter_s()
             if first_insert:
                 '''set the sort_value as SPu * C'''
-                redis_object['sort_value'] = lru_social_parameter_sp * lru_social_parameter_c
+                # print("lru_social_parameter_sp: ", lru_social_parameter_sp)
+                # print("lru_social_parameter_c: ", lru_social_parameter_c)
+                redis_object['sort_value'] = lru_social_parameter_sp * lru_social_parameter_c + redis_object['timestamp']
+                # print("redis_object['sort_value']: ", redis_object['sort_value'])
             else:
                 '''set label as C-S'''
-                redis_object['sort_value'] = lru_social_parameter_c - lru_social_parameter_s
+                if lru_social_parameter_c - lru_social_parameter_s > 0:
+                    redis_object['sort_value'] = lru_social_parameter_c - lru_social_parameter_s + redis_object['timestamp']
+                else:
+                    redis_object['sort_value'] = redis_object['timestamp']
 
         self.modify_cache_node(picture_hash=picture_hash, redis_object=redis_object)
 
@@ -207,7 +213,7 @@ class Redis_cache:
             if self.cache_level > 1:
                 '''递归调用，一层层上传'''
                 print(redis_object['media_size'], file=self.file_insert_media_size)
-                self.higher_cache_redis.insert(picture_hash=picture_hash, redis_object=redis_object, need_uplift=need_uplift, use_LRU_social=use_LRU_social, first_insert=first_insert) 
+                self.higher_cache_redis.insert(picture_hash=picture_hash, redis_object=redis_object, need_uplift=need_uplift, use_LRU_social=use_LRU_social, first_insert=first_insert, lru_social_parameter_sp=lru_social_parameter_sp) 
 
         elif self.cache_level > 1: 
             '''如果不是最后一层，而且需要从上层获取数据传播'''
@@ -239,8 +245,13 @@ class Redis_cache:
                         self.decrement_lru_social(lowerest_threshold=lru_social_parameter_c)
                     else:
                         self.decrement_lru_social(lowerest_threshold=result_label)
-                    new_sort_value = lru_social_parameter_c - lru_social_parameter_s
-                    new_redis_object['sort_value'] = new_sort_value
+                    
+                    if lru_social_parameter_c - lru_social_parameter_s > 0:
+                        new_sort_value = lru_social_parameter_c - lru_social_parameter_s + current_timestamp
+                    else:
+                        new_sort_value = current_timestamp
+                    new_redis_object['timestamp'] = current_timestamp
+                    new_redis_object['sort_value'] = new_sort_value 
                 else:
                     last_timestamp = redis_object['timestamp']
                     new_sort_value = redis_object['sort_value'] + (current_timestamp - last_timestamp) * config_timestamp
@@ -264,14 +275,14 @@ class Redis_cache:
 
             '''如果当前层没找到，有更高层，向上查询'''
             if self.cache_level > 1:
-                find_result = self.higher_cache_redis.find(picture_hash=picture_hash, user_host=user_host, current_timestamp=current_timestamp, need_update_cache=need_update_cache)
+                find_result = self.higher_cache_redis.find(picture_hash=picture_hash, user_host=user_host, current_timestamp=current_timestamp, need_update_cache=need_update_cache, config_timestamp=config_timestamp, use_LRU_social=use_LRU_social)
                 result_level = find_result[0]
                 redis_object = find_result[1]
 
                 '''上层已经操作完毕。根据上层的结果，当前层获取图片cache'''
                 if result_level != 0: 
                     '''有命中数据'''
-                    self.insert(picture_hash=picture_hash, redis_object=redis_object, need_uplift=False)
+                    self.insert(picture_hash=picture_hash, redis_object=redis_object, need_uplift=False, use_LRU_social=use_LRU_social, first_insert=False, lru_social_parameter_sp=0)
             
             '''返回一个list，分别表示[第几层命中的, 查到的redis_object]'''
             return [result_level, redis_object]
