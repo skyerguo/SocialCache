@@ -181,24 +181,26 @@ class Main:
                 effective_size_metrics = pickle.load(open(curr_social_metric_path, "rb"))
             else:
                 adj_matrix = util.generate_adj_matrix_graph("data/traces/" + self.make_trace.dir_name + "/relations.txt", len(self.make_trace.G.nodes))
-                networkx_graph = networkx.DiGraph(adj_matrix)
+                networkx_graph = networkx.DiGraph(adj_matrix).reverse() ## 关注的方向，传播需要反向
                 '''easygraph的constraint只能针对无向图，networkx的constraint可以针对有向图'''
                 # constraint_metrics = eg.functions.structural_holes.evaluation.constraint(self.make_trace.biG) 
                 effective_size_metrics = networkx.effective_size(networkx_graph)
                 pickle.dump(effective_size_metrics, open(curr_social_metric_path, "wb"))
 
-        elif caching_policy == "LRU_social":
+        elif caching_policy == "LRU-social":
             degree_dict = self.make_trace.G.degree()
             parameter_k = np.mean(list(degree_dict.values()))
             epidemic_threshold = parameter_k / (parameter_k * parameter_k - parameter_k)
+            print("epidemic_threshold: ", epidemic_threshold)
 
             adj_matrix = util.generate_adj_matrix_graph("data/traces/" + self.make_trace.dir_name + "/relations.txt", len(self.make_trace.G.nodes))
             networkx_graph = networkx.DiGraph(adj_matrix)
             
             spreading_power_list = [0 for _ in range(len(self.make_trace.G.nodes))]
             for i in range(len(self.make_trace.G.nodes)):
-                spreading_power_list[i] = SIR.SIR_network(networkx_graph, [i] , epidemic_threshold, 1, 10)
-            # print(spreading_power_list)
+                spreading_power_list[i] = SIR.SIR_network(networkx_graph, [i] , epidemic_threshold, 1, 20) + 1
+            # print("degree_dict: ", degree_dict)
+            print("spreading_power_list: ", spreading_power_list)
 
         f_in = open("data/traces/" + self.trace_dir + "/all_timeline.txt", "r")
         f_out_find = open(self.result_path + 'find_log.txt', 'w')
@@ -289,7 +291,7 @@ class Main:
                     print("temp_redis_object: ", temp_redis_object)
                 
                 '''往第三层级插入，后续的调整都由redis内部完成'''
-                if caching_policy == "LRU_social":
+                if caching_policy == "LRU-social":
                     self.build_network.level_3_host[selected_level_3_id].redis_cache.insert(picture_hash=post_id, redis_object=temp_redis_object, need_uplift=True, use_LRU_social=True, first_insert=True, lru_social_parameter_sp=spreading_power_list[user_id])
                 else:
                     self.build_network.level_3_host[selected_level_3_id].redis_cache.insert(picture_hash=post_id, redis_object=temp_redis_object, need_uplift=True, use_LRU_social=False)
@@ -297,8 +299,8 @@ class Main:
             elif current_type == "view":
                 post_id = int(line.split('+')[1])
                 # user_id = int(line.split('+')[3])
-                '''往第三层级查询，后续的调整都由redis内部完成，这里先假设只有一个user'''
-                if caching_policy == "LRU_social":
+                '''往第三层级查询，后续的调整都由redis内部完成，这里先假设只有一个user节点'''
+                if caching_policy == "LRU-social":
                     find_result = self.build_network.level_3_host[selected_level_3_id].redis_cache.find(picture_hash=post_id, user_host=self.build_network.user_host[0], current_timestamp=current_timestamp, need_update_cache=need_update_cache, config_timestamp=CONFIG['params'][0], use_LRU_social=True)
                 else:
                     find_result = self.build_network.level_3_host[selected_level_3_id].redis_cache.find(picture_hash=post_id, user_host=self.build_network.user_host[0], current_timestamp=current_timestamp, need_update_cache=need_update_cache, config_timestamp=CONFIG['params'][0], use_LRU_social=False)
@@ -335,7 +337,7 @@ class Main:
                     util.calculate_flow(host=self.build_network.level_3_host[level_3_host_id], eth_name='c%s-eth%s'%(str(level_3_host_id), str(eth_port)), flow_direction='TX', result_path=self.result_path+'flow/'+self.build_network.level_3_host_ip[level_3_host_id])
 
             for level_2_host_id in range(self.build_network.level_2_host_number):
-                for eth_port in range(self.build_network.level_1_host_number + 1): # 对应第一层的每一个节点，以及自己的switch
+                for eth_port in range(self.build_network.level_1_host_number): # 对应第一层的每一个节点，以及自己的switch
                     util.calculate_flow(host=self.build_network.level_2_host[level_2_host_id], eth_name='b%s-eth%s'%(str(level_2_host_id), str(eth_port)), flow_direction='TX', result_path=self.result_path+'flow/'+self.build_network.level_2_host_ip[level_2_host_id])
 
             for level_1_host_id in range(self.build_network.level_1_host_number):
