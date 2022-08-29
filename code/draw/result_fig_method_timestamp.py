@@ -17,6 +17,10 @@ result_path = './figures/results/result_fig_method_timestamp.pdf'
 
 if __name__ == '__main__':
     df = pd.DataFrame.from_dict(raw_data)
-    print(df)
-    sns.barplot(x='Timestamp', y='Method', data=df)
+    # print(df)
+    plt.rcParams["font.family"] = "Times New Roman"
+    
+    g = sns.barplot(x='Timestamp', y='Method', data=df)
+    g.spines['top'].set_visible(False)
+    g.spines['right'].set_visible(False)
     plt.savefig(result_path, dpi=600, bbox_inches='tight')

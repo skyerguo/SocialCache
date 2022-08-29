@@ -1,6 +1,6 @@
-import seaborn as sns
-import matplotlib.pyplot as plt
 import os
+import matplotlib.pyplot as plt
+import seaborn as sns
 import json
 import pandas as pd
 import numpy as np
@@ -32,6 +32,11 @@ result_path = './figures/results/result_fig_cachesize_mediasize.pdf'
 
 if __name__ == '__main__':
     df = pd.DataFrame.from_dict(raw_data)
+    plt.rcParams["font.family"] = "Times New Roman"
     # print(df)
-    sns.lineplot(x='Level 1 Cache Size', y='Media File Size', hue='Method', style='Method', data=df)
+    g = sns.lineplot(x='Level 1 Cache Size', y='Media File Size', hue='Method', style='Method', data=df)
+
+    g.spines['top'].set_visible(False)
+    g.spines['right'].set_visible(False)
+    g.set_ylim(0, 120000000)
     plt.savefig(result_path, dpi=600, bbox_inches='tight')

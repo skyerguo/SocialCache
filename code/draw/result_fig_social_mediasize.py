@@ -29,6 +29,9 @@ result_path = './figures/results/result_fig_social_mediasize.pdf'
 
 if __name__ == '__main__':
     df = pd.DataFrame.from_dict(raw_data)
-    print(df)
-    sns.catplot(x='Cache Level', y='Media File Size', hue='Social Metric', kind='bar', data=df)
+    plt.rcParams["font.family"] = "Times New Roman"
+    # print(df)
+    g = sns.barplot(x='Cache Level', y='Media File Size', hue='Social Metric', data=df)
+    g.spines['top'].set_visible(False)
+    g.spines['right'].set_visible(False)
     plt.savefig(result_path, dpi=600, bbox_inches='tight')
