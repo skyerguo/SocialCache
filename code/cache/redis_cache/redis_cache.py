@@ -23,7 +23,7 @@ class Redis_cache:
 
         '''获得本机的IP地址，作为redis IP'''
         # self.redis_ip = "128.105.145.13"
-        ret = subprocess.Popen("ifconfig enp1s0f0 | grep inet | awk '{print $2}' | cut -f 2 -d ':'",shell=True,stdout=subprocess.PIPE)
+        ret = subprocess.Popen("ifconfig eno1 | grep inet | awk '{print $2}' | cut -f 2 -d ':'",shell=True,stdout=subprocess.PIPE)
         self.redis_ip = ret.stdout.read().decode("utf-8").strip('\n')
         ret.stdout.close()
 

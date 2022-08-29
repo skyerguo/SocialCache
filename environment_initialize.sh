@@ -75,3 +75,6 @@ echo "gtc            hard    nofile          102400" | sudo tee -a /etc/security
 # git clone -b master --recurse-submodules git@github.com:1a1a11a/PyMimircache.git
 # cd PyMimircache
 # sudo python3 setup.py install
+
+## Matlab缺少字体
+## https://stackoverflow.com/questions/42097053/matplotlib-cannot-find-basic-fonts
