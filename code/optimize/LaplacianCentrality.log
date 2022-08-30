@@ -1,0 +1,64 @@
+
+
+
+===================== round =====================
+start :2022-08-29 22:16:51
+end   :2022-08-29 23:21:00
+optimize traffic : 4063038
+optimize params  : [1, 100, 1]
+
+------ [step1] ------
+params  :[1, 100, 0]
+traffic :4177966
+
+------ [step2] ------
+params  :[1, 110, 0]
+traffic :4164981
+
+------ [step3] ------
+params  :[1, 120, 0]
+traffic :4145464
+
+------ [step4] ------
+params  :[1, 130, 0]
+traffic :4133007
+
+------ [step5] ------
+params  :[1, 140, 0]
+traffic :4120782
+
+------ [step6] ------
+params  :[1, 150, 0]
+traffic :4113994
+
+------ [step7] ------
+params  :[1, 160, 0]
+traffic :4104281
+
+------ [step8] ------
+params  :[1, 170, 0]
+traffic :4097831
+
+------ [step9] ------
+params  :[1, 180, 0]
+traffic :4090301
+
+------ [step10] ------
+params  :[1, 190, 0]
+traffic :4087130
+
+------ [step11] ------
+params  :[1, 200, 0]
+traffic :4083831
+
+------ [step12] ------
+params  :[1, 210, 0]
+traffic :4070621
+
+------ [step13] ------
+params  :[1, 220, 0]
+traffic :4065922
+
+------ [step14] ------
+params  :[1, 230, 0]
+traffic :4063038

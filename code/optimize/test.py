@@ -1,8 +1,25 @@
 import pandas as pd
+import re
 
-log_df = pd.DataFrame(columns=["optimal", "average"])
-print(log_df)
+policy_list = ["Degree", "PageRank", "LaplacianCentrality", "BetweennessCentrality", "EffectiveSize"]
 
-log_df = log_df.append(dict(optimal=1366600, average=1489999), ignore_index=True)
+df = pd.DataFrame()
+for policy in policy_list:
+    with open(policy + ".log", "r") as fd:
+        optimize_trace = []
+        lines = fd.readlines()
+        for line in lines:
+            if re.match("traffic", line):
+                optimize_trace.append(int(line.split(":")[1]))
+        
+        print(optimize_trace)
+    se = pd.Series(optimize_trace, dtype=int, name=policy)
+    print(se)
+    df = pd.concat([df, se], axis=1, ignore_index=True)
+    #df[policy] = optimize_trace
+    print(df)
 
-print(log_df)
+print(df)
+df.columns = policy_list
+print(df)
+df.to_csv("optimize_trace.csv")

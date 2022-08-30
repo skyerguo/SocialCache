@@ -1,0 +1,444 @@
+
+
+
+===================== round =====================
+start :2022-08-30 10:07:16
+end   :2022-08-30 18:47:52
+optimize traffic : 4061104
+optimize params  : [1, 100, 1]
+
+------ [step1] ------
+params  :[1, 100, 0]
+traffic :6412821
+
+------ [step2] ------
+params  :[2, 100, 0]
+traffic :6172038
+
+------ [step3] ------
+params  :[3, 100, 0]
+traffic :5956881
+
+------ [step4] ------
+params  :[4, 100, 0]
+traffic :5810340
+
+------ [step5] ------
+params  :[5, 100, 0]
+traffic :5671680
+
+------ [step6] ------
+params  :[6, 100, 0]
+traffic :5550876
+
+------ [step7] ------
+params  :[7, 100, 0]
+traffic :5433390
+
+------ [step8] ------
+params  :[8, 100, 0]
+traffic :5333825
+
+------ [step9] ------
+params  :[9, 100, 0]
+traffic :5243578
+
+------ [step10] ------
+params  :[10, 100, 0]
+traffic :5166258
+
+------ [step11] ------
+params  :[11, 100, 0]
+traffic :5094137
+
+------ [step12] ------
+params  :[12, 100, 0]
+traffic :5031176
+
+------ [step13] ------
+params  :[13, 100, 0]
+traffic :4973545
+
+------ [step14] ------
+params  :[14, 100, 0]
+traffic :4922240
+
+------ [step15] ------
+params  :[15, 100, 0]
+traffic :4867115
+
+------ [step16] ------
+params  :[16, 100, 0]
+traffic :4820390
+
+------ [step17] ------
+params  :[17, 100, 0]
+traffic :4774663
+
+------ [step18] ------
+params  :[18, 100, 0]
+traffic :4736041
+
+------ [step19] ------
+params  :[19, 100, 0]
+traffic :4703948
+
+------ [step20] ------
+params  :[20, 100, 0]
+traffic :4669271
+
+------ [step21] ------
+params  :[21, 100, 0]
+traffic :4636127
+
+------ [step22] ------
+params  :[22, 100, 0]
+traffic :4612429
+
+------ [step23] ------
+params  :[23, 100, 0]
+traffic :4580399
+
+------ [step24] ------
+params  :[24, 100, 0]
+traffic :4553639
+
+------ [step25] ------
+params  :[25, 100, 0]
+traffic :4525688
+
+------ [step26] ------
+params  :[26, 100, 0]
+traffic :4505748
+
+------ [step27] ------
+params  :[27, 100, 0]
+traffic :4489398
+
+------ [step28] ------
+params  :[28, 100, 0]
+traffic :4472002
+
+------ [step29] ------
+params  :[29, 100, 0]
+traffic :4454660
+
+------ [step30] ------
+params  :[30, 100, 0]
+traffic :4441946
+
+------ [step31] ------
+params  :[31, 100, 0]
+traffic :4421952
+
+------ [step32] ------
+params  :[32, 100, 0]
+traffic :4406263
+
+------ [step33] ------
+params  :[33, 100, 0]
+traffic :4392202
+
+------ [step34] ------
+params  :[34, 100, 0]
+traffic :4379137
+
+------ [step35] ------
+params  :[35, 100, 0]
+traffic :4365107
+
+------ [step36] ------
+params  :[36, 100, 0]
+traffic :4354475
+
+------ [step37] ------
+params  :[37, 100, 0]
+traffic :4342874
+
+------ [step38] ------
+params  :[38, 100, 0]
+traffic :4332593
+
+------ [step39] ------
+params  :[39, 100, 0]
+traffic :4324121
+
+------ [step40] ------
+params  :[40, 100, 0]
+traffic :4315052
+
+------ [step41] ------
+params  :[41, 100, 0]
+traffic :4306543
+
+------ [step42] ------
+params  :[42, 100, 0]
+traffic :4298297
+
+------ [step43] ------
+params  :[43, 100, 0]
+traffic :4285704
+
+------ [step44] ------
+params  :[44, 100, 0]
+traffic :4277903
+
+------ [step45] ------
+params  :[45, 100, 0]
+traffic :4267744
+
+------ [step46] ------
+params  :[46, 100, 0]
+traffic :4262346
+
+------ [step47] ------
+params  :[47, 100, 0]
+traffic :4254493
+
+------ [step48] ------
+params  :[48, 100, 0]
+traffic :4249952
+
+------ [step49] ------
+params  :[49, 100, 0]
+traffic :4242863
+
+------ [step50] ------
+params  :[50, 100, 0]
+traffic :4236521
+
+------ [step51] ------
+params  :[51, 100, 0]
+traffic :4227816
+
+------ [step52] ------
+params  :[52, 100, 0]
+traffic :4223538
+
+------ [step53] ------
+params  :[53, 100, 0]
+traffic :4218533
+
+------ [step54] ------
+params  :[54, 100, 0]
+traffic :4212389
+
+------ [step55] ------
+params  :[55, 100, 0]
+traffic :4206717
+
+------ [step56] ------
+params  :[56, 100, 0]
+traffic :4200513
+
+------ [step57] ------
+params  :[57, 100, 0]
+traffic :4195683
+
+------ [step58] ------
+params  :[58, 100, 0]
+traffic :4189561
+
+------ [step59] ------
+params  :[59, 100, 0]
+traffic :4184283
+
+------ [step60] ------
+params  :[60, 100, 0]
+traffic :4181048
+
+------ [step61] ------
+params  :[61, 100, 0]
+traffic :4175198
+
+------ [step62] ------
+params  :[62, 100, 0]
+traffic :4170157
+
+------ [step63] ------
+params  :[63, 100, 0]
+traffic :4166562
+
+------ [step64] ------
+params  :[64, 100, 0]
+traffic :4161428
+
+------ [step65] ------
+params  :[65, 100, 0]
+traffic :4157946
+
+------ [step66] ------
+params  :[66, 100, 0]
+traffic :4153726
+
+------ [step67] ------
+params  :[67, 100, 0]
+traffic :4148092
+
+------ [step68] ------
+params  :[68, 100, 0]
+traffic :4144519
+
+------ [step69] ------
+params  :[69, 100, 0]
+traffic :4141351
+
+------ [step70] ------
+params  :[70, 100, 0]
+traffic :4136767
+
+------ [step71] ------
+params  :[71, 100, 0]
+traffic :4130666
+
+------ [step72] ------
+params  :[72, 100, 0]
+traffic :4128224
+
+------ [step73] ------
+params  :[73, 100, 0]
+traffic :4125222
+
+------ [step74] ------
+params  :[74, 100, 0]
+traffic :4121008
+
+------ [step75] ------
+params  :[75, 100, 0]
+traffic :4119293
+
+------ [step76] ------
+params  :[76, 100, 0]
+traffic :4117878
+
+------ [step77] ------
+params  :[77, 100, 0]
+traffic :4116081
+
+------ [step78] ------
+params  :[78, 100, 0]
+traffic :4113946
+
+------ [step79] ------
+params  :[79, 100, 0]
+traffic :4111328
+
+------ [step80] ------
+params  :[80, 100, 0]
+traffic :4108992
+
+------ [step81] ------
+params  :[81, 100, 0]
+traffic :4108281
+
+------ [step82] ------
+params  :[82, 100, 0]
+traffic :4105346
+
+------ [step83] ------
+params  :[83, 100, 0]
+traffic :4105061
+
+------ [step84] ------
+params  :[84, 100, 0]
+traffic :4104171
+
+------ [step85] ------
+params  :[85, 100, 0]
+traffic :4102814
+
+------ [step86] ------
+params  :[86, 100, 0]
+traffic :4100125
+
+------ [step87] ------
+params  :[87, 100, 0]
+traffic :4097639
+
+------ [step88] ------
+params  :[88, 100, 0]
+traffic :4096771
+
+------ [step89] ------
+params  :[89, 100, 0]
+traffic :4092680
+
+------ [step90] ------
+params  :[90, 100, 0]
+traffic :4088520
+
+------ [step91] ------
+params  :[91, 100, 0]
+traffic :4085889
+
+------ [step92] ------
+params  :[92, 100, 0]
+traffic :4084568
+
+------ [step93] ------
+params  :[93, 100, 0]
+traffic :4083968
+
+------ [step94] ------
+params  :[94, 100, 0]
+traffic :4082452
+
+------ [step95] ------
+params  :[95, 100, 0]
+traffic :4080892
+
+------ [step96] ------
+params  :[96, 100, 0]
+traffic :4080350
+
+------ [step97] ------
+params  :[97, 100, 0]
+traffic :4078022
+
+------ [step98] ------
+params  :[98, 100, 0]
+traffic :4077823
+
+------ [step99] ------
+params  :[99, 100, 0]
+traffic :4075382
+
+------ [step100] ------
+params  :[100, 100, 0]
+traffic :4072657
+
+------ [step101] ------
+params  :[101, 100, 0]
+traffic :4071865
+
+------ [step102] ------
+params  :[102, 100, 0]
+traffic :4070260
+
+------ [step103] ------
+params  :[102, 100, 1]
+traffic :4069985
+
+------ [step104] ------
+params  :[103, 100, 1]
+traffic :4068386
+
+------ [step105] ------
+params  :[104, 100, 1]
+traffic :4067524
+
+------ [step106] ------
+params  :[105, 100, 1]
+traffic :4065095
+
+------ [step107] ------
+params  :[106, 100, 1]
+traffic :4064393
+
+------ [step108] ------
+params  :[107, 100, 1]
+traffic :4063167
+
+------ [step109] ------
+params  :[108, 100, 1]
+traffic :4061104

@@ -176,7 +176,7 @@ class Main:
                 pickle.dump(laplacian_centrality_metrics, open(curr_social_metric_path, "wb"))
 
         elif caching_policy == "EffectiveSize":
-            curr_social_metric_path = self.social_metric_dict_path + 'LaplacianCentrality.pkl'
+            curr_social_metric_path = self.social_metric_dict_path + 'EffectiveSize.pkl'
             if os.path.exists(curr_social_metric_path):
                 effective_size_metrics = pickle.load(open(curr_social_metric_path, "rb"))
             else:
