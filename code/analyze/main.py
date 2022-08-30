@@ -37,6 +37,7 @@ config_path = experiment_path + '/config.json'
 config_json = json.load(open(config_path, 'r'))
 
 def get_media_size():
+    ## all = insert_all * 2 + insert[level_3];
     total_media_size = 0
     media_size_each_level = [0 for _ in range(3)]
     for ip_address in os.listdir(media_size_path):
