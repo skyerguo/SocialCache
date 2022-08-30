@@ -138,6 +138,7 @@ class hill_climb_optimize():
         log_str += "="*21 + " round " + "="*21 + "\n"
         log_str += "start :" + self.start_time + "\n"
         log_str += "end   :" + self.end_time   + "\n"
+        log_str += "cache policy     :" + str(self.json_config["caching_policy"]) + "\n"
         log_str += "optimize traffic : " + str(self.optimal_altitude) + "\n"
         log_str += "optimize params  : " + str([round(x, 2) for x in self.optimal_config["params"]]) + "\n"
 
