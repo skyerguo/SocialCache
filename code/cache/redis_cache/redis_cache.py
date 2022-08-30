@@ -72,6 +72,7 @@ class Redis_cache:
         self.result_path = result_path
         os.system('mkdir -p ' + self.result_path + 'mediaSize/' + self.host_ip)
         self.file_insert_media_size = open(self.result_path + 'mediaSize/' + self.host_ip + '/insert_all.txt', 'a')
+        self.file_receive_media_size = open(self.result_path + 'mediaSize/' + self.host_ip + '/receive_all.txt', 'a')
 
     def __del__(self):
         '''程序结束后，自动关闭连接，释放资源'''
@@ -180,6 +181,8 @@ class Redis_cache:
             need_uplift: True表示向上传播，False表示向下传播
         '''
 
+        print(redis_object['media_size'], file=self.file_receive_media_size)
+        
         if use_LRU_social:
             lru_social_parameter_c = self.cache_size
             lru_social_parameter_s = self.get_lru_social_parameter_s()
