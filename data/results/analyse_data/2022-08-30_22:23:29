@@ -1,0 +1,21 @@
+caching_policy:  BetweennessCentrality
+cache_size_level_3:  10
+cache_size_level_2:  100
+cache_size_level_1:  1000000
+parameters:  [1, 270, 0]
+dataset:  myk4
+------
+三级CDN缓存命中率:  0.05808045008537178
+二级CDN缓存命中率:  0.29324968005270613
+一级CDN缓存命中率:  1.0
+总缓存命中率:  0.38349124004955176
+二三级缓存命中率:  0.17214825235572814
+------
+total_media_size:  407055872
+insert_all_media_size:  197624956
+level 1; media szie: 83257234
+level 2; media szie: 197624956
+level 3; media szie: 126173682
+------
+time_duration:  96.965176
+------

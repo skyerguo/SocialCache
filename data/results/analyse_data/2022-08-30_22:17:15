@@ -1,0 +1,21 @@
+caching_policy:  LaplacianCentrality
+cache_size_level_3:  10
+cache_size_level_2:  100
+cache_size_level_1:  1000000
+parameters:  [1, 230, 0]
+dataset:  myk4
+------
+三级CDN缓存命中率:  0.0786320899814099
+二级CDN缓存命中率:  0.27646331337927993
+一级CDN缓存命中率:  1.0
+总缓存命中率:  0.3863970622433571
+二三级缓存命中率:  0.17349957469793809
+------
+total_media_size:  398426694
+insert_all_media_size:  193310367
+level 1; media szie: 83137695
+level 2; media szie: 193310367
+level 3; media szie: 121978632
+------
+time_duration:  99.048017
+------

@@ -3,3 +3,4 @@
 *.pyc
 *__pycache__/*
 code/main/config.json
+code/main/config_tmp.json

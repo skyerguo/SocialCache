@@ -1,7 +1,5 @@
 import logging
 import json
-import redis
-import pickle
 import queue
 import subprocess
 from collections import OrderedDict, defaultdict
@@ -31,17 +29,7 @@ class Redis_cache:
         self.db=db
 
         '''连接池'''
-        pool = redis.ConnectionPool(
-            host=self.redis_ip,
-            port=6379,
-            db=db,
-            password='gtcA4010',
-            max_connections=None  # 连接池最大值，默认2**31
-        )
-        self.redis = redis.Redis(connection_pool=pool)
-
-        '''实验开始，清空该数据库'''
-        self.redis.flushdb()
+        self.redis_fake = {}
 
         '''设置优先队列'''
         self.use_priority_queue = use_priority_queue
@@ -74,10 +62,6 @@ class Redis_cache:
         self.file_insert_media_size = open(self.result_path + 'mediaSize/' + self.host_ip + '/insert_all.txt', 'a')
         self.file_receive_media_size = open(self.result_path + 'mediaSize/' + self.host_ip + '/receive_all.txt', 'a')
 
-    def __del__(self):
-        '''程序结束后，自动关闭连接，释放资源'''
-        self.redis.connection_pool.disconnect()
-
     def remove_cache_node(self, given_key=''):
         '''删掉权值最小的cache数据'''
 
@@ -91,23 +75,18 @@ class Redis_cache:
                 a = self.priority_queue.get() ## 取出并在priority_queue中去掉该元素
                 remove_key = a[1]
                 
-                # print("!!!", remove_key, a)
-                while not self.priority_queue.empty() and (not self.redis.exists(remove_key) or self.hash_table[remove_key] != a[0]):
+                while not self.priority_queue.empty() and (not remove_key in self.redis_fake.keys() or self.hash_table[remove_key] != a[0]):
                     a = self.priority_queue.get() ## 取出并在priority_queue中去掉该元素
                     remove_key = a[1]
-                # for curr_key in self.redis.keys():
-                #     print(curr_key, pickle.loads(self.redis.get(curr_key)))
-                # print("-----------")
             else:
                 min_value = 1e9
                 remove_key = -1
-                for curr_key in self.redis.keys():
-                    curr_value = pickle.loads(self.redis.get(curr_key))['sort_value']
+                for curr_key in self.redis_fake.keys():
+                    curr_value = self.redis_fake[curr_key]['sort_value']
                     if curr_value < min_value:
                         min_value = curr_value
                         remove_key = curr_key
-        # print("remove_key: ", remove_key)
-        self.redis.delete(remove_key)
+        del self.redis_fake[remove_key]
 
         if self.picture_root_path != '/dev/null': ## 启用HTTP了
             util.delete_picture(host=self.host, picture_path=self.picture_root_path+str(remove_key)) #在硬盘中删除当前文件，保证硬盘不会存太多垃圾文件
@@ -120,7 +99,7 @@ class Redis_cache:
             '''若数据已存在，表示命中一次，需要把数据移到缓存队列末端'''
             if picture_hash in self.LRUcache:
                 self.LRUcache.move_to_end(picture_hash)
-            elif self.redis.dbsize() >= self.cache_size:
+            elif len(self.redis_fake) >= self.cache_size:
                 '''若缓存已满，则需要淘汰最早没有使用的数据'''
                 self.remove_cache_node(given_key=next(iter(self.LRUcache)))
                 self.LRUcache.popitem(last=False)
@@ -128,28 +107,15 @@ class Redis_cache:
 
         else:
             '''如果当前cache的空间使用完了，且不是LRU，则按照内在的权值替换'''
-            if self.redis.dbsize() >= self.cache_size:
-                if not self.redis.get(picture_hash) and self.redis.dbsize() == self.cache_size:
-                    # print("xx before xx", self.redis.dbsize())
+            if len(self.redis_fake) >= self.cache_size:
+                if picture_hash not in self.redis_fake.keys() and len(self.redis_fake) == self.cache_size:
                     self.remove_cache_node()
-                    # print("xx after xx", self.redis.dbsize())
-                # else:
-                #     if self.redis.get(picture_hash):
-                #         print("????", pickle.loads(self.redis.get(picture_hash)), not self.redis.get(picture_hash), self.redis.dbsize(), self.cache_size)
-                #     else:
-                #         print(not self.redis.get(picture_hash), self.redis.dbsize(), self.cache_size)
         
         '''插入redis数据库'''
-        # print("!!before!!", self.redis.dbsize(), self.cache_size)
-        # for curr_key in self.redis.keys():
-        #     print(curr_key, pickle.loads(self.redis.get(curr_key)))
-        self.redis.set(picture_hash, pickle.dumps(redis_object))
-        # print("!!after!!", self.redis.dbsize(), self.cache_size)
-        # for curr_key in self.redis.keys():
-        #     print(curr_key, pickle.loads(self.redis.get(curr_key)))
+        self.redis_fake[picture_hash] = redis_object
         '''留个检测，以防出现bug'''
-        if self.redis.dbsize() > self.cache_size:
-            print("Error to check!!!", picture_hash, pickle.loads(self.redis.get(picture_hash)))
+        if len(self.redis_fake) > self.cache_size:
+            print("Error to check!!!", picture_hash, self.redis_fake[picture_hash])
             exit(0)
 
         '''如有有使用优先队列，每次插入时需要维护优先队列。使用第一关键字为sort_value，第二关键字为timestamp。保证timestamp互不相同，从而保证了key的唯一'''
@@ -159,19 +125,19 @@ class Redis_cache:
         
     def get_lru_social_parameter_s(self) -> int:
         res = 0
-        for curr_key in self.redis.keys():
-            curr_value = pickle.loads(self.redis.get(curr_key))['sort_value']
+        for curr_key in self.redis_fake.keys():
+            curr_value = self.redis_fake[curr_key]['sort_value']
             if curr_value > self.cache_size:
                 res += 1
         return res
 
     def decrement_lru_social(self, lowerest_threshold=0):
-        for curr_key in self.redis.keys():
-            temp_redis_object = pickle.loads(self.redis.get(curr_key))
+        for curr_key in self.redis_fake.keys():
+            temp_redis_object = self.redis_fake[curr_key]
             curr_value = int(temp_redis_object['sort_value'])
             if curr_value > lowerest_threshold:
                 temp_redis_object['sort_value'] = curr_value - 1
-                self.redis.set(curr_key, pickle.dumps(temp_redis_object))
+                self.redis_fake[curr_key] = temp_redis_object
                 '''lru-social就不要管priority_queue了'''
                 # if self.use_priority_queue:
                     # self.priority_queue.put((temp_redis_object['sort_value'], int.from_bytes(curr_key, byteorder='big'))) 
@@ -226,15 +192,10 @@ class Redis_cache:
             print(redis_object['media_size'], file=self.higher_cache_redis.file_insert_media_size)
 
     def find(self, picture_hash, user_host, current_timestamp, need_update_cache=False, config_timestamp=1, use_LRU_social=False):
-        redis_object = self.redis.get(name=picture_hash)
-        if redis_object:
+        
+        if picture_hash in self.redis_fake.keys():
             '''如果找到了'''
-            # if self.cache_level == 3:
-            #     for curr_key in self.redis.keys():
-            #         print(curr_key, pickle.loads(self.redis.get(curr_key)))
-            #     print(self.cache_size)
-            #     print('-------')
-            redis_object = pickle.loads(redis_object)
+            redis_object = self.redis_fake[picture_hash]
             result_level = self.cache_level
             new_redis_object= copy.deepcopy(redis_object)
 
