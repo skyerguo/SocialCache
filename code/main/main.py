@@ -188,19 +188,24 @@ class Main:
                 pickle.dump(effective_size_metrics, open(curr_social_metric_path, "wb"))
 
         elif caching_policy == "LRU-social":
-            degree_dict = self.make_trace.G.degree()
-            parameter_k = np.mean(list(degree_dict.values()))
-            epidemic_threshold = parameter_k / (parameter_k * parameter_k - parameter_k)
-            print("epidemic_threshold: ", epidemic_threshold)
+            curr_social_metric_path = self.social_metric_dict_path + 'LRUSocial.pkl'
+            if os.path.exists(curr_social_metric_path):
+                spreading_power_list = pickle.load(open(curr_social_metric_path, "rb"))
+            else:
+                degree_dict = self.make_trace.G.degree()
+                parameter_k = np.mean(list(degree_dict.values()))
+                epidemic_threshold = parameter_k / (parameter_k * parameter_k - parameter_k)
+                print("epidemic_threshold: ", epidemic_threshold)
 
-            adj_matrix = util.generate_adj_matrix_graph("data/traces/" + self.make_trace.dir_name + "/relations.txt", len(self.make_trace.G.nodes))
-            networkx_graph = networkx.DiGraph(adj_matrix)
-            
-            spreading_power_list = [0 for _ in range(len(self.make_trace.G.nodes))]
-            for i in range(len(self.make_trace.G.nodes)):
-                spreading_power_list[i] = SIR.SIR_network(networkx_graph, [i] , epidemic_threshold, 1, 20) + 1
-            # print("degree_dict: ", degree_dict)
-            print("spreading_power_list: ", spreading_power_list)
+                adj_matrix = util.generate_adj_matrix_graph("data/traces/" + self.make_trace.dir_name + "/relations.txt", len(self.make_trace.G.nodes))
+                networkx_graph = networkx.DiGraph(adj_matrix)
+                
+                spreading_power_list = [0 for _ in range(len(self.make_trace.G.nodes))]
+                for i in range(len(self.make_trace.G.nodes)):
+                    print(i)
+                    spreading_power_list[i] = SIR.SIR_network(networkx_graph, [i] , epidemic_threshold, 1, 20) + 1
+                print("spreading_power_list: ", spreading_power_list)
+                pickle.dump(spreading_power_list, open(curr_social_metric_path, "wb"))
 
         f_in = open("data/traces/" + self.trace_dir + "/all_timeline.txt", "r")
         f_out_find = open(self.result_path + 'find_log.txt', 'w')
