@@ -1,0 +1,21 @@
+caching_policy:  PageRank
+cache_size_level_3:  10
+cache_size_level_2:  100
+cache_size_level_1:  1000000
+parameters:  [1, 680, 0]
+dataset:  myk4
+------
+三级CDN缓存命中率:  0.08378916959783873
+二级CDN缓存命中率:  0.2800416508529667
+一级CDN缓存命中率:  1.0
+总缓存命中率:  0.3882221976845091
+二三级缓存命中率:  0.17762469435661923
+------
+total_media_size:  394841358
+insert_all_media_size:  191517699
+level 1; media szie: 82228660
+level 2; media szie: 191517699
+level 3; media szie: 121094999
+------
+time_duration:  94.180218
+------
