@@ -79,10 +79,11 @@ class Redis_cache:
                     a = self.priority_queue.get() ## 取出并在priority_queue中去掉该元素
                     remove_key = a[1]
             else:
-                min_value = 1e9
+                min_value = 1e18
                 remove_key = -1
                 for curr_key in self.redis_fake.keys():
                     curr_value = self.redis_fake[curr_key]['sort_value']
+                    # print(curr_value)
                     if curr_value < min_value:
                         min_value = curr_value
                         remove_key = curr_key
