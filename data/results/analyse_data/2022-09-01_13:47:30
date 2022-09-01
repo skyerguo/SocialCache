@@ -1,0 +1,21 @@
+caching_policy:  FIFO
+cache_size_level_3:  10
+cache_size_level_2:  100
+cache_size_level_1:  1000000
+parameters:  [1, 100, 0]
+dataset:  myk3
+------
+三级CDN缓存命中率:  0.23803332683265077
+二级CDN缓存命中率:  0.35795131384370377
+一级CDN缓存命中率:  1.0
+总缓存命中率:  0.4442102223505631
+二三级缓存命中率:  0.2898921451674394
+------
+total_media_size:  13683042
+insert_all_media_size:  6641674
+level 1; media szie: 2706394
+level 2; media szie: 6641674
+level 3; media szie: 4334974
+------
+time_duration:  3.310366
+------

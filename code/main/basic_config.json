@@ -1,1 +1,1 @@
-{"trace_dir": "myk4", "caching_policy": "PageRank", "use_http_server": false, "use_priority_queue": true, "cache_size_level_3": 10, "cache_size_level_2": 100, "cache_size_level_1": 1000000, "max_trace_len": null, "mode": "normal", "params": [1, 100, 0]}
+{"trace_dir": "naive", "caching_policy": "PageRank", "use_http_server": false, "use_priority_queue": true, "cache_size_level_3": 10, "cache_size_level_2": 100, "cache_size_level_1": 1000000, "max_trace_len": null, "mode": "normal", "params": [1, 680, 0]}

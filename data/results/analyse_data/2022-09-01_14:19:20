@@ -1,0 +1,21 @@
+caching_policy:  LRU-social
+cache_size_level_3:  10
+cache_size_level_2:  100
+cache_size_level_1:  1000000
+parameters:  [1, 680, 0]
+dataset:  myk3
+------
+三级CDN缓存命中率:  0.1295586036533836
+二级CDN缓存命中率:  0.17971122728404282
+一级CDN缓存命中率:  1.0
+总缓存命中率:  0.3869288169699002
+二三级缓存命中率:  0.15289797147789017
+------
+total_media_size:  16517546
+insert_all_media_size:  8058926
+level 1; media szie: 3643330
+level 2; media szie: 8058926
+level 3; media szie: 4815290
+------
+time_duration:  37.336257
+------

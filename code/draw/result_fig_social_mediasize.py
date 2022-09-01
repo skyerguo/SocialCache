@@ -32,20 +32,14 @@ if __name__ == '__main__':
     df = pd.DataFrame.from_dict(raw_data)
     plt.rcParams["font.family"] = "Times New Roman"
     plt.rcParams["font.size"] = 14
-    # print(df)
+
     g = sns.barplot(x='Cache Level', y='Media File Size (Bytes)', hue='OSN Graph Metric', data=df)
     g.spines['top'].set_visible(False)
     g.spines['right'].set_visible(False)
 
-    # Define some hatches
     hatches = ['--', 'xx', '**', '\\\\', 'oo']
-    # hatches = hatches[:4]
-    # Loop over the bars
     for i,thisbar in enumerate(g.patches):
-        # Set a different hatch for each bar
         thisbar.set_hatch(hatches[math.floor(i/4)])
     g.legend(loc='upper right', frameon=False, title=None)
-    # for i,thisbar in enumerate(g.legends):
-        # print(i)
 
     plt.savefig(result_path, dpi=600, bbox_inches='tight')
