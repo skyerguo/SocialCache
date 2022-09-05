@@ -233,7 +233,7 @@ class Main:
             if current_type == "post":
                 post_id = int(line.split('+')[4])
                 user_id = int(line.split('+')[3])
-                media_size = float(line.split('+')[1])
+                media_size = int(line.split('+')[1])
 
                 if caching_policy == 'RAND':
                     sort_value = random.randint(0, 1000)
@@ -243,8 +243,8 @@ class Main:
 
                 elif caching_policy == 'PageRank':
                     sort_value = current_timestamp + \
-                                media_size * CONFIG['params'][0] + \
-                                int(nearest_distance) * CONFIG['params'][1] + \
+                                int(nearest_distance) * CONFIG['params'][0] + \
+                                media_size * CONFIG['params'][1] + \
                                 page_rank_metrics[str(user_id)] * CONFIG['params'][2]
                     # print(CONFIG['params'][0], CONFIG['params'][1], CONFIG['params'][2])
 
@@ -306,9 +306,9 @@ class Main:
                 # user_id = int(line.split('+')[3])
                 '''往第三层级查询，后续的调整都由redis内部完成，这里先假设只有一个user节点'''
                 if caching_policy == "LRU-social":
-                    find_result = self.build_network.level_3_host[selected_level_3_id].redis_cache.find(picture_hash=post_id, user_host=self.build_network.user_host[0], current_timestamp=current_timestamp, need_update_cache=need_update_cache, config_timestamp=CONFIG['params'][0], use_LRU_social=True)
+                    find_result = self.build_network.level_3_host[selected_level_3_id].redis_cache.find(picture_hash=post_id, user_host=self.build_network.user_host[0], current_timestamp=current_timestamp, need_update_cache=need_update_cache, config_timestamp=1, use_LRU_social=True)
                 else:
-                    find_result = self.build_network.level_3_host[selected_level_3_id].redis_cache.find(picture_hash=post_id, user_host=self.build_network.user_host[0], current_timestamp=current_timestamp, need_update_cache=need_update_cache, config_timestamp=CONFIG['params'][0], use_LRU_social=False)
+                    find_result = self.build_network.level_3_host[selected_level_3_id].redis_cache.find(picture_hash=post_id, user_host=self.build_network.user_host[0], current_timestamp=current_timestamp, need_update_cache=need_update_cache, config_timestamp=1, use_LRU_social=False)
                 result_level = find_result[0]
                 
                 if self.if_debug:
