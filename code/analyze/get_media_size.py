@@ -30,8 +30,8 @@ for ip_address in os.listdir(media_size_path):
         for line in open(curr_path + file_name, 'r'):
             curr_media_size = line.strip()
             if curr_media_size:
-                total_media_size += int(curr_media_size)
-                media_size_each_level[curr_level] += int(curr_media_size)
+                total_media_size += float(curr_media_size)
+                media_size_each_level[curr_level] += float(curr_media_size)
 print(total_media_size)
 
 if args.detailOutput:
