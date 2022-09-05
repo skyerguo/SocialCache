@@ -203,7 +203,7 @@ class hill_climb_optimize():
 if __name__ == "__main__":
     optimize = hill_climb_optimize()
     optimize.hill_climb_specific_point([[1, 100, 0]])
-    #optimize.hill_climb()
+    optimize.hill_climb()
     optimize.visualize()
     optimize.savelog()
 
