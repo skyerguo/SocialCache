@@ -12,6 +12,8 @@ df = pd.DataFrame(test_data, columns=['Media Size (Bytes)'])
 
 if __name__ == '__main__':
     plt.rcParams["font.family"] = "Times New Roman"
+    plt.rcParams["font.size"] = 14 
+    plt.figure(figsize=(10, 6))
     g = sns.histplot(data=df, x="Media Size (Bytes)", element="step", log_scale=True)
     # g.set_xlim(1)
     g.spines['top'].set_visible(False)
