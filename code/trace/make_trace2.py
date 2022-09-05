@@ -169,7 +169,7 @@ class gen_trace_data:
                 user_postline_dict[curr_user_id].append(post_seq_num)
                 position_post_dict[row["location"]].append(post_seq_num)
                 item_line += "+%s+{'lat': '%.2f', 'lon': '%.2f'}+%d+%d+post"\
-                            %(str(row["media_size"] // 1024),\
+                            %(str(row["media_size"] / 1024),\
                             row["location"][0], row["location"][1],\
                             curr_user_id,\
                             post_seq_num)
