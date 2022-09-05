@@ -1,5 +1,6 @@
 import random
-import media_size_sample.media_size_sample as sp
+import argparse
+import code.util.media_size_sample.media_size_sample as sp
 import numpy as np
 import pandas as pd
 import networkx as nx
@@ -7,7 +8,7 @@ import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
 
 class gen_trace_data:
-    def __init__(self, edge_file="edges.dat", loc_file="loc.dat"):
+    def __init__(self, edge_file="edges.dat", loc_file="loc.dat", res_path="./"):
         # The number of clusters that users are divided into using the K-means algorithm
         self.cluster    = 7
 
@@ -22,6 +23,7 @@ class gen_trace_data:
         self.pub_ratio  = 0.05
         self.edge_file  = edge_file
         self.loc_file   = loc_file
+        self.res_path   = res_path
 
         self.media_size = sp.media_size_sample()
     
@@ -151,7 +153,7 @@ class gen_trace_data:
         for loc in self.locations:
             position_post_dict[loc] = []
 
-        fd = open("all_timeline.txt", "w+")
+        fd = open(self.res_path + "all_timeline.txt", "w+")
         post_seq_num = -1
         last_view_id = -1
         last_user_id = -1
@@ -228,12 +230,24 @@ class gen_trace_data:
         fd.close()
 
     def launch(self):
-        self.load_network(self.edge_file, draw=False)
+        self.load_network(self.edge_file, output_edge_filename = self.res_path + "relations.txt", draw=False)
         self.load_location(self.loc_file)
         self.build_user_df()
         self.build_user_activity()
         self.trans_trace2timeline()
     
 if __name__ == "__main__":
-    trace_data = gen_trace_data("./twitter_combined.txt", "../../data/static/user_country.csv")
+    argpar = argparse.ArgumentParser(description="Make trace data for the system.")
+    argpar.add_argument('-G', help="add 'big' to use full usernet")
+    args = argpar.parse_args()
+    print(type(args.G))
+    if args.G == 'big':
+        print("use big net")
+        usernet_filename = "./data/static/twitter_combined.txt"
+        res_path = "./data/traces/long_trace/"
+    else:
+        print("use litte net")
+        usernet_filename = "./data/static/twitter_single.txt"
+        res_path = "./data/traces/short_trace/"
+    trace_data = gen_trace_data(usernet_filename, "./data/static/user_country.csv", res_path)
     trace_data.launch()
