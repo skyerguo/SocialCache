@@ -233,7 +233,7 @@ class Main:
             if current_type == "post":
                 post_id = int(line.split('+')[4])
                 user_id = int(line.split('+')[3])
-                media_size = int(float(line.split('+')[1]))
+                media_size = float(line.split('+')[1])
 
                 if caching_policy == 'RAND':
                     sort_value = random.randint(0, 1000)
@@ -242,9 +242,10 @@ class Main:
                     sort_value = current_timestamp
 
                 elif caching_policy == 'PageRank':
-                    sort_value = current_timestamp * CONFIG['params'][0] + \
-                                page_rank_metrics[str(user_id)] * media_size * CONFIG['params'][1] + \
-                                int(nearest_distance) * CONFIG['params'][2]
+                    sort_value = current_timestamp + \
+                                media_size * CONFIG['params'][0] + \
+                                int(nearest_distance) * CONFIG['params'][1] + \
+                                page_rank_metrics[str(user_id)] * CONFIG['params'][2]
                     # print(CONFIG['params'][0], CONFIG['params'][1], CONFIG['params'][2])
 
                 elif caching_policy == "Degree":
