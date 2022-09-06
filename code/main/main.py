@@ -35,6 +35,7 @@ class Main:
         self.use_http_server = use_http_server
 
         self.social_metric_dict_path = 'data/social_metric_dict/' + self.trace_dir + '/'
+        os.system("mkdir -p %s"%(self.social_metric_dict_path))
 
     def start_http_server(self, host, db, host_ip, temp_picture_path):
         '''
@@ -233,7 +234,7 @@ class Main:
             if current_type == "post":
                 post_id = int(line.split('+')[4])
                 user_id = int(line.split('+')[3])
-                media_size = int(line.split('+')[1])
+                media_size = float(line.split('+')[1])
 
                 if caching_policy == 'RAND':
                     sort_value = random.randint(0, 1000)
@@ -349,22 +350,22 @@ class Main:
                 for eth_port in range(1): # 对应自己的switch
                     util.calculate_flow(host=self.build_network.level_1_host[level_1_host_id], eth_name='a%s-eth%s'%(str(level_1_host_id), str(eth_port)), flow_direction='TX', result_path=self.result_path+'flow/'+self.build_network.level_1_host_ip[level_1_host_id])
 
-        '''分析'''
-        print('缓存策略： *** %s ***'%(caching_policy))
-        if self.find_success_number[3] + self.find_fail_number[3] > 0:
-            print('三级CDN缓存命中率：', self.find_success_number[3] / (self.find_success_number[3] + self.find_fail_number[3]))
-        else:
-            print('未经过三级CDN缓存')
+        # '''分析'''
+        # print('缓存策略： *** %s ***'%(caching_policy))
+        # if self.find_success_number[3] + self.find_fail_number[3] > 0:
+        #     print('三级CDN缓存命中率：', self.find_success_number[3] / (self.find_success_number[3] + self.find_fail_number[3]))
+        # else:
+        #     print('未经过三级CDN缓存')
 
-        if self.find_success_number[2] + self.find_fail_number[2] > 0:
-            print('二级CDN缓存命中率：', self.find_success_number[2] / (self.find_success_number[2] + self.find_fail_number[2]))
-        else:
-            print('未经过二级CDN缓存')
+        # if self.find_success_number[2] + self.find_fail_number[2] > 0:
+        #     print('二级CDN缓存命中率：', self.find_success_number[2] / (self.find_success_number[2] + self.find_fail_number[2]))
+        # else:
+        #     print('未经过二级CDN缓存')
             
-        if self.find_success_number[1] + self.find_fail_number[1] > 0:
-            print('一级CDN缓存命中率：', self.find_success_number[1] / (self.find_success_number[1] + self.find_fail_number[1]))
-        else:
-            print('未经过一级CDN缓存')
+        # if self.find_success_number[1] + self.find_fail_number[1] > 0:
+        #     print('一级CDN缓存命中率：', self.find_success_number[1] / (self.find_success_number[1] + self.find_fail_number[1]))
+        # else:
+        #     print('未经过一级CDN缓存')
 
     def run(self, caching_policy):
         self.main(caching_policy=caching_policy)

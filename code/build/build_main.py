@@ -47,14 +47,14 @@ class Build_network:
 
         '''获得本机的IP地址，作为redis_ip，并获得redis_ip的前缀'''
         # self.redis_ip = "128.105.145.13"
-        ret = subprocess.Popen("ifconfig eno1 | grep inet | awk '{print $2}' | cut -f 2 -d ':'",shell=True,stdout=subprocess.PIPE)
-        self.redis_ip = ret.stdout.read().decode("utf-8").strip('\n')
-        ret.stdout.close()
-        print("redis_ip: ", self.redis_ip)
+        # ret = subprocess.Popen("ifconfig eno1 | grep inet | awk '{print $2}' | cut -f 2 -d ':'",shell=True,stdout=subprocess.PIPE)
+        # self.redis_ip = ret.stdout.read().decode("utf-8").strip('\n')
+        # ret.stdout.close()
+        # print("redis_ip: ", self.redis_ip)
 
-        self.redis_ip_subnet = str(self.redis_ip.split('.')[0]) + '.' + \
-                                str(self.redis_ip.split('.')[1]) + '.' + \
-                                str(self.redis_ip.split('.')[2]) + '.0' + '/24'
+        # self.redis_ip_subnet = str(self.redis_ip.split('.')[0]) + '.' + \
+        #                         str(self.redis_ip.split('.')[1]) + '.' + \
+        #                         str(self.redis_ip.split('.')[2]) + '.0' + '/24'
 
         self.net = Mininet( topo=None,
             build=False,

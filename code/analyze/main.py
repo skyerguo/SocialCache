@@ -122,10 +122,10 @@ if __name__ == '__main__':
         sys.stdout = f_out
         pass
     print("caching_policy: ", config_json['caching_policy'])
-    print("cache_size_level_3: ", config_json['cache_size_level_3'])
-    print("cache_size_level_2: ", config_json['cache_size_level_2'])
-    print("cache_size_level_1: ", config_json['cache_size_level_1'])
     if args.parameters:
+        print("cache_size_level_3: ", config_json['cache_size_level_3'])
+        print("cache_size_level_2: ", config_json['cache_size_level_2'])
+        print("cache_size_level_1: ", config_json['cache_size_level_1'])
         print("parameters: ", config_json['params'])
     if args.dataset:
         print("dataset: ", config_json['trace_dir'])
