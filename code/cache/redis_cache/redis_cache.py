@@ -85,13 +85,32 @@ class Redis_cache:
         if self.picture_root_path != '/dev/null': ## 启用HTTP了
             util.delete_picture(host=self.host, picture_path=self.picture_root_path+str(remove_key)) #在硬盘中删除当前文件，保证硬盘不会存太多垃圾文件
 
-    def modify_cache_node(self, picture_hash, redis_object):
+    def get_lru_social_parameter_s(self) -> int:
+        res = 0
+        for curr_key in self.redis_fake.keys():
+            curr_value = self.redis_fake[curr_key]['sort_value']
+            if curr_value > self.cache_size:
+                res += 1
+        return res
+
+    def decrement_lru_label(self, lowerest_threshold=0):
+        print("self.cache_level: ", self.cache_level)
+        print(self.redis_fake)
+        print(lowerest_threshold)
+        
+        for curr_key in self.redis_fake.keys():
+            if self.redis_fake[curr_key]['sort_value'] > lowerest_threshold:
+                self.redis_fake[curr_key]['sort_value'] -= 1
+        print(self.redis_fake)
+        print("-------")
+
+    def modify_cache_node(self, picture_hash, redis_object, use_LRU_label):
         '''修改cache里面的节点，一般为插入或者调整'''
 
         '''如果是LRU，特殊处理'''
         if self.use_LRU_cache: 
-            '''若数据已存在，表示命中一次，需要把数据移到缓存队列末端'''
             if picture_hash in self.LRUcache:
+                '''若数据已存在，表示命中一次，需要把数据移到缓存队列末端'''
                 self.LRUcache.move_to_end(picture_hash)
             elif len(self.redis_fake) >= self.cache_size:
                 '''若缓存已满，则需要淘汰最早没有使用的数据'''
@@ -99,6 +118,14 @@ class Redis_cache:
                 self.LRUcache.popitem(last=False)
             self.LRUcache[picture_hash] = redis_object['sort_value']
 
+        elif use_LRU_label:
+            if picture_hash in self.redis_fake.keys(): 
+                '''Cache Hit'''
+                self.decrement_lru_label(lowerest_threshold=self.redis_fake[picture_hash]['sort_value'])
+            elif len(self.redis_fake) >= self.cache_size:
+                '''Cache Miss and Cahce is Full'''
+                self.remove_cache_node()
+                self.decrement_lru_label(lowerest_threshold=0)
         else:
             '''如果当前cache的空间使用完了，且不是LRU，则按照内在的权值替换'''
             if len(self.redis_fake) >= self.cache_size:
@@ -107,6 +134,7 @@ class Redis_cache:
         
         '''插入redis数据库'''
         self.redis_fake[picture_hash] = redis_object
+
         '''留个检测，以防出现bug'''
         if len(self.redis_fake) > self.cache_size:
             print("Error to check!!!", picture_hash, self.redis_fake[picture_hash])
@@ -116,21 +144,8 @@ class Redis_cache:
         if self.use_priority_queue:
             self.hash_table[picture_hash] = (redis_object['sort_value'], redis_object['timestamp'])
             self.priority_queue.put(((redis_object['sort_value'], redis_object['timestamp']), picture_hash))  
-        
-    def get_lru_social_parameter_s(self) -> int:
-        res = 0
-        for curr_key in self.redis_fake.keys():
-            curr_value = self.redis_fake[curr_key]['sort_value']
-            if curr_value > self.cache_size:
-                res += 1
-        return res
 
-    def decrement_lru_social(self, lowerest_threshold=0):
-        for curr_key in self.redis_fake.keys():
-            if self.redis_fake[curr_key]['sort_value'] > lowerest_threshold:
-                self.redis_fake[curr_key]['sort_value'] -= 1
-
-    def insert(self, picture_hash, redis_object, need_uplift=True, use_LRU_social=False, first_insert=False, lru_social_parameter_sp=0):
+    def insert(self, picture_hash, redis_object, need_uplift=True, use_LRU_label=False, use_LRU_social=False, first_insert=False, lru_social_parameter_sp=0):
         '''
             need_uplift: True表示向上传播，False表示向下传播
         '''
@@ -149,7 +164,10 @@ class Redis_cache:
                 if lru_social_parameter_c - lru_social_parameter_s > 0:
                     redis_object['sort_value'] = lru_social_parameter_c - lru_social_parameter_s
 
-        self.modify_cache_node(picture_hash=picture_hash, redis_object=redis_object)
+        elif use_LRU_label:
+            redis_object['sort_value'] = self.cache_size
+        
+        self.modify_cache_node(picture_hash=picture_hash, redis_object=redis_object, use_LRU_label=use_LRU_label)
 
         if need_uplift:
             '''需要逐层递归向上传播'''
@@ -166,7 +184,7 @@ class Redis_cache:
             if self.cache_level > 1:
                 '''递归调用，一层层上传'''
                 print(redis_object['media_size'], file=self.file_insert_media_size)
-                self.higher_cache_redis.insert(picture_hash=picture_hash, redis_object=redis_object, need_uplift=need_uplift, use_LRU_social=use_LRU_social, first_insert=first_insert, lru_social_parameter_sp=lru_social_parameter_sp) 
+                self.higher_cache_redis.insert(picture_hash=picture_hash, redis_object=redis_object, need_uplift=need_uplift, use_LRU_label=use_LRU_label, use_LRU_social=use_LRU_social, first_insert=first_insert, lru_social_parameter_sp=lru_social_parameter_sp) 
 
         elif self.cache_level > 1: 
             '''如果不是最后一层，而且需要从上层获取数据传播'''
@@ -175,7 +193,7 @@ class Redis_cache:
                 util.HTTP_GET(host=self.host, picture_hash=picture_hash, IP_address=self.higher_cache_redis.host_ip, port_number=self.higher_cache_redis.host_port, use_TLS=False, result_path=self.higher_cache_redis.result_path+'wget/'+self.host_ip, picture_path=self.picture_root_path+str(picture_hash))
             print(redis_object['media_size'], file=self.higher_cache_redis.file_insert_media_size)
 
-    def find(self, picture_hash, user_host, current_timestamp, need_update_cache=False, config_timestamp=1, use_LRU_social=False):
+    def find(self, picture_hash, user_host, current_timestamp, need_update_cache=False, config_timestamp=1, use_LRU_label=False, use_LRU_social=False):
         
         if picture_hash in self.redis_fake.keys():
             '''如果找到了'''
@@ -188,17 +206,23 @@ class Redis_cache:
                 if use_LRU_social:
                     lru_social_parameter_c = self.cache_size
                     result_label = redis_object['sort_value']
-                    
+
                     if result_label > lru_social_parameter_c:
-                        self.decrement_lru_social(lowerest_threshold=lru_social_parameter_c)
+                        self.decrement_lru_label(lowerest_threshold=lru_social_parameter_c)
                         new_sort_value = result_label - 1
                     else:
                         lru_social_parameter_s = self.get_lru_social_parameter_s()
-                        self.decrement_lru_social(lowerest_threshold=result_label)
+                        self.decrement_lru_label(lowerest_threshold=result_label)
                         new_sort_value = lru_social_parameter_c - lru_social_parameter_s
 
-                    new_redis_object['timestamp'] = current_timestamp
                     new_redis_object['sort_value'] = new_sort_value 
+
+                elif use_LRU_label:
+                    result_label = redis_object['sort_value']
+                    new_sort_value = self.cache_size
+                    self.decrement_lru_label(lowerest_threshold=new_sort_value)
+                    new_redis_object['sort_value'] = new_sort_value 
+                    
                 else:
                     last_timestamp = redis_object['timestamp']
                     new_sort_value = redis_object['sort_value'] + (current_timestamp - last_timestamp) * config_timestamp
@@ -207,7 +231,7 @@ class Redis_cache:
                 
                 # print("redis_object: ", redis_object)
                 # print("new_redis_object: ", new_redis_object)
-                self.modify_cache_node(picture_hash=picture_hash, redis_object=new_redis_object)
+                self.modify_cache_node(picture_hash=picture_hash, redis_object=new_redis_object, use_LRU_label=use_LRU_label)
 
             '''启用HTTP，从user_host对当前节点进行HTTP_GET操作'''
             if self.picture_root_path != '/dev/null': 
@@ -222,14 +246,14 @@ class Redis_cache:
 
             '''如果当前层没找到，有更高层，向上查询'''
             if self.cache_level > 1:
-                find_result = self.higher_cache_redis.find(picture_hash=picture_hash, user_host=user_host, current_timestamp=current_timestamp, need_update_cache=need_update_cache, config_timestamp=config_timestamp, use_LRU_social=use_LRU_social)
+                find_result = self.higher_cache_redis.find(picture_hash=picture_hash, user_host=user_host, current_timestamp=current_timestamp, need_update_cache=need_update_cache, config_timestamp=config_timestamp, use_LRU_label=use_LRU_label, use_LRU_social=use_LRU_social)
                 result_level = find_result[0]
                 redis_object = find_result[1]
 
                 '''上层已经操作完毕。根据上层的结果，当前层获取图片cache'''
                 if result_level != 0: 
                     '''有命中数据'''
-                    self.insert(picture_hash=picture_hash, redis_object=redis_object, need_uplift=False, use_LRU_social=use_LRU_social, first_insert=False, lru_social_parameter_sp=0)
+                    self.insert(picture_hash=picture_hash, redis_object=redis_object, need_uplift=False, use_LRU_label=use_LRU_label, use_LRU_social=use_LRU_social, first_insert=False, lru_social_parameter_sp=0)
             
             '''返回一个list，分别表示[第几层命中的, 查到的redis_object]'''
             return [result_level, redis_object]
