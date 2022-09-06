@@ -132,7 +132,8 @@ class Main:
         self.find_success_number = [0, 0, 0, 0]
         self.find_fail_number = [0, 0, 0, 0]
         
-        time.sleep(5) ## 等待5秒，让HTTP server启动
+        if self.use_http_server:
+            time.sleep(5) ## 等待5秒，让HTTP server启动
 
 
     def main(self, caching_policy):
