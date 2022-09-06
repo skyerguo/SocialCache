@@ -10,7 +10,7 @@ from sklearn.cluster import KMeans
 class gen_trace_data:
     def __init__(self, edge_file="edges.dat", loc_file="loc.dat", res_path="./"):
         # The number of clusters that users are divided into using the K-means algorithm
-        self.cluster    = 7
+        self.cluster    = 5
 
         # Parameters of zipf distribution of user activities
         self.zipf_A     = 1.765
@@ -21,6 +21,7 @@ class gen_trace_data:
         self.lognormal_theta    = 2.366
 
         self.pub_ratio  = 0.05
+        self.near_ratio = 10
         self.edge_file  = edge_file
         self.loc_file   = loc_file
         self.res_path   = res_path
@@ -107,7 +108,7 @@ class gen_trace_data:
         time_list       = []
         loc_list        = []
         media_size_list = []
-        kind_list = np.random.binomial(1, 0.05, activity_num)
+        kind_list = np.random.binomial(1, self.pub_ratio, activity_num)
         media_size_list = self.media_size.sample(activity_num)
         activity_interval = np.random.lognormal(self.lognormal_mu, self.lognormal_theta, activity_num)
         time = 0
@@ -165,7 +166,7 @@ class gen_trace_data:
 
             if row["publish"] == 1:
                 # get a post item
-                print("Get a post item")
+                # print("Get a post item")
                 post_seq_num += 1
 
                 user_postline_dict[curr_user_id].append(post_seq_num)
@@ -179,11 +180,11 @@ class gen_trace_data:
                 #print("user %d current postline : " %curr_user_id, user_postline_dict[curr_user_id])
             else:
                 # get a view item
-                print("Get a view item")
+                # print("Get a view item")
                 viewid  = -1
 
-                coin = random.randint(1, 10)
-                if coin == 1:
+                coin = random.randint(1, 100)
+                if coin <= self.near_ratio:
                     # nearby view
                     # item_line += "+nearby"
                     loc_post_list = position_post_dict[row["location"]]
