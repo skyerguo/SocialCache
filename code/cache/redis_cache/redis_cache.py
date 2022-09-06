@@ -19,15 +19,6 @@ class Redis_cache:
 
         self.cache_size = int(cache_size)
 
-        '''获得本机的IP地址，作为redis IP'''
-        # self.redis_ip = "128.105.145.13"
-        ret = subprocess.Popen("ifconfig eno1 | grep inet | awk '{print $2}' | cut -f 2 -d ':'",shell=True,stdout=subprocess.PIPE)
-        self.redis_ip = ret.stdout.read().decode("utf-8").strip('\n')
-        ret.stdout.close()
-
-        '''记录db数据'''
-        self.db=db
-
         '''连接池'''
         self.redis_fake = {}
 
@@ -83,10 +74,12 @@ class Redis_cache:
                 remove_key = -1
                 for curr_key in self.redis_fake.keys():
                     curr_value = self.redis_fake[curr_key]['sort_value']
-                    # print(curr_value)
                     if curr_value < min_value:
                         min_value = curr_value
                         remove_key = curr_key
+        if remove_key == -1:
+            print("Error Delete")
+            exit(0)
         del self.redis_fake[remove_key]
 
         if self.picture_root_path != '/dev/null': ## 启用HTTP了
@@ -134,14 +127,8 @@ class Redis_cache:
 
     def decrement_lru_social(self, lowerest_threshold=0):
         for curr_key in self.redis_fake.keys():
-            temp_redis_object = self.redis_fake[curr_key]
-            curr_value = int(temp_redis_object['sort_value'])
-            if curr_value > lowerest_threshold:
-                temp_redis_object['sort_value'] = curr_value - 1
-                self.redis_fake[curr_key] = temp_redis_object
-                '''lru-social就不要管priority_queue了'''
-                # if self.use_priority_queue:
-                    # self.priority_queue.put((temp_redis_object['sort_value'], int.from_bytes(curr_key, byteorder='big'))) 
+            if self.redis_fake[curr_key]['sort_value'] > lowerest_threshold:
+                self.redis_fake[curr_key]['sort_value'] -= 1
 
     def insert(self, picture_hash, redis_object, need_uplift=True, use_LRU_social=False, first_insert=False, lru_social_parameter_sp=0):
         '''
@@ -152,19 +139,15 @@ class Redis_cache:
         
         if use_LRU_social:
             lru_social_parameter_c = self.cache_size
-            lru_social_parameter_s = self.get_lru_social_parameter_s()
+            
             if first_insert:
                 '''set the sort_value as SPu * C'''
-                # print("lru_social_parameter_sp: ", lru_social_parameter_sp)
-                # print("lru_social_parameter_c: ", lru_social_parameter_c)
-                redis_object['sort_value'] = lru_social_parameter_sp * lru_social_parameter_c + redis_object['timestamp']
-                # print("redis_object['sort_value']: ", redis_object['sort_value'])
+                redis_object['sort_value'] = lru_social_parameter_sp * lru_social_parameter_c
             else:
                 '''set label as C-S'''
+                lru_social_parameter_s = self.get_lru_social_parameter_s()
                 if lru_social_parameter_c - lru_social_parameter_s > 0:
-                    redis_object['sort_value'] = lru_social_parameter_c - lru_social_parameter_s + redis_object['timestamp']
-                else:
-                    redis_object['sort_value'] = redis_object['timestamp']
+                    redis_object['sort_value'] = lru_social_parameter_c - lru_social_parameter_s
 
         self.modify_cache_node(picture_hash=picture_hash, redis_object=redis_object)
 
@@ -204,17 +187,16 @@ class Redis_cache:
             if need_update_cache:
                 if use_LRU_social:
                     lru_social_parameter_c = self.cache_size
-                    lru_social_parameter_s = self.get_lru_social_parameter_s()
                     result_label = redis_object['sort_value']
+                    
                     if result_label > lru_social_parameter_c:
                         self.decrement_lru_social(lowerest_threshold=lru_social_parameter_c)
+                        new_sort_value = result_label - 1
                     else:
+                        lru_social_parameter_s = self.get_lru_social_parameter_s()
                         self.decrement_lru_social(lowerest_threshold=result_label)
-                    
-                    if lru_social_parameter_c - lru_social_parameter_s > 0:
-                        new_sort_value = lru_social_parameter_c - lru_social_parameter_s + current_timestamp
-                    else:
-                        new_sort_value = current_timestamp
+                        new_sort_value = lru_social_parameter_c - lru_social_parameter_s
+
                     new_redis_object['timestamp'] = current_timestamp
                     new_redis_object['sort_value'] = new_sort_value 
                 else:

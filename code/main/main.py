@@ -204,8 +204,8 @@ class Main:
                 spreading_power_list = [0 for _ in range(len(self.make_trace.G.nodes))]
                 for i in range(len(self.make_trace.G.nodes)):
                     spreading_power_list[i] = SIR.SIR_network(networkx_graph, [i] , epidemic_threshold, 1, 20) + 1
-                # print("spreading_power_list: ", spreading_power_list)
                 pickle.dump(spreading_power_list, open(curr_social_metric_path, "wb"))
+            # print("spreading_power_list: ", spreading_power_list)
 
         f_in = open("data/traces/" + self.trace_dir + "/all_timeline.txt", "r")
         f_out_find = open(self.result_path + 'find_log.txt', 'w')

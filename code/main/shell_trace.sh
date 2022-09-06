@@ -1,4 +1,4 @@
-python3 -m code.trace.make_trace3
+# python3 -m code.trace.make_trace3
 
 sleep 5
 cat code/main/basic_config.json | jq '.caching_policy="LRU"' > code/main/config.json
