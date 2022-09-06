@@ -26,9 +26,9 @@ class hill_climb_optimize():
         self.iteration_time = 0
 
         # define step length
-        self.step_len0 = 1        # timestamp
-        self.step_len1 = 10          # pagerank * media_size
-        self.step_len2 = 1        # nearest
+        self.step_len0 = 1        # location
+        self.step_len1 = 0.1      # media_size
+        self.step_len2 = 100      # social_metric
         self.step_list = [self.step_len0, self.step_len1, self.step_len2]
 
         # debug switch
@@ -56,7 +56,7 @@ class hill_climb_optimize():
         os.system(SIMULATION_CMD)
 
         # run analyzation
-        res = int(subprocess.getoutput(ANALYZE_CMD))
+        res = float(subprocess.getoutput(ANALYZE_CMD))
         
         print("******* simulator done, get res ", res)
         return res
@@ -155,8 +155,8 @@ class hill_climb_optimize():
         # save to dataframe
         self.log_df = pd.concat([self.log_df, pd.Series([x['traffic'] for x in self.climb_path], name="iter%d" %self.iteration_time)], axis=1)
 
-    def hill_climb(self):
-        for i in range(10):
+    def hill_climb(self, seed_num=10):
+        for i in range(seed_num):
             # reset status
             self.reset()
 
@@ -202,8 +202,8 @@ class hill_climb_optimize():
 
 if __name__ == "__main__":
     optimize = hill_climb_optimize()
-    optimize.hill_climb_specific_point([[1, 100, 0]])
-    optimize.hill_climb()
+    optimize.hill_climb_specific_point([[0, 0, 0], [0, 10, 500000]])
+    optimize.hill_climb(8)
     optimize.visualize()
     optimize.savelog()
 
