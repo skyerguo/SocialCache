@@ -275,11 +275,9 @@ class Main:
                                 effective_size_metrics[user_id] * media_size * CONFIG['params'][1] + \
                                 int(nearest_distance) * CONFIG['params'][2]    
                     
-                elif caching_policy == "LRU-social":
-                    '''LRU-social can adjust the sort_value automatically'''
+                elif caching_policy == "LRU-social" or caching_policy == "LRU-label":
+                    '''LRU-social and LRU-label can adjust the sort_value automatically'''
                     sort_value = 0
-
-                # print(sort_value, current_timestamp)
                     
                 '''记录redis_object，使用json形式保存'''
                 temp_redis_object = {
@@ -298,18 +296,22 @@ class Main:
                 
                 '''往第三层级插入，后续的调整都由redis内部完成'''
                 if caching_policy == "LRU-social":
-                    self.build_network.level_3_host[selected_level_3_id].redis_cache.insert(picture_hash=post_id, redis_object=temp_redis_object, need_uplift=True, use_LRU_social=True, first_insert=True, lru_social_parameter_sp=spreading_power_list[user_id])
+                    self.build_network.level_3_host[selected_level_3_id].redis_cache.insert(picture_hash=post_id, redis_object=temp_redis_object, need_uplift=True, use_LRU_label=False, use_LRU_social=True, first_insert=True, lru_social_parameter_sp=spreading_power_list[user_id])
+                elif caching_policy == "LRU-label":
+                    self.build_network.level_3_host[selected_level_3_id].redis_cache.insert(picture_hash=post_id, redis_object=temp_redis_object, need_uplift=True, use_LRU_label=True, use_LRU_social=False)
                 else:
-                    self.build_network.level_3_host[selected_level_3_id].redis_cache.insert(picture_hash=post_id, redis_object=temp_redis_object, need_uplift=True, use_LRU_social=False)
+                    self.build_network.level_3_host[selected_level_3_id].redis_cache.insert(picture_hash=post_id, redis_object=temp_redis_object, need_uplift=True, use_LRU_label=False, use_LRU_social=False)
 
             elif current_type == "view":
                 post_id = int(line.split('+')[1])
                 # user_id = int(line.split('+')[3])
                 '''往第三层级查询，后续的调整都由redis内部完成，这里先假设只有一个user节点'''
                 if caching_policy == "LRU-social":
-                    find_result = self.build_network.level_3_host[selected_level_3_id].redis_cache.find(picture_hash=post_id, user_host=self.build_network.user_host[0], current_timestamp=current_timestamp, need_update_cache=need_update_cache, config_timestamp=1, use_LRU_social=True)
+                    find_result = self.build_network.level_3_host[selected_level_3_id].redis_cache.find(picture_hash=post_id, user_host=self.build_network.user_host[0], current_timestamp=current_timestamp, need_update_cache=need_update_cache, config_timestamp=1, use_LRU_label=False, use_LRU_social=True)
+                elif caching_policy == "LRU-label":
+                    find_result = self.build_network.level_3_host[selected_level_3_id].redis_cache.find(picture_hash=post_id, user_host=self.build_network.user_host[0], current_timestamp=current_timestamp, need_update_cache=need_update_cache, config_timestamp=1, use_LRU_label=True, use_LRU_social=False)
                 else:
-                    find_result = self.build_network.level_3_host[selected_level_3_id].redis_cache.find(picture_hash=post_id, user_host=self.build_network.user_host[0], current_timestamp=current_timestamp, need_update_cache=need_update_cache, config_timestamp=1, use_LRU_social=False)
+                    find_result = self.build_network.level_3_host[selected_level_3_id].redis_cache.find(picture_hash=post_id, user_host=self.build_network.user_host[0], current_timestamp=current_timestamp, need_update_cache=need_update_cache, config_timestamp=1, use_LRU_label=False, use_LRU_social=False)
                 result_level = find_result[0]
                 
                 if self.if_debug:
