@@ -37,6 +37,7 @@ class Redis_cache:
 
         '''设置当前层的redis_cache'''
         self.cache_level = cache_level
+        self.lru_social_parameter_s = 0
 
         '''设置当前cache对应的mininet_host'''
         self.host = host
@@ -53,7 +54,7 @@ class Redis_cache:
         self.file_insert_media_size = open(self.result_path + 'mediaSize/' + self.host_ip + '/insert_all.txt', 'a')
         self.file_receive_media_size = open(self.result_path + 'mediaSize/' + self.host_ip + '/receive_all.txt', 'a')
 
-    def remove_cache_node(self, given_key=''):
+    def remove_cache_node(self, given_key='', use_LRU_social=False):
         '''删掉权值最小的cache数据'''
 
         '''如果有指定的key，直接删除'''
@@ -80,6 +81,9 @@ class Redis_cache:
         if remove_key == -1:
             print("Error Delete")
             exit(0)
+        if use_LRU_social:
+            if min_value > self.cache_size:
+                self.lru_social_parameter_s -= 1
         del self.redis_fake[remove_key]
 
         if self.picture_root_path != '/dev/null': ## 启用HTTP了
@@ -93,7 +97,7 @@ class Redis_cache:
                 res += 1
         return res
 
-    def decrement_lru_label(self, lowerest_threshold=0):
+    def decrement_lru_label(self, lowerest_threshold=0, use_LRU_social=False):
         # print("self.cache_level: ", self.cache_level)
         # print(self.redis_fake)
         # print(lowerest_threshold)
@@ -101,10 +105,13 @@ class Redis_cache:
         for curr_key in self.redis_fake.keys():
             if self.redis_fake[curr_key]['sort_value'] > lowerest_threshold:
                 self.redis_fake[curr_key]['sort_value'] -= 1
+                if use_LRU_social:
+                    if self.redis_fake[curr_key]['sort_value'] == self.cache_size: ## 原来大于C，更新S
+                        self.lru_social_parameter_s -= 1
         # print(self.redis_fake)
         # print("-------")
 
-    def modify_cache_node(self, picture_hash, redis_object, use_LRU_label):
+    def modify_cache_node(self, picture_hash, redis_object, use_LRU_label, use_LRU_social):
         '''修改cache里面的节点，一般为插入或者调整'''
 
         '''如果是LRU，特殊处理'''
@@ -128,14 +135,35 @@ class Redis_cache:
                     self.remove_cache_node()
                 '''Cache Miss'''
                 self.decrement_lru_label(lowerest_threshold=0)
+
+        elif use_LRU_social:
+            if picture_hash in self.redis_fake.keys(): 
+                '''Cache Hit'''
+                if self.redis_fake[picture_hash]['sort_value'] > self.cache_size:
+                    self.decrement_lru_label(lowerest_threshold=self.cache_size, use_LRU_social=True)
+                else:
+                    self.decrement_lru_label(lowerest_threshold=self.redis_fake[picture_hash]['sort_value'], use_LRU_social=True)
+                    redis_object['sort_value'] = self.cache_size - self.lru_social_parameter_s
+                    self.redis_fake[picture_hash] = redis_object
+            else:
+                if len(self.redis_fake) >= self.cache_size:
+                    '''Cache Miss and Cahce is Full'''
+                    self.remove_cache_node(given_key='', use_LRU_social=True)
+                '''Cache Miss'''
+                self.decrement_lru_label(lowerest_threshold=0, use_LRU_social=True)
+                self.redis_fake[picture_hash] = redis_object
+                if redis_object['sort_value'] > self.cache_size:
+                    self.lru_social_parameter_s += 1
+
         else:
             '''如果当前cache的空间使用完了，且不是LRU，则按照内在的权值替换'''
             if len(self.redis_fake) >= self.cache_size:
                 if picture_hash not in self.redis_fake.keys() and len(self.redis_fake) == self.cache_size:
                     self.remove_cache_node()
         
-        '''插入redis数据库'''
-        self.redis_fake[picture_hash] = redis_object
+        '''插入redis数据库, LRU_social单独处理'''
+        if not use_LRU_social:
+            self.redis_fake[picture_hash] = redis_object
 
         '''留个检测，以防出现bug'''
         if len(self.redis_fake) > self.cache_size:
@@ -154,24 +182,24 @@ class Redis_cache:
 
         print(redis_object['media_size'], file=self.file_receive_media_size)
         
-        if use_LRU_social:
-            lru_social_parameter_c = self.cache_size
-            
+        if use_LRU_label:
+            redis_object['sort_value'] = self.cache_size
+
+        elif use_LRU_social:       
+            # if self.lru_social_parameter_s != self.get_lru_social_parameter_s():
+            #     print("!!!!!!!", self.lru_social_parameter_s, self.get_lru_social_parameter_s(), self.cache_size)
+            #     print(self.redis_fake)
+            #     exit(0)
             if first_insert:
                 '''set the sort_value as SPu * C'''
-                redis_object['sort_value'] = lru_social_parameter_sp * lru_social_parameter_c
+                redis_object['sort_value'] = lru_social_parameter_sp * self.cache_size
             else:
                 '''set label as C-S'''
-                lru_social_parameter_s = self.get_lru_social_parameter_s()
-                if lru_social_parameter_c - lru_social_parameter_s > 0:
-                    redis_object['sort_value'] = lru_social_parameter_c - lru_social_parameter_s
-
-        elif use_LRU_label:
-            redis_object['sort_value'] = self.cache_size
+                redis_object['sort_value'] = self.cache_size - self.lru_social_parameter_s
 
         # print("post!!!", self.host_ip, picture_hash, self.cache_level, redis_object)
         # print(self.redis_fake)
-        self.modify_cache_node(picture_hash=picture_hash, redis_object=copy.deepcopy(redis_object), use_LRU_label=use_LRU_label)
+        self.modify_cache_node(picture_hash=picture_hash, redis_object=copy.deepcopy(redis_object), use_LRU_label=use_LRU_label, use_LRU_social=use_LRU_social)
         # print(self.redis_fake)
         # print("---------")
 
@@ -209,25 +237,11 @@ class Redis_cache:
 
             '''查询需要更新cache'''
             if need_update_cache:
-                if use_LRU_social:
-                    lru_social_parameter_c = self.cache_size
-                    result_label = redis_object['sort_value']
+                if use_LRU_label:
+                    new_redis_object['sort_value'] = self.cache_size 
 
-                    if result_label > lru_social_parameter_c:
-                        self.decrement_lru_label(lowerest_threshold=lru_social_parameter_c)
-                        new_sort_value = result_label - 1
-                    else:
-                        lru_social_parameter_s = self.get_lru_social_parameter_s()
-                        self.decrement_lru_label(lowerest_threshold=result_label)
-                        new_sort_value = lru_social_parameter_c - lru_social_parameter_s
-
-                    new_redis_object['sort_value'] = new_sort_value 
-
-                elif use_LRU_label:
-                    result_label = redis_object['sort_value']
-                    new_sort_value = self.cache_size
-                    # self.decrement_lru_label(lowerest_threshold=new_sort_value)
-                    new_redis_object['sort_value'] = new_sort_value 
+                elif use_LRU_social:
+                    new_redis_object['sort_value'] = 0 ## 会在modify_cache_node自动处理
                     
                 else:
                     last_timestamp = redis_object['timestamp']
@@ -237,7 +251,7 @@ class Redis_cache:
                 
                 # print("view hit!!!", self.host_ip, picture_hash, self.cache_level, result_level, redis_object, new_redis_object)
                 # print(self.redis_fake)
-                self.modify_cache_node(picture_hash=picture_hash, redis_object=copy.deepcopy(new_redis_object), use_LRU_label=use_LRU_label)
+                self.modify_cache_node(picture_hash=picture_hash, redis_object=copy.deepcopy(new_redis_object), use_LRU_label=use_LRU_label, use_LRU_social=use_LRU_social)
                 # print(self.redis_fake)
                 # print("------")
 
