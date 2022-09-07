@@ -49,7 +49,7 @@ class gen_trace_data:
     def build_user_df(self):
         # calculate degree of user
         # social_dict = self.G.in_degree()
-        social_dict = pickle.load(open('./data/social_metric_dict/gtc_short_trace/PageRank.pkl', "rb"))
+        social_dict = pickle.load(open('./data/social_metric_dict/gtc_long_trace/PageRank.pkl', "rb"))
         
         self.user_df = pd.DataFrame(dict(user_id=list(social_dict.keys()), user_influence=list(social_dict.values())))
         rank_degree = {}
@@ -77,7 +77,8 @@ class gen_trace_data:
             time += int(interval * 10)
             time_list.append(time)
             loc_list.append(random.choice(self.location_list))
-        
+
+        # print(len(time_list), len(kind_list), len(media_size_list), len(loc_list), activity_num)
         return pd.DataFrame(dict(timestamp=time_list, publish=kind_list, media_size=media_size_list, location=loc_list)), time
 
     def build_user_activity(self):
