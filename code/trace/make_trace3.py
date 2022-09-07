@@ -15,7 +15,8 @@ class gen_trace_data:
         # Parameters of zipf distribution of user activities, zipf(x) = zipf_B * pow(x, -zipf_A)
         self.zipf_A     = 1.765
         self.zipf_B     = 4.888
-        self.zipf_size  = 10000
+        self.zipf_size  = 1000
+        self.zipf_start_point = 10
         
         # Inter-activity time distribution
         self.lognormal_mu       = 1.789
@@ -48,26 +49,28 @@ class gen_trace_data:
 
     def build_user_df(self):
         # calculate degree of user
-        # social_dict = self.G.in_degree()
-        social_dict = pickle.load(open('./data/social_metric_dict/gtc_long_trace/PageRank.pkl', "rb"))
+        social_dict = self.G.in_degree()
+        # social_dict = pickle.load(open('./data/social_metric_dict/gtc_long_trace/PageRank.pkl', "rb"))
         
         self.user_df = pd.DataFrame(dict(user_id=list(social_dict.keys()), user_influence=list(social_dict.values())))
         rank_degree = {}
         temp_rank_degree = sorted(np.unique(list(social_dict.values())), reverse=True)
         for i in range(len(temp_rank_degree)):
-            rank_degree[temp_rank_degree[i]] = i + 1
-        # print(rank_degree)
+            rank_degree[temp_rank_degree[i]] = i + self.zipf_start_point
         
-        min_zipf_number = self.zipf_B * pow(len(temp_rank_degree), -self.zipf_A)
+        # min_zipf_number = self.zipf_B * pow(len(temp_rank_degree), -self.zipf_A)
+        max_zipf_number = self.zipf_B * pow(self.zipf_start_point, -self.zipf_A)
         # print(min_zipf_number)
 
-        self.user_df["activity_number"] = [int(self.zipf_B * pow(rank_degree[social_dict[x]], -self.zipf_A) / min_zipf_number) for x in self.user_df['user_id']]
+        self.user_df["activity_number"] = [int(self.zipf_B * pow(rank_degree[social_dict[x]], -self.zipf_A) / max_zipf_number * (self.zipf_size)) for x in self.user_df['user_id']]
 
         # print(self.user_df)
+        print([int(self.zipf_B * pow(rank_degree[social_dict[x]], -self.zipf_A) / max_zipf_number * (self.zipf_size)) for x in self.user_df['user_id']])
+        # exit(0)
     
     def gen_activity_df(self, activity_num):
         time_list       = []
-        loc_list        = []
+        loc_list        = [] 
         media_size_list = []
         kind_list = np.random.binomial(1, self.pub_ratio, activity_num)
         media_size_list = self.media_size.sample(activity_num)
@@ -87,6 +90,9 @@ class gen_trace_data:
         max_duration = 0
         self.df_trace = pd.DataFrame(columns=["timestamp", "publish", "media_size", "location", "user_id"])
         for rowidx, row in self.user_df.iterrows():
+            if rowidx % 100 == 0:
+                print("rowidx: ", rowidx)
+
             user_id = row["user_id"]
             df, duration = self.gen_activity_df(int(row["activity_number"]))
             df["user_id"] = user_id
@@ -177,6 +183,8 @@ class gen_trace_data:
                     continue
             fd.write(item_line + '\n')
             line_number += 1
+            # if line_number % 1000 == 0:
+                # print("line_number: ", line_number)
         fd.close()
         print("line_number: ", line_number)
 
