@@ -61,7 +61,7 @@ class gen_trace_data:
         min_zipf_number = self.zipf_B * pow(len(temp_rank_degree), -self.zipf_A)
         # print(min_zipf_number)
 
-        self.user_df["activity_number"] = [int(self.zipf_B * pow(rank_degree[social_dict[x]], -self.zipf_A) / min_zipf_number * 10) for x in self.user_df['user_id']]
+        self.user_df["activity_number"] = [int(self.zipf_B * pow(rank_degree[social_dict[x]], -self.zipf_A) / min_zipf_number) for x in self.user_df['user_id']]
 
         # print(self.user_df)
     

@@ -1,10 +1,10 @@
 {
   "trace_dir": "gtc_short_trace",
-  "caching_policy": "LRU-label",
+  "caching_policy": "LRU-social",
   "use_http_server": false,
   "use_priority_queue": false,
-  "cache_size_level_3": 5,
-  "cache_size_level_2": 50,
+  "cache_size_level_3": 10,
+  "cache_size_level_2": 100,
   "cache_size_level_1": 1000000,
   "max_trace_len": null,
   "mode": "normal",
