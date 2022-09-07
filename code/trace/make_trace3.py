@@ -6,17 +6,20 @@ import pandas as pd
 import easygraph as eg
 import matplotlib.pyplot as plt
 import pickle
+import math
 
 class gen_trace_data:
-    def __init__(self, edge_file="edges.dat", loc_file="loc.dat", res_path="./"):
+    def __init__(self, edge_file="edges.dat", loc_file="loc.dat", res_path="./", zipf_size=2000):
         # The number of clusters that users are divided into using the K-means algorithm
         # self.cluster    = 7
 
         # Parameters of zipf distribution of user activities, zipf(x) = zipf_B * pow(x, -zipf_A)
         self.zipf_A     = 1.765
         self.zipf_B     = 4.888
-        self.zipf_size  = 1000
+        self.zipf_size  = zipf_size
         self.zipf_start_point = 10
+
+        print("zipf_size: ", self.zipf_size)
         
         # Inter-activity time distribution
         self.lognormal_mu       = 1.789
@@ -65,7 +68,7 @@ class gen_trace_data:
         self.user_df["activity_number"] = [int(self.zipf_B * pow(rank_degree[social_dict[x]], -self.zipf_A) / max_zipf_number * (self.zipf_size)) for x in self.user_df['user_id']]
 
         # print(self.user_df)
-        print([int(self.zipf_B * pow(rank_degree[social_dict[x]], -self.zipf_A) / max_zipf_number * (self.zipf_size)) for x in self.user_df['user_id']])
+        # print([int(self.zipf_B * pow(rank_degree[social_dict[x]], -self.zipf_A) / max_zipf_number * (self.zipf_size)) for x in self.user_df['user_id']])
         # exit(0)
     
     def gen_activity_df(self, activity_num):
@@ -74,13 +77,19 @@ class gen_trace_data:
         media_size_list = []
         kind_list = np.random.binomial(1, self.pub_ratio, activity_num)
         media_size_list = self.media_size.sample(activity_num)
-        activity_interval = np.random.lognormal(self.lognormal_mu, self.lognormal_theta, activity_num)
+        activity_interval = np.random.lognormal(self.lognormal_mu, self.lognormal_theta, self.zipf_size)
         time = 0
+        curr_mod = math.floor(self.zipf_size / activity_num)
+        start_point = random.randint(0, curr_mod)
+        cnt = start_point
         for interval in activity_interval:
             time += int(interval * 10)
-            time_list.append(time)
-            loc_list.append(random.choice(self.location_list))
-
+            if (cnt - start_point) % curr_mod == 0:
+                time_list.append(time)
+                loc_list.append(random.choice(self.location_list))
+            if len(time_list) == activity_num:
+                break
+            cnt += 1
         # print(len(time_list), len(kind_list), len(media_size_list), len(loc_list), activity_num)
         return pd.DataFrame(dict(timestamp=time_list, publish=kind_list, media_size=media_size_list, location=loc_list)), time
 
@@ -204,9 +213,11 @@ if __name__ == "__main__":
         print("use big net")
         usernet_filename = "./data/static/twitter_combined.txt"
         res_path = "./data/traces/gtc_long_trace/"
+        zipf_size = 5000
     else:
         print("use litte net")
         usernet_filename = "./data/static/twitter_single.txt"
         res_path = "./data/traces/gtc_short_trace/"
-    trace_data = gen_trace_data(usernet_filename, "./data/static/user_country.csv", res_path)
+        zipf_size = 2000
+    trace_data = gen_trace_data(usernet_filename, "./data/static/user_country.csv", res_path, zipf_size)
     trace_data.launch()
