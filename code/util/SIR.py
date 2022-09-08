@@ -53,7 +53,7 @@ def count_node(graph):
     return s_num, i_num, r_num
 
 
-def SIR_network(graph, source, beta, gamma, step, cache_size):
+def SIR_network(graph, source, beta, gamma, step, cache_size=1):
     """
     获得感染源的节点序列的SIR感染情况
     :param graph: networkx创建的网络
@@ -81,5 +81,5 @@ def SIR_network(graph, source, beta, gamma, step, cache_size):
         sir = (i + r) / n  # 该节点的sir值为迭代结束后 感染节点数i+免疫节点数r
         sir_values.append(sir)  # 将本次迭代的sir值加入数组
 
-    return round(sir_values[-1] * n - 1) / cache_size
+    return round(sir_values[-1] * n) / cache_size ## 返回感染人数+免疫人数 / cache_size
 

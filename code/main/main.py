@@ -253,30 +253,30 @@ class Main:
                                 page_rank_metrics[str(user_id)] * CONFIG['params'][2]
 
                 elif caching_policy == "Degree":
-                    # print(degree_metrics[str(user_id)])
-                    sort_value = current_timestamp * CONFIG['params'][0] + \
-                                degree_metrics[str(user_id)] * media_size * CONFIG['params'][1] + \
-                                int(nearest_distance) * CONFIG['params'][2]
+                    sort_value = current_timestamp + \
+                                int(nearest_distance) * CONFIG['params'][0] + \
+                                media_size * CONFIG['params'][1] + \
+                                degree_metrics[str(user_id)] * CONFIG['params'][2]
 
                 elif caching_policy == "BetweennessCentrality":
-                    # print(betweenness_centrality_metrics[str(user_id)])
-                    sort_value = current_timestamp * CONFIG['params'][0] + \
-                                betweenness_centrality_metrics[str(user_id)] * media_size * CONFIG['params'][1] + \
-                                int(nearest_distance) * CONFIG['params'][2]
+                    sort_value = current_timestamp + \
+                                int(nearest_distance) * CONFIG['params'][0] + \
+                                media_size * CONFIG['params'][1] + \
+                                betweenness_centrality_metrics[str(user_id)] * CONFIG['params'][2]
                     
                 elif caching_policy == "LaplacianCentrality":
-                    # print(laplacian_centrality_metrics[str(user_id)])
-                    sort_value = current_timestamp * CONFIG['params'][0] + \
-                                laplacian_centrality_metrics[str(user_id)] * media_size * CONFIG['params'][1] + \
-                                int(nearest_distance) * CONFIG['params'][2]
+                    sort_value = current_timestamp + \
+                                int(nearest_distance) * CONFIG['params'][0] + \
+                                media_size * CONFIG['params'][1] + \
+                                laplacian_centrality_metrics[str(user_id)] * CONFIG['params'][2]
 
                 elif caching_policy == "EffectiveSize":
                     if math.isnan(effective_size_metrics[user_id]):
                         effective_size_metrics[user_id] = 0
-                    # print(constraint_metrics[user_id])
-                    sort_value = current_timestamp * CONFIG['params'][0] + \
-                                effective_size_metrics[user_id] * media_size * CONFIG['params'][1] + \
-                                int(nearest_distance) * CONFIG['params'][2]    
+                    sort_value = current_timestamp + \
+                                int(nearest_distance) * CONFIG['params'][0] + \
+                                media_size * CONFIG['params'][1] + \
+                                effective_size_metrics[user_id] * CONFIG['params'][2]
                     
                 elif caching_policy == "LRU-social" or caching_policy == "LRU-label":
                     '''LRU-social and LRU-label can adjust the sort_value automatically'''
@@ -340,8 +340,6 @@ class Main:
         f_out_find.close()
         f_out_time.close()
 
-        # CLI(self.build_network.net)
-
         if self.use_http_server == True:
             for level_3_host_id in range(self.build_network.level_3_host_number):
                 for eth_port in range(self.build_network.level_2_host_number): # 对应第二层的每一个节点
@@ -355,22 +353,6 @@ class Main:
                 for eth_port in range(1): # 对应自己的switch
                     util.calculate_flow(host=self.build_network.level_1_host[level_1_host_id], eth_name='a%s-eth%s'%(str(level_1_host_id), str(eth_port)), flow_direction='TX', result_path=self.result_path+'flow/'+self.build_network.level_1_host_ip[level_1_host_id])
 
-        # '''分析'''
-        # print('缓存策略： *** %s ***'%(caching_policy))
-        # if self.find_success_number[3] + self.find_fail_number[3] > 0:
-        #     print('三级CDN缓存命中率：', self.find_success_number[3] / (self.find_success_number[3] + self.find_fail_number[3]))
-        # else:
-        #     print('未经过三级CDN缓存')
-
-        # if self.find_success_number[2] + self.find_fail_number[2] > 0:
-        #     print('二级CDN缓存命中率：', self.find_success_number[2] / (self.find_success_number[2] + self.find_fail_number[2]))
-        # else:
-        #     print('未经过二级CDN缓存')
-            
-        # if self.find_success_number[1] + self.find_fail_number[1] > 0:
-        #     print('一级CDN缓存命中率：', self.find_success_number[1] / (self.find_success_number[1] + self.find_fail_number[1]))
-        # else:
-        #     print('未经过一级CDN缓存')
 
     def run(self, caching_policy):
         self.main(caching_policy=caching_policy)
