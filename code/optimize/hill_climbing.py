@@ -14,7 +14,8 @@ ANALYZE_CMD="python3 -m code.analyze.get_media_size -n 0"
 LOG_FILENAME="./optimize.log"
 
 init_list = {
-    "PageRank": [[0,10.5,1010000], [0,0,0]],
+    # "PageRank": [[0,10.5,1010000], [0,0,0]],
+    "PageRank": [],
     "Degree": [[0,50,5], [0,0,0]],
     "BetweennessCentrality": [[0,50,50000], [0,0,0]],
     "LaplacianCentrality": [[0,50,50000], [0,0,0]],
@@ -51,8 +52,8 @@ class hill_climb_optimize():
         self.debug = False
 
         # init logfile
-        self.start_timestamp = %time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
-        self.log_filename = LOG_FILENAME + "%s" %start_timestamp
+        self.start_timestamp = time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
+        self.log_filename = LOG_FILENAME + "%s" %(self.start_timestamp)
         with open(self.log_filename, "w") as log_fd:
             log_fd.write("\n")
         
@@ -220,6 +221,6 @@ class hill_climb_optimize():
 if __name__ == "__main__":
     optimize = hill_climb_optimize()
     optimize.hill_climb_specific_point(init_list[optimize.init_config['caching_policy']])
-    optimize.hill_climb(8)
+    optimize.hill_climb(3)
     # optimize.visualize()
     optimize.savelog()
