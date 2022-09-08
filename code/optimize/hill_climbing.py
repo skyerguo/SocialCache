@@ -27,7 +27,7 @@ class hill_climb_optimize():
 
         # define step length
         self.step_len0 = 1        # location
-        self.step_len1 = 0.1      # media_size
+        self.step_len1 = 0.5      # media_size
         self.step_len2 = 100      # social_metric
         self.step_list = [self.step_len0, self.step_len1, self.step_len2]
 
@@ -117,9 +117,9 @@ class hill_climb_optimize():
 
         if not params:
             # randomly init status
-            param0 = round(random.uniform(-10, 10), 1)
-            param1 = random.randint(-100, 100)
-            param2 = round(random.uniform(-10, 10), 1)
+            param0 = round(random.uniform(0, 200), 1)
+            param1 = round(random.uniform(0, 100), 1)
+            param2 = round(random.uniform(0, 500000), 1)
 
             self.init_config["params"]  = [param0, param1, param2]
         else:
@@ -190,7 +190,7 @@ class hill_climb_optimize():
             self.record()
     
     def savelog(self):
-        self.log_df.to_csv("./optimze.csv")
+        self.log_df.to_csv("./optimze_%s.csv"%(self.log_filename))
 
     def visualize(self):
         print(self.log_df)
@@ -198,13 +198,13 @@ class hill_climb_optimize():
         print("ploting result")
         plt.figure()
         self.log_df.plot.line(xlabel="iterations", ylabel="traffic",title="hill-climbing optimization", grid=True)
-        plt.savefig("./figures/hill_climbing/opt_%s.png" %self.end_time)
+        plt.savefig("./code/figures/hill_climbing/opt_%s.png" %self.end_time)
 
 if __name__ == "__main__":
     optimize = hill_climb_optimize()
-    optimize.hill_climb_specific_point([[0, 0, 0], [0, 10, 500000]])
-    optimize.hill_climb(8)
-    optimize.visualize()
+    optimize.hill_climb_specific_point([[0, 0, 0], [0, 10, 500000], [0, 6.0, 500]])
+    optimize.hill_climb(7)
+    # optimize.visualize()
     optimize.savelog()
 
     #social_config_list = ["PageRank","Degree","BetweennessCentrality","LaplacianCentrality","EffectiveSize"]
