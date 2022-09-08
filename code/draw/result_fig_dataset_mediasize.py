@@ -13,9 +13,9 @@ raw_data = {
         'Data-Gamma', 'Data-Gamma', 'Data-Gamma', 'Data-Gamma', 'Data-Gamma'
     ],
     'Method': [
-        'RAND', 'FIFO', 'LRU', 'LRU-social', 'SocCache', 
-        'RAND', 'FIFO', 'LRU', 'LRU-social', 'SocCache', 
-        'RAND', 'FIFO', 'LRU', 'LRU-social', 'SocCache', 
+        'RAND', 'FIFO', 'LRU', 'LRU-social', 'SocialCache', 
+        'RAND', 'FIFO', 'LRU', 'LRU-social', 'SocialCache', 
+        'RAND', 'FIFO', 'LRU', 'LRU-social', 'SocialCache', 
     ],
     'Media File Size (Bytes)': [
         4156979, 2445467, 2638787, 2613263, 2201197, 

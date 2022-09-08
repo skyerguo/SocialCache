@@ -192,7 +192,7 @@ class Redis_cache:
             #     exit(0)
             if first_insert:
                 '''set the sort_value as SPu * C'''
-                redis_object['sort_value'] = lru_social_parameter_sp * self.cache_size
+                redis_object['sort_value'] = ((lru_social_parameter_sp - 1) / self.cache_size + 1) * self.cache_size
             else:
                 '''set label as C-S'''
                 redis_object['sort_value'] = self.cache_size - self.lru_social_parameter_s

@@ -13,6 +13,10 @@ SIMULATION_CMD="sudo python3 -m code.main.main"
 ANALYZE_CMD="python3 -m code.analyze.get_media_size -n 0"
 LOG_FILENAME="./optimize.log"
 
+init_list = {
+    "PageRank": [[0,10.5,1010000], [0,0,0]]
+}
+
 class hill_climb_optimize():
     def __init__(self) -> None:
         self.json_config    = json.load(open(CONFIG_FILE_PATH, "r"))
@@ -28,14 +32,15 @@ class hill_climb_optimize():
         # define step length
         self.step_len0 = 1        # location
         self.step_len1 = 0.5      # media_size
-        self.step_len2 = 100      # social_metric
+        self.step_len2 = 10000      # social_metric
         self.step_list = [self.step_len0, self.step_len1, self.step_len2]
 
         # debug switch
         self.debug = False
 
         # init logfile
-        self.log_filename = LOG_FILENAME + "%s" %time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
+        self.start_timestamp = %time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
+        self.log_filename = LOG_FILENAME + "%s" %start_timestamp
         with open(self.log_filename, "w") as log_fd:
             log_fd.write("\n")
         
@@ -190,7 +195,7 @@ class hill_climb_optimize():
             self.record()
     
     def savelog(self):
-        self.log_df.to_csv("./optimze_%s.csv"%(self.log_filename))
+        self.log_df.to_csv("./optimze_%s.csv"%(self.start_timestamp))
 
     def visualize(self):
         print(self.log_df)
@@ -198,14 +203,11 @@ class hill_climb_optimize():
         print("ploting result")
         plt.figure()
         self.log_df.plot.line(xlabel="iterations", ylabel="traffic",title="hill-climbing optimization", grid=True)
-        plt.savefig("./code/figures/hill_climbing/opt_%s.png" %self.end_time)
+        plt.savefig("./code/figures/hil_climbing/opt_%s.png" %self.end_time)
 
 if __name__ == "__main__":
     optimize = hill_climb_optimize()
-    optimize.hill_climb_specific_point([[0, 0, 0], [0, 10, 500000], [0, 6.0, 500]])
-    optimize.hill_climb(7)
+    optimize.hill_climb_specific_point(init_list[optimize.init_config['caching_policy']])
+    # optimize.hill_climb(7)
     # optimize.visualize()
     optimize.savelog()
-
-    #social_config_list = ["PageRank","Degree","BetweennessCentrality","LaplacianCentrality","EffectiveSize"]
-    #for social in social_config_list:

@@ -156,6 +156,7 @@ class Main:
             else:
                 page_rank_metrics = eg.functions.not_sorted.pagerank(self.make_trace.G)
                 pickle.dump(page_rank_metrics, open(curr_social_metric_path, "wb"))
+            # print("page_rank_metrics: ", page_rank_metrics)
 
         elif caching_policy == "Degree":
             '''To use it, remember the key is str type, and the value is bool'''
@@ -203,7 +204,8 @@ class Main:
                 networkx_graph = networkx.DiGraph(adj_matrix)
                 spreading_power_list = [0 for _ in range(len(self.make_trace.G.nodes))]
                 for i in range(len(self.make_trace.G.nodes)):
-                    spreading_power_list[i] = SIR.SIR_network(networkx_graph, [i] , epidemic_threshold, 1, 1, CONFIG['cache_size_level_3']) + 1
+                    # spreading_power_list[i] = SIR.SIR_network(networkx_graph, [i] , epidemic_threshold, 1, 1, CONFIG['cache_size_level_3']) + 1
+                    spreading_power_list[i] = SIR.SIR_network(networkx_graph, [i] , epidemic_threshold, 1, 1, 1)
                 pickle.dump(spreading_power_list, open(curr_social_metric_path, "wb"))
                 
             # spreading_power_list = [1.0 for x in range(self.make_trace.G.number_of_nodes())]
@@ -249,7 +251,6 @@ class Main:
                                 int(nearest_distance) * CONFIG['params'][0] + \
                                 media_size * CONFIG['params'][1] + \
                                 page_rank_metrics[str(user_id)] * CONFIG['params'][2]
-                    # print(CONFIG['params'][0], CONFIG['params'][1], CONFIG['params'][2])
 
                 elif caching_policy == "Degree":
                     # print(degree_metrics[str(user_id)])
