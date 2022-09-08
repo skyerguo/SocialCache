@@ -161,6 +161,7 @@ class Main:
         elif caching_policy == "Degree":
             '''To use it, remember the key is str type, and the value is bool'''
             degree_metrics = self.make_trace.G.in_degree()
+            # print("degree_metrics: ", degree_metrics)
 
         elif caching_policy == "BetweennessCentrality":
             curr_social_metric_path = self.social_metric_dict_path + 'BetweennessCentrality.pkl'
@@ -169,6 +170,7 @@ class Main:
             else:
                 betweenness_centrality_metrics = eg.functions.centrality.betweenness.betweenness_centrality(self.make_trace.G)
                 pickle.dump(betweenness_centrality_metrics, open(curr_social_metric_path, "wb"))
+            # print("betweenness_centrality_metrics: ", betweenness_centrality_metrics)
 
         elif caching_policy == "LaplacianCentrality":
             curr_social_metric_path = self.social_metric_dict_path + 'LaplacianCentrality.pkl'
@@ -177,6 +179,7 @@ class Main:
             else:
                 laplacian_centrality_metrics = eg.functions.not_sorted.laplacian(self.make_trace.G)
                 pickle.dump(laplacian_centrality_metrics, open(curr_social_metric_path, "wb"))
+            # print("laplacian_centrality_metrics: ", laplacian_centrality_metrics)
 
         elif caching_policy == "EffectiveSize":
             curr_social_metric_path = self.social_metric_dict_path + 'EffectiveSize.pkl'
@@ -189,27 +192,29 @@ class Main:
                 # constraint_metrics = eg.functions.structural_holes.evaluation.constraint(self.make_trace.biG) 
                 effective_size_metrics = networkx.effective_size(networkx_graph)
                 pickle.dump(effective_size_metrics, open(curr_social_metric_path, "wb"))
+            # print("effective_size_metrics: ", effective_size_metrics)
 
         elif caching_policy == "LRU-social":
             curr_social_metric_path = self.social_metric_dict_path + 'LRUSocial.pkl'
-            if os.path.exists(curr_social_metric_path):
-                spreading_power_list = pickle.load(open(curr_social_metric_path, "rb"))
-            else:
-                all_degree_dict = self.make_trace.G.degree()
-                parameter_k = np.mean(list(all_degree_dict.values()))
-                epidemic_threshold = parameter_k / (parameter_k * parameter_k - parameter_k)
-                print("epidemic_threshold: ", epidemic_threshold)
+            # if os.path.exists(curr_social_metric_path):
+            #     spreading_power_list = pickle.load(open(curr_social_metric_path, "rb"))
+            # else:
+            all_degree_dict = self.make_trace.G.degree()
+            parameter_k = np.mean(list(all_degree_dict.values()))
+            epidemic_threshold = parameter_k / (parameter_k * parameter_k - parameter_k)
+            # print("epidemic_threshold: ", epidemic_threshold)
 
-                adj_matrix = util.generate_adj_matrix_graph("data/traces/" + self.make_trace.dir_name + "/relations.txt", len(self.make_trace.G.nodes))
-                networkx_graph = networkx.DiGraph(adj_matrix)
-                spreading_power_list = [0 for _ in range(len(self.make_trace.G.nodes))]
-                for i in range(len(self.make_trace.G.nodes)):
-                    # spreading_power_list[i] = SIR.SIR_network(networkx_graph, [i] , epidemic_threshold, 1, 1, CONFIG['cache_size_level_3']) + 1
-                    spreading_power_list[i] = SIR.SIR_network(networkx_graph, [i] , epidemic_threshold, 1, 1, 1)
-                pickle.dump(spreading_power_list, open(curr_social_metric_path, "wb"))
+            adj_matrix = util.generate_adj_matrix_graph("data/traces/" + self.make_trace.dir_name + "/relations.txt", len(self.make_trace.G.nodes))
+            networkx_graph = networkx.DiGraph(adj_matrix)
+            spreading_power_list = [0 for _ in range(len(self.make_trace.G.nodes))]
+            for i in range(len(self.make_trace.G.nodes)):
+                spreading_number = SIR.SIR_network(networkx_graph, [i] , epidemic_threshold, 1, 1)
+                spreading_power_list[i] = (spreading_number - 1) / CONFIG['cache_size_level_3'] + 1 # 如果没有传播，设置为1，即和LRU等同。
+                # spreading_power_list[i] = SIR.SIR_network(networkx_graph, [i] , epidemic_threshold, 1, 1, 1)
+            pickle.dump(spreading_power_list, open(curr_social_metric_path, "wb"))
                 
             # spreading_power_list = [1.0 for x in range(self.make_trace.G.number_of_nodes())]
-            print("spreading_power_list: ", spreading_power_list)
+            # print("spreading_power_list: ", spreading_power_list)
 
         f_in = open("data/traces/" + self.trace_dir + "/all_timeline.txt", "r")
         f_out_find = open(self.result_path + 'find_log.txt', 'w')

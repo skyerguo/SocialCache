@@ -14,7 +14,19 @@ ANALYZE_CMD="python3 -m code.analyze.get_media_size -n 0"
 LOG_FILENAME="./optimize.log"
 
 init_list = {
-    "PageRank": [[0,10.5,1010000], [0,0,0]]
+    "PageRank": [[0,10.5,1010000], [0,0,0]],
+    "Degree": [[0,50,5], [0,0,0]],
+    "BetweennessCentrality": [[0,50,50000], [0,0,0]],
+    "LaplacianCentrality": [[0,50,50000], [0,0,0]],
+    "EffectiveSize": [[0, 60, 102], [0,0,0]]
+}
+
+step_social = {
+    "PageRank": 10000,
+    "Degree": 1,
+    "BetweennessCentrality": 1000,
+    "LaplacianCentrality": 1000,
+    "EffectiveSize": 1
 }
 
 class hill_climb_optimize():
@@ -32,7 +44,7 @@ class hill_climb_optimize():
         # define step length
         self.step_len0 = 1        # location
         self.step_len1 = 0.5      # media_size
-        self.step_len2 = 10000      # social_metric
+        self.step_len2 = step_social[self.init_config['caching_policy']]      # social_metric
         self.step_list = [self.step_len0, self.step_len1, self.step_len2]
 
         # debug switch
@@ -208,6 +220,6 @@ class hill_climb_optimize():
 if __name__ == "__main__":
     optimize = hill_climb_optimize()
     optimize.hill_climb_specific_point(init_list[optimize.init_config['caching_policy']])
-    # optimize.hill_climb(7)
+    optimize.hill_climb(8)
     # optimize.visualize()
     optimize.savelog()
