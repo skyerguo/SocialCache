@@ -19,7 +19,7 @@ import code.util.simple_httpserver as simple_httpserver
 class Build_network:
     def __init__(self):
         '''首先删除上一次拓扑'''
-        ret = subprocess.Popen("sudo mn -c", shell=True,stdout=subprocess.PIPE)
+        ret = subprocess.Popen("sudo mn -c", shell=True, stdout=subprocess.PIPE)
         data=ret.communicate() 
         ret.wait() 
 

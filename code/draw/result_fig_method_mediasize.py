@@ -14,10 +14,10 @@ raw_data = {
         'Level 3', 'Level 3', 'Level 3', 'Level 3', 'Level 3'
     ],
     'Method': [
-        'RAND', 'FIFO', 'LRU', 'LRU-social', 'SocCache', 
-        'RAND', 'FIFO', 'LRU', 'LRU-social', 'SocCache', 
-        'RAND', 'FIFO', 'LRU', 'LRU-social', 'SocCache', 
-        'RAND', 'FIFO', 'LRU', 'LRU-social', 'SocCache'
+        'RAND', 'FIFO', 'LRU', 'LRU-social', 'SocialCache', 
+        'RAND', 'FIFO', 'LRU', 'LRU-social', 'SocialCache', 
+        'RAND', 'FIFO', 'LRU', 'LRU-social', 'SocialCache', 
+        'RAND', 'FIFO', 'LRU', 'LRU-social', 'SocialCache'
     ],
     'Media File Size': [
         489575848, 415480796, 397356592, 481480978, 394841358, 
