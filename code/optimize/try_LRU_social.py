@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 
 SIMULATION_CMD="sudo python3 -m code.main.main"
 ANALYZE_CMD="python3 -m code.analyze.get_media_size -n 0"
-BETTER_NUMBER = 10
+BETTER_NUMBER = 5
 
 for i in range(BETTER_NUMBER):
     res = 1e18
