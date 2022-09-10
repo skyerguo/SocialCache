@@ -4,7 +4,8 @@ import seaborn as sns
 import json
 import pandas as pd
 import numpy as np
-result_path = 'figures/parameter_fine_tune.pdf'
+import matplotlib as mpl
+result_path = 'figures/parameter_fine_tune.eps'
 
 optimize_log_name = {
     "Degree": "optimize.log2022-09-08 22:04:57",
@@ -50,9 +51,11 @@ def fetch_data(max_len=0):
 
 if __name__ == '__main__':
     df = fetch_data(161)
+    mpl.rcParams['figure.figsize'] = (6, 5)
     plt.rcParams["font.family"] = "Times New Roman"
+    plt.rcParams["font.size"] = 14
     g = sns.lineplot(data=df)
     g.spines['top'].set_visible(False)
     g.spines['right'].set_visible(False)
     g.legend(loc='upper right', frameon=False, title=None)
-    plt.savefig(result_path, dpi=600, bbox_inches='tight')
+    plt.savefig(result_path, dpi=600, bbox_inches='tight', format='eps')
