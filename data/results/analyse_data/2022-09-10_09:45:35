@@ -1,0 +1,21 @@
+caching_policy:  Degree
+cache_size_level_3:  5
+cache_size_level_2:  50
+cache_size_level_1:  1000000
+parameters:  [0, 56, 13]
+dataset:  gtc_short_trace
+------
+三级CDN缓存命中率:  0.06889335105630816
+二级CDN缓存命中率:  0.48233757555508305
+一级CDN缓存命中率:  1.0
+总缓存命中率:  0.4144037503662467
+二三级缓存命中率:  0.2682405319117776
+------
+total_media_size:  8629990.313476562
+insert_all_media_size:  4222533.9189453125
+level 1; media szie: 1408218.2529296875
+level 2; media szie: 4222533.9189453125
+level 3; media szie: 2999238.1416015625
+------
+time_duration:  4.039489
+------
