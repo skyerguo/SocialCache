@@ -1,9 +1,10 @@
-import seaborn as sns
-import matplotlib.pyplot as plt
 import os
-import json
-import pandas as pd
+import pandas as pd 
 import numpy as np
+import matplotlib.pyplot as plt
+import scipy
+import seaborn as sns
+import matplotlib as mpl
 import math
 
 raw_data = {
@@ -17,13 +18,13 @@ raw_data = {
         'RAND', 'FIFO', 'LRU', 'LRU-social', 'SocialCache', 
         'RAND', 'FIFO', 'LRU', 'LRU-social', 'SocialCache', 
     ],
-    'Media File Size (Bytes)': [
-        4156979, 2445467, 2638787, 2613263, 2201197, 
+    'Media File Size (KB)': [
+        4385835, 3190920, 3467542, 3500678, 3543355, 
         13072837, 10834993, 10019583, 10007388, 8491286,
         136898589, 129580451, 131342355, 131635447, 125001941 
     ]
 }
-result_path = './figures/results/result_fig_dataset_mediasize.pdf'
+result_path = './figures/results/result_fig_dataset_mediasize.eps'
 
 if __name__ == '__main__':
     df = pd.DataFrame.from_dict(raw_data)

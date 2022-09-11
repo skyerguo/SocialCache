@@ -1,11 +1,13 @@
 import os
-import matplotlib.pyplot as plt
-import seaborn as sns
-import json
-import pandas as pd
+import pandas as pd 
 import numpy as np
-result_path = 'figures/mediasize_distribution.png'
+import matplotlib.pyplot as plt
+import scipy
+import seaborn as sns
+import matplotlib as mpl
+import math
 
+result_path = 'figures/mediasize_distribution.png'
 
 def calc_mediasize(data_path):
     f_out = open(data_path, 'w')
@@ -17,31 +19,29 @@ def calc_mediasize(data_path):
                 print(media_size, file=f_out)
     f_out.close()
 
-trace_data_path = "data/traces/gtc_long_trace/mediasize.txt"
-if not os.path.exists(trace_data_path):
-    calc_mediasize(trace_data_path)
-trace_data = np.loadtxt(trace_data_path, dtype='int')
-trace_data_dict = {'Trace Media Size (KB)': trace_data}
-
-origin_data_path = 'code/util/media_size_sample/population'
-origin_data = np.loadtxt(origin_data_path, dtype='int') / 1024
-origin_data_dict = {'Origin Media Size (KB)': origin_data}
-
-# df1 = pd.DataFrame(origin_data, columns=['Origin Media Size (KB)'])
-# df2 = pd.DataFrame(trace_data, columns=['Trace Media Size (KB)'])
-df = pd.concat([])
-
 if __name__ == '__main__':
-    plt.rcParams["font.family"] = "Times New Roman"
-    plt.rcParams["font.size"] = 14 
-    plt.figure(figsize=(10, 6))
+    trace_data_path = "data/traces/gtc_long_trace/mediasize.txt"
+    if not os.path.exists(trace_data_path):
+        calc_mediasize(trace_data_path)
+    trace_data = np.loadtxt(trace_data_path, dtype='int')
+    trace_data_dict = {'Media File Size (KB)': trace_data, 'Kind': ['Trace' for _ in range(len(trace_data))]}
 
-    # g = sns.distplot(df1)
-    # g = sns.distplot(df2)
+    origin_data_path = 'code/util/media_size_sample/population'
+    origin_data = np.loadtxt(origin_data_path, dtype='int') / 1024
+    origin_data_dict = {'Media File Size (KB)': origin_data, 'Kind': ['Origin' for _ in range(len(origin_data))]}
+
+    df1 = pd.DataFrame(origin_data_dict)
+    df2 = pd.DataFrame(trace_data_dict)
+    df = pd.concat([df1, df2])
+    ## 弄成两列，一列是Size，另一列是对等长度的Kind
+
+    mpl.rcParams['figure.figsize'] = (6, 5)
+    plt.rcParams["font.family"] = "Times New Roman"
+    plt.rcParams["font.size"] = 14
+
+    g = sns.displot(data=df, x="Media File Size (KB)", hue="Kind", col="Kind", kind="kde")
 
     # g.set_xscale("log")
-
-    # g = sns.histplot(data=df, x="Media Size (Bytes)", element="step", log_scale=False)
     # g.set_xlim(1)
     g.spines['top'].set_visible(False)
     g.spines['right'].set_visible(False)
