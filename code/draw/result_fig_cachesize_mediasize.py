@@ -51,6 +51,6 @@ if __name__ == '__main__':
     g.spines['top'].set_visible(False)
     g.spines['right'].set_visible(False)
     g.set_ylim(0)
-    g.legend(loc='upper right', frameon=False, title=None)
+    g.legend(loc='lower left', frameon=False, title=None)
 
     plt.savefig(result_path, dpi=600, bbox_inches='tight', format='eps')

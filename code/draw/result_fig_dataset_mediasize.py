@@ -40,6 +40,6 @@ if __name__ == '__main__':
     for i,thisbar in enumerate(g.patches):
         thisbar.set_hatch(hatches[math.floor(i/4)])
         thisbar.set_edgecolor(edgecolor_list[math.floor(i/4)])
-    g.legend(loc='upper right', frameon=False, title=None)
+    g.legend(loc='upper left', frameon=False, title=None)
 
     plt.savefig(result_path, dpi=600, bbox_inches='tight', format='eps')
