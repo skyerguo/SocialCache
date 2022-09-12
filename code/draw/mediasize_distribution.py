@@ -7,7 +7,7 @@ import seaborn as sns
 import matplotlib as mpl
 import math
 
-result_path = 'figures/mediasize_distribution.png'
+result_path = 'figures/mediasize_distribution.eps'
 
 def calc_mediasize(data_path):
     f_out = open(data_path, 'w')
@@ -32,17 +32,16 @@ if __name__ == '__main__':
 
     df1 = pd.DataFrame(origin_data_dict)
     df2 = pd.DataFrame(trace_data_dict)
-    df = pd.concat([df1, df2])
+    df = pd.concat([df1, df2]).reset_index()
     ## 弄成两列，一列是Size，另一列是对等长度的Kind
 
     mpl.rcParams['figure.figsize'] = (6, 5)
     plt.rcParams["font.family"] = "Times New Roman"
     plt.rcParams["font.size"] = 14
 
-    g = sns.displot(data=df, x="Media File Size (KB)", hue="Kind", col="Kind", kind="kde")
-
-    # g.set_xscale("log")
-    # g.set_xlim(1)
-    g.spines['top'].set_visible(False)
-    g.spines['right'].set_visible(False)
-    plt.savefig(result_path, dpi=600, bbox_inches='tight')
+    g = sns.displot(data=df1, x="Media File Size (KB)", kind="kde", aspect=1.2)
+    plt.xlim(0, 1000)
+    # g.set(xticks=range(0,1000,100))
+    plt.legend(["Origin Data"], loc='upper right', frameon=False, title=None)
+    
+    plt.savefig(result_path, dpi=600, bbox_inches='tight', format='eps')
