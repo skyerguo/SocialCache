@@ -1,0 +1,21 @@
+caching_policy:  EffectiveSize
+cache_size_level_3:  15
+cache_size_level_2:  150
+cache_size_level_1:  1000000
+parameters:  [0, 60, 103]
+dataset:  gtc_long_trace
+------
+三级CDN缓存命中率:  0.04400458445621534
+二级CDN缓存命中率:  0.16381746072891284
+一级CDN缓存命中率:  1.0
+总缓存命中率:  0.36292607248853315
+二三级缓存命中率:  0.10256329043762491
+------
+total_media_size:  115831643.07128906
+insert_all_media_size:  56935120.587890625
+level 1; media szie: 25600409.807617188
+level 2; media szie: 56935120.587890625
+level 3; media szie: 33296112.67578125
+------
+time_duration:  39.495034
+------

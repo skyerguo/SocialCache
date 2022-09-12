@@ -1,0 +1,21 @@
+caching_policy:  RAND
+cache_size_level_3:  20
+cache_size_level_2:  200
+cache_size_level_1:  1000000
+parameters:  [0, 6, 500]
+dataset:  gtc_long_trace
+------
+三级CDN缓存命中率:  0.010113682123718366
+二级CDN缓存命中率:  0.04560887456386025
+一级CDN缓存命中率:  1.0
+总缓存命中率:  0.3407590367168575
+二三级缓存命中率:  0.027771075428669276
+------
+total_media_size:  134083707.79785156
+insert_all_media_size:  66061152.951171875
+level 1; media szie: 32309850.795898438
+level 2; media szie: 66061152.951171875
+level 3; media szie: 35712704.05078125
+------
+time_duration:  36.873829
+------
