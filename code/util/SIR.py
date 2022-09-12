@@ -1,4 +1,5 @@
 import random
+import math
 
 '''
 程序主要功能
@@ -80,5 +81,5 @@ def SIR_network(graph, source, beta, gamma, step):
         sir = (i + r) / n  # 该节点的sir值为迭代结束后 感染节点数i+免疫节点数r
         sir_values.append(sir)  # 将本次迭代的sir值加入数组
 
-    return sir_values[-1] * n
+    return round(sir_values[-1] * n) ## 返回感染人数+免疫人数
 

@@ -35,6 +35,7 @@ class Main:
         self.use_http_server = use_http_server
 
         self.social_metric_dict_path = 'data/social_metric_dict/' + self.trace_dir + '/'
+        os.system("mkdir -p %s"%(self.social_metric_dict_path))
 
     def start_http_server(self, host, db, host_ip, temp_picture_path):
         '''
@@ -131,7 +132,8 @@ class Main:
         self.find_success_number = [0, 0, 0, 0]
         self.find_fail_number = [0, 0, 0, 0]
         
-        time.sleep(5) ## 等待5秒，让HTTP server启动
+        if self.use_http_server:
+            time.sleep(5) ## 等待5秒，让HTTP server启动
 
 
     def main(self, caching_policy):
@@ -154,10 +156,12 @@ class Main:
             else:
                 page_rank_metrics = eg.functions.not_sorted.pagerank(self.make_trace.G)
                 pickle.dump(page_rank_metrics, open(curr_social_metric_path, "wb"))
+            # print("page_rank_metrics: ", page_rank_metrics)
 
         elif caching_policy == "Degree":
             '''To use it, remember the key is str type, and the value is bool'''
             degree_metrics = self.make_trace.G.in_degree()
+            # print("degree_metrics: ", degree_metrics)
 
         elif caching_policy == "BetweennessCentrality":
             curr_social_metric_path = self.social_metric_dict_path + 'BetweennessCentrality.pkl'
@@ -166,6 +170,7 @@ class Main:
             else:
                 betweenness_centrality_metrics = eg.functions.centrality.betweenness.betweenness_centrality(self.make_trace.G)
                 pickle.dump(betweenness_centrality_metrics, open(curr_social_metric_path, "wb"))
+            # print("betweenness_centrality_metrics: ", betweenness_centrality_metrics)
 
         elif caching_policy == "LaplacianCentrality":
             curr_social_metric_path = self.social_metric_dict_path + 'LaplacianCentrality.pkl'
@@ -174,6 +179,7 @@ class Main:
             else:
                 laplacian_centrality_metrics = eg.functions.not_sorted.laplacian(self.make_trace.G)
                 pickle.dump(laplacian_centrality_metrics, open(curr_social_metric_path, "wb"))
+            # print("laplacian_centrality_metrics: ", laplacian_centrality_metrics)
 
         elif caching_policy == "EffectiveSize":
             curr_social_metric_path = self.social_metric_dict_path + 'EffectiveSize.pkl'
@@ -186,21 +192,28 @@ class Main:
                 # constraint_metrics = eg.functions.structural_holes.evaluation.constraint(self.make_trace.biG) 
                 effective_size_metrics = networkx.effective_size(networkx_graph)
                 pickle.dump(effective_size_metrics, open(curr_social_metric_path, "wb"))
+            # print("effective_size_metrics: ", effective_size_metrics)
 
         elif caching_policy == "LRU-social":
-            degree_dict = self.make_trace.G.degree()
-            parameter_k = np.mean(list(degree_dict.values()))
-            epidemic_threshold = parameter_k / (parameter_k * parameter_k - parameter_k)
-            print("epidemic_threshold: ", epidemic_threshold)
+            curr_social_metric_path = self.social_metric_dict_path + 'LRUSocial.pkl'
+            if os.path.exists(curr_social_metric_path):
+                spreading_power_list = pickle.load(open(curr_social_metric_path, "rb"))
+            else:
+                all_degree_dict = self.make_trace.G.degree()
+                parameter_k = np.mean(list(all_degree_dict.values()))
+                epidemic_threshold = parameter_k / (parameter_k * parameter_k - parameter_k)
+                # print("epidemic_threshold: ", epidemic_threshold)
 
-            adj_matrix = util.generate_adj_matrix_graph("data/traces/" + self.make_trace.dir_name + "/relations.txt", len(self.make_trace.G.nodes))
-            networkx_graph = networkx.DiGraph(adj_matrix)
-            
-            spreading_power_list = [0 for _ in range(len(self.make_trace.G.nodes))]
-            for i in range(len(self.make_trace.G.nodes)):
-                spreading_power_list[i] = SIR.SIR_network(networkx_graph, [i] , epidemic_threshold, 1, 20) + 1
-            # print("degree_dict: ", degree_dict)
-            print("spreading_power_list: ", spreading_power_list)
+                adj_matrix = util.generate_adj_matrix_graph("data/traces/" + self.make_trace.dir_name + "/relations.txt", len(self.make_trace.G.nodes))
+                networkx_graph = networkx.DiGraph(adj_matrix)
+                spreading_power_list = [0 for _ in range(len(self.make_trace.G.nodes))]
+                for i in range(len(self.make_trace.G.nodes)):
+                    spreading_number = SIR.SIR_network(networkx_graph, [i] , epidemic_threshold, 1, 1)
+                    spreading_power_list[i] = (spreading_number - 1) / CONFIG['cache_size_level_3'] + 1 # 如果没有传播，设置为1，即和LRU等同。
+                    # spreading_power_list[i] = SIR.SIR_network(networkx_graph, [i] , epidemic_threshold, 1, 1, 1)
+                pickle.dump(spreading_power_list, open(curr_social_metric_path, "wb"))
+                
+            # print("spreading_power_list: ", spreading_power_list)
 
         f_in = open("data/traces/" + self.trace_dir + "/all_timeline.txt", "r")
         f_out_find = open(self.result_path + 'find_log.txt', 'w')
@@ -229,7 +242,7 @@ class Main:
             if current_type == "post":
                 post_id = int(line.split('+')[4])
                 user_id = int(line.split('+')[3])
-                media_size = int(float(line.split('+')[1]))
+                media_size = float(line.split('+')[1])
 
                 if caching_policy == 'RAND':
                     sort_value = random.randint(0, 1000)
@@ -238,42 +251,40 @@ class Main:
                     sort_value = current_timestamp
 
                 elif caching_policy == 'PageRank':
-                    sort_value = current_timestamp * CONFIG['params'][0] + \
-                                page_rank_metrics[str(user_id)] * media_size * CONFIG['params'][1] + \
-                                int(nearest_distance) * CONFIG['params'][2]
-                    # print(CONFIG['params'][0], CONFIG['params'][1], CONFIG['params'][2])
+                    sort_value = current_timestamp + \
+                                int(nearest_distance) * CONFIG['params'][0] + \
+                                media_size * CONFIG['params'][1] + \
+                                page_rank_metrics[str(user_id)] * CONFIG['params'][2]
 
                 elif caching_policy == "Degree":
-                    # print(degree_metrics[str(user_id)])
-                    sort_value = current_timestamp * CONFIG['params'][0] + \
-                                degree_metrics[str(user_id)] * media_size * CONFIG['params'][1] + \
-                                int(nearest_distance) * CONFIG['params'][2]
+                    sort_value = current_timestamp + \
+                                int(nearest_distance) * CONFIG['params'][0] + \
+                                media_size * CONFIG['params'][1] + \
+                                degree_metrics[str(user_id)] * CONFIG['params'][2]
 
                 elif caching_policy == "BetweennessCentrality":
-                    # print(betweenness_centrality_metrics[str(user_id)])
-                    sort_value = current_timestamp * CONFIG['params'][0] + \
-                                betweenness_centrality_metrics[str(user_id)] * media_size * CONFIG['params'][1] + \
-                                int(nearest_distance) * CONFIG['params'][2]
+                    sort_value = current_timestamp + \
+                                int(nearest_distance) * CONFIG['params'][0] + \
+                                media_size * CONFIG['params'][1] + \
+                                betweenness_centrality_metrics[str(user_id)] * CONFIG['params'][2]
                     
                 elif caching_policy == "LaplacianCentrality":
-                    # print(laplacian_centrality_metrics[str(user_id)])
-                    sort_value = current_timestamp * CONFIG['params'][0] + \
-                                laplacian_centrality_metrics[str(user_id)] * media_size * CONFIG['params'][1] + \
-                                int(nearest_distance) * CONFIG['params'][2]
+                    sort_value = current_timestamp + \
+                                int(nearest_distance) * CONFIG['params'][0] + \
+                                media_size * CONFIG['params'][1] + \
+                                laplacian_centrality_metrics[str(user_id)] * CONFIG['params'][2]
 
                 elif caching_policy == "EffectiveSize":
                     if math.isnan(effective_size_metrics[user_id]):
                         effective_size_metrics[user_id] = 0
-                    # print(constraint_metrics[user_id])
-                    sort_value = current_timestamp * CONFIG['params'][0] + \
-                                effective_size_metrics[user_id] * media_size * CONFIG['params'][1] + \
-                                int(nearest_distance) * CONFIG['params'][2]    
+                    sort_value = current_timestamp + \
+                                int(nearest_distance) * CONFIG['params'][0] + \
+                                media_size * CONFIG['params'][1] + \
+                                effective_size_metrics[user_id] * CONFIG['params'][2]
                     
-                elif caching_policy == "LRU-social":
-                    '''LRU-social can adjust the sort_value automatically'''
+                elif caching_policy == "LRU-social" or caching_policy == "LRU-label":
+                    '''LRU-social and LRU-label can adjust the sort_value automatically'''
                     sort_value = 0
-
-                # print(sort_value, current_timestamp)
                     
                 '''记录redis_object，使用json形式保存'''
                 temp_redis_object = {
@@ -292,18 +303,22 @@ class Main:
                 
                 '''往第三层级插入，后续的调整都由redis内部完成'''
                 if caching_policy == "LRU-social":
-                    self.build_network.level_3_host[selected_level_3_id].redis_cache.insert(picture_hash=post_id, redis_object=temp_redis_object, need_uplift=True, use_LRU_social=True, first_insert=True, lru_social_parameter_sp=spreading_power_list[user_id])
+                    self.build_network.level_3_host[selected_level_3_id].redis_cache.insert(picture_hash=post_id, redis_object=temp_redis_object, need_uplift=True, use_LRU_label=False, use_LRU_social=True, first_insert=True, lru_social_parameter_sp=spreading_power_list[user_id])
+                elif caching_policy == "LRU-label":
+                    self.build_network.level_3_host[selected_level_3_id].redis_cache.insert(picture_hash=post_id, redis_object=temp_redis_object, need_uplift=True, use_LRU_label=True, use_LRU_social=False)
                 else:
-                    self.build_network.level_3_host[selected_level_3_id].redis_cache.insert(picture_hash=post_id, redis_object=temp_redis_object, need_uplift=True, use_LRU_social=False)
+                    self.build_network.level_3_host[selected_level_3_id].redis_cache.insert(picture_hash=post_id, redis_object=temp_redis_object, need_uplift=True, use_LRU_label=False, use_LRU_social=False)
 
             elif current_type == "view":
                 post_id = int(line.split('+')[1])
                 # user_id = int(line.split('+')[3])
                 '''往第三层级查询，后续的调整都由redis内部完成，这里先假设只有一个user节点'''
                 if caching_policy == "LRU-social":
-                    find_result = self.build_network.level_3_host[selected_level_3_id].redis_cache.find(picture_hash=post_id, user_host=self.build_network.user_host[0], current_timestamp=current_timestamp, need_update_cache=need_update_cache, config_timestamp=CONFIG['params'][0], use_LRU_social=True)
+                    find_result = self.build_network.level_3_host[selected_level_3_id].redis_cache.find(picture_hash=post_id, user_host=self.build_network.user_host[0], current_timestamp=current_timestamp, need_update_cache=need_update_cache, config_timestamp=1, use_LRU_label=False, use_LRU_social=True)
+                elif caching_policy == "LRU-label":
+                    find_result = self.build_network.level_3_host[selected_level_3_id].redis_cache.find(picture_hash=post_id, user_host=self.build_network.user_host[0], current_timestamp=current_timestamp, need_update_cache=need_update_cache, config_timestamp=1, use_LRU_label=True, use_LRU_social=False)
                 else:
-                    find_result = self.build_network.level_3_host[selected_level_3_id].redis_cache.find(picture_hash=post_id, user_host=self.build_network.user_host[0], current_timestamp=current_timestamp, need_update_cache=need_update_cache, config_timestamp=CONFIG['params'][0], use_LRU_social=False)
+                    find_result = self.build_network.level_3_host[selected_level_3_id].redis_cache.find(picture_hash=post_id, user_host=self.build_network.user_host[0], current_timestamp=current_timestamp, need_update_cache=need_update_cache, config_timestamp=1, use_LRU_label=False, use_LRU_social=False)
                 result_level = find_result[0]
                 
                 if self.if_debug:
@@ -329,8 +344,6 @@ class Main:
         f_out_find.close()
         f_out_time.close()
 
-        # CLI(self.build_network.net)
-
         if self.use_http_server == True:
             for level_3_host_id in range(self.build_network.level_3_host_number):
                 for eth_port in range(self.build_network.level_2_host_number): # 对应第二层的每一个节点
@@ -344,22 +357,6 @@ class Main:
                 for eth_port in range(1): # 对应自己的switch
                     util.calculate_flow(host=self.build_network.level_1_host[level_1_host_id], eth_name='a%s-eth%s'%(str(level_1_host_id), str(eth_port)), flow_direction='TX', result_path=self.result_path+'flow/'+self.build_network.level_1_host_ip[level_1_host_id])
 
-        '''分析'''
-        print('缓存策略： *** %s ***'%(caching_policy))
-        if self.find_success_number[3] + self.find_fail_number[3] > 0:
-            print('三级CDN缓存命中率：', self.find_success_number[3] / (self.find_success_number[3] + self.find_fail_number[3]))
-        else:
-            print('未经过三级CDN缓存')
-
-        if self.find_success_number[2] + self.find_fail_number[2] > 0:
-            print('二级CDN缓存命中率：', self.find_success_number[2] / (self.find_success_number[2] + self.find_fail_number[2]))
-        else:
-            print('未经过二级CDN缓存')
-            
-        if self.find_success_number[1] + self.find_fail_number[1] > 0:
-            print('一级CDN缓存命中率：', self.find_success_number[1] / (self.find_success_number[1] + self.find_fail_number[1]))
-        else:
-            print('未经过一级CDN缓存')
 
     def run(self, caching_policy):
         self.main(caching_policy=caching_policy)

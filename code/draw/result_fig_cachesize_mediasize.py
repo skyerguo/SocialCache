@@ -1,42 +1,56 @@
 import os
-import matplotlib.pyplot as plt
-import seaborn as sns
-import json
-import pandas as pd
+import pandas as pd 
 import numpy as np
+import matplotlib.pyplot as plt
+import scipy
+import seaborn as sns
+import matplotlib as mpl
+import math
 
 raw_data = {
-    'Level 1 Cache Size': [
+    'L1 CDN Cache Size': [
         5, 5, 5, 5, 5,
         10, 10, 10, 10, 10,
+        15, 15, 15, 15, 15,
         20, 20, 20, 20, 20,
+        25, 25, 25, 25, 25,
         50, 50, 50, 50, 50,
+        75, 75, 75, 75, 75,
         100, 100, 100, 100, 100
     ],
     'Method': [
-        'RAND', 'FIFO', 'LRU', 'LRU-social', 'SocCache',
-        'RAND', 'FIFO', 'LRU', 'LRU-social', 'SocCache',
-        'RAND', 'FIFO', 'LRU', 'LRU-social', 'SocCache',
-        'RAND', 'FIFO', 'LRU', 'LRU-social', 'SocCache',
-        'RAND', 'FIFO', 'LRU', 'LRU-social', 'SocCache'
+        'RAND', 'FIFO', 'LRU', 'LRU-social', 'SocialCache',
+        'RAND', 'FIFO', 'LRU', 'LRU-social', 'SocialCache',
+        'RAND', 'FIFO', 'LRU', 'LRU-social', 'SocialCache',
+        'RAND', 'FIFO', 'LRU', 'LRU-social', 'SocialCache',
+        'RAND', 'FIFO', 'LRU', 'LRU-social', 'SocialCache',
+        'RAND', 'FIFO', 'LRU', 'LRU-social', 'SocialCache',
+        'RAND', 'FIFO', 'LRU', 'LRU-social', 'SocialCache',
+        'RAND', 'FIFO', 'LRU', 'LRU-social', 'SocialCache'
     ],
-    'Media File Size': [ ## Level 1
-        107579639, 88030325, 82564049, 104132987, 78867908,
-        107349735, 86603630, 74161487, 101827053, 70422700, 
-        106538623, 84837176, 64584126, 98767073, 62043814,
-        104220906, 80609286, 49250184, 92234825, 48244556,
-        101655824, 74832825, 35986053, 84831237, 35701844
+    'Media File Size (KB)': [
+        136898589, 129580451, 131342356, 131635447, 125001941,
+        135938238, 126947334, 127377876, 127647782, 119575117, 
+        135219910, 124954591, 124214721, 124075570, 115831643,
+        134083708, 123257532, 121431983, 121566200, 112971637,
+        133673496, 121799502, 119067295, 119203876, 110657800,
+        129778995, 115897593, 109840942, 110220227, 102244003,
+        126830329, 111121490, 103048312, 103268061, 96141512,
+        124006822, 107198527, 97511786, 97726852, 90978330
     ]
 }
-result_path = './figures/results/result_fig_cachesize_mediasize.pdf'
+result_path = './figures/results/result_fig_cachesize_mediasize.eps'
 
 if __name__ == '__main__':
     df = pd.DataFrame.from_dict(raw_data)
+    mpl.rcParams['figure.figsize'] = (6, 5)
     plt.rcParams["font.family"] = "Times New Roman"
-    # print(df)
-    g = sns.lineplot(x='Level 1 Cache Size', y='Media File Size', hue='Method', style='Method', data=df)
+    plt.rcParams["font.size"] = 14
 
+    g = sns.lineplot(x='L1 CDN Cache Size', y='Media File Size (KB)', hue='Method', style='Method', data=df)
     g.spines['top'].set_visible(False)
     g.spines['right'].set_visible(False)
-    g.set_ylim(0, 120000000)
-    plt.savefig(result_path, dpi=600, bbox_inches='tight')
+    g.set_ylim(0)
+    g.legend(loc='lower left', frameon=False, title=None)
+
+    plt.savefig(result_path, dpi=600, bbox_inches='tight', format='eps')

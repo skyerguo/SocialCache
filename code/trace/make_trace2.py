@@ -1,5 +1,6 @@
 import random
-import media_size_sample.media_size_sample as sp
+import argparse
+import code.util.media_size_sample.media_size_sample as sp
 import numpy as np
 import pandas as pd
 import networkx as nx
@@ -7,12 +8,13 @@ import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
 
 class gen_trace_data:
-    def __init__(self, edge_file="edges.dat", loc_file="loc.dat"):
+    def __init__(self, edge_file="edges.dat", loc_file="loc.dat", res_path="./"):
         # The number of clusters that users are divided into using the K-means algorithm
         self.cluster    = 7
 
         # Parameters of zipf distribution of user activities
         self.zipf_A     = 1.765
+        self.zipf_B     = 4.888
         self.zipf_size  = 10000
         
         # Inter-activity time distribution
@@ -20,8 +22,10 @@ class gen_trace_data:
         self.lognormal_theta    = 2.366
 
         self.pub_ratio  = 0.05
+        self.near_ratio = 10
         self.edge_file  = edge_file
         self.loc_file   = loc_file
+        self.res_path   = res_path
 
         self.media_size = sp.media_size_sample()
     
@@ -70,8 +74,7 @@ class gen_trace_data:
             repeat = [(longtitude, latitude)]*int(row["count"])
             self.location_list.extend(repeat)
             self.locations.append((longtitude, latitude))
-        #print(self.location_list)
-        print(self.locations)
+        # print(self.locations)
 
     def build_user_df(self):
         # calculate pagerank of user
@@ -95,7 +98,7 @@ class gen_trace_data:
         # zipf distribution
         x = np.random.zipf(a=self.zipf_A, size=self.zipf_size)
         level_nactivity = {}
-        for i in range(1, 8):
+        for i in range(1, self.cluster + 1):
             level_nactivity[i] = np.count_nonzero(x == i)
         
         self.user_df["activity_number"] = [level_nactivity[x] for x in self.user_df["influence_level"]]
@@ -105,7 +108,7 @@ class gen_trace_data:
         time_list       = []
         loc_list        = []
         media_size_list = []
-        kind_list = np.random.binomial(1, 0.05, activity_num)
+        kind_list = np.random.binomial(1, self.pub_ratio, activity_num)
         media_size_list = self.media_size.sample(activity_num)
         activity_interval = np.random.lognormal(self.lognormal_mu, self.lognormal_theta, activity_num)
         time = 0
@@ -151,10 +154,12 @@ class gen_trace_data:
         for loc in self.locations:
             position_post_dict[loc] = []
 
-        fd = open("all_timeline.txt", "w+")
+        fd = open(self.res_path + "all_timeline.txt", "w+")
         post_seq_num = -1
         last_view_id = -1
         last_user_id = -1
+
+        line_number = 0
 
         for rowidx, row in self.df_trace.iterrows():
             item_line = str(row["timestamp"])
@@ -163,13 +168,13 @@ class gen_trace_data:
 
             if row["publish"] == 1:
                 # get a post item
-                print("Get a post item")
+                # print("Get a post item")
                 post_seq_num += 1
 
                 user_postline_dict[curr_user_id].append(post_seq_num)
                 position_post_dict[row["location"]].append(post_seq_num)
                 item_line += "+%s+{'lat': '%.2f', 'lon': '%.2f'}+%d+%d+post"\
-                            %(str(row["media_size"] // 1024),\
+                            %(str(row["media_size"] / 1024),\
                             row["location"][0], row["location"][1],\
                             curr_user_id,\
                             post_seq_num)
@@ -177,11 +182,11 @@ class gen_trace_data:
                 #print("user %d current postline : " %curr_user_id, user_postline_dict[curr_user_id])
             else:
                 # get a view item
-                print("Get a view item")
+                # print("Get a view item")
                 viewid  = -1
 
-                coin = random.randint(1, 10)
-                if coin == 1:
+                coin = random.randint(1, 100)
+                if coin <= self.near_ratio:
                     # nearby view
                     # item_line += "+nearby"
                     loc_post_list = position_post_dict[row["location"]]
@@ -225,15 +230,29 @@ class gen_trace_data:
                     # ignore invalid view
                     continue
             fd.write(item_line + '\n')
+            line_number += 1
         fd.close()
+        print("line_number: ", line_number)
 
     def launch(self):
-        self.load_network(self.edge_file, draw=False)
+        self.load_network(self.edge_file, output_edge_filename = self.res_path + "relations.txt", draw=False)
         self.load_location(self.loc_file)
         self.build_user_df()
         self.build_user_activity()
         self.trans_trace2timeline()
     
 if __name__ == "__main__":
-    trace_data = gen_trace_data("./twitter_combined.txt", "../../data/static/user_country.csv")
+    argpar = argparse.ArgumentParser(description="Make trace data for the system.")
+    argpar.add_argument('-G', help="add 'big' to use full usernet")
+    args = argpar.parse_args()
+    print(type(args.G))
+    if args.G == 'big':
+        print("use big net")
+        usernet_filename = "./data/static/twitter_combined.txt"
+        res_path = "./data/traces/long_trace/"
+    else:
+        print("use litte net")
+        usernet_filename = "./data/static/twitter_single.txt"
+        res_path = "./data/traces/short_trace/"
+    trace_data = gen_trace_data(usernet_filename, "./data/static/user_country.csv", res_path)
     trace_data.launch()

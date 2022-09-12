@@ -66,12 +66,13 @@ def calculate_flow(host, eth_name, flow_direction, result_path=''):
     export_path = result_path + '/%s_%s.log' % (str(flow_direction), str(eth_name))
     host.cmd("ifconfig %s | grep %s | grep bytes | awk '{print $5}' > %s"%(str(eth_name), str(flow_direction), str(export_path)))
 
-'''生成临接表'''
+'''生成接表'''
 def generate_adj_matrix_graph(relation_file_path, nodes_number):
     A = np.zeros((nodes_number, nodes_number), int)
     f_in = open(relation_file_path, "r")
     for line in f_in:
-        A[int(line.strip().split(' ')[1])][int(line.strip().split(' ')[0])] = 1
+        A[int(line.strip().split(' ')[1])][int(line.strip().split(' ')[0])] = 1 ## 原图是关注，为了SIR传播，需要改为反向图，发送关系。
+        # A[int(line.strip().split(' ')[0])][int(line.strip().split(' ')[1])] = 1
     f_in.close()
 
     return A

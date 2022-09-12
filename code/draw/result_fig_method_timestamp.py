@@ -7,7 +7,7 @@ import numpy as np
 
 raw_data = {
     'Method': [
-        'RAND', 'FIFO', 'LRU', 'LRU-social', 'SocCache'
+        'RAND', 'FIFO', 'LRU', 'LRU-social', 'SocialCache'
     ],
     'Timestamp': [
         1756.533695, 1448.979625, 1215.642967, 1889.90346, 1800.42668

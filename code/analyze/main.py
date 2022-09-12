@@ -39,6 +39,7 @@ config_json = json.load(open(config_path, 'r'))
 def get_media_size():
     ## all = insert_all * 2 + insert[level_3];
     total_media_size = 0
+    insert_all_media_size = 0
     media_size_each_level = [0 for _ in range(3)]
     for ip_address in os.listdir(media_size_path):
         curr_path = media_size_path + ip_address + '/'
@@ -47,9 +48,13 @@ def get_media_size():
             for line in open(curr_path + file_name, 'r'):
                 curr_media_size = line.strip()
                 if curr_media_size:
-                    total_media_size += int(curr_media_size)
-                    media_size_each_level[curr_level] += int(curr_media_size)
+                    total_media_size += float(curr_media_size)
+                    media_size_each_level[curr_level] += float(curr_media_size)
+                    if "insert" in file_name:
+                        insert_all_media_size += float(curr_media_size)
+
     print("total_media_size: ", total_media_size)
+    print("insert_all_media_size: ", insert_all_media_size)
     if args.detailOutput:
         for i in range(3):
             print("level %i; media szie: %s"%(i + 1, media_size_each_level[i]))
@@ -117,10 +122,10 @@ if __name__ == '__main__':
         sys.stdout = f_out
         pass
     print("caching_policy: ", config_json['caching_policy'])
-    print("cache_size_level_3: ", config_json['cache_size_level_3'])
-    print("cache_size_level_2: ", config_json['cache_size_level_2'])
-    print("cache_size_level_1: ", config_json['cache_size_level_1'])
     if args.parameters:
+        print("cache_size_level_3: ", config_json['cache_size_level_3'])
+        print("cache_size_level_2: ", config_json['cache_size_level_2'])
+        print("cache_size_level_1: ", config_json['cache_size_level_1'])
         print("parameters: ", config_json['params'])
     if args.dataset:
         print("dataset: ", config_json['trace_dir'])

@@ -13,6 +13,23 @@ SIMULATION_CMD="sudo python3 -m code.main.main"
 ANALYZE_CMD="python3 -m code.analyze.get_media_size -n 0"
 LOG_FILENAME="./optimize.log"
 
+init_list = {
+    # "PageRank": [[0,10.5,1010000], [0,0,0]],
+    "PageRank": [],
+    "Degree": [[0,50,5], [0,0,0]],
+    "BetweennessCentrality": [[0,50,50000], [0,0,0]],
+    "LaplacianCentrality": [[0,50,50000], [0,0,0]],
+    "EffectiveSize": [[0, 60, 102], [0,0,0]]
+}
+
+step_social = {
+    "PageRank": 10000,
+    "Degree": 1,
+    "BetweennessCentrality": 1000,
+    "LaplacianCentrality": 1000,
+    "EffectiveSize": 1
+}
+
 class hill_climb_optimize():
     def __init__(self) -> None:
         self.json_config    = json.load(open(CONFIG_FILE_PATH, "r"))
@@ -26,16 +43,17 @@ class hill_climb_optimize():
         self.iteration_time = 0
 
         # define step length
-        self.step_len0 = 1        # timestamp
-        self.step_len1 = 10          # pagerank * media_size
-        self.step_len2 = 1        # nearest
+        self.step_len0 = 1        # location
+        self.step_len1 = 0.5      # media_size
+        self.step_len2 = step_social[self.init_config['caching_policy']]      # social_metric
         self.step_list = [self.step_len0, self.step_len1, self.step_len2]
 
         # debug switch
         self.debug = False
 
         # init logfile
-        self.log_filename = LOG_FILENAME + "%s" %time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
+        self.start_timestamp = time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
+        self.log_filename = LOG_FILENAME + "%s" %(self.start_timestamp)
         with open(self.log_filename, "w") as log_fd:
             log_fd.write("\n")
         
@@ -56,7 +74,7 @@ class hill_climb_optimize():
         os.system(SIMULATION_CMD)
 
         # run analyzation
-        res = int(subprocess.getoutput(ANALYZE_CMD))
+        res = float(subprocess.getoutput(ANALYZE_CMD))
         
         print("******* simulator done, get res ", res)
         return res
@@ -117,9 +135,9 @@ class hill_climb_optimize():
 
         if not params:
             # randomly init status
-            param0 = round(random.uniform(-10, 10), 1)
-            param1 = random.randint(-100, 100)
-            param2 = round(random.uniform(-10, 10), 1)
+            param0 = round(random.uniform(0, 200), 1)
+            param1 = round(random.uniform(0, 100), 1)
+            param2 = round(random.uniform(0, 500000), 1)
 
             self.init_config["params"]  = [param0, param1, param2]
         else:
@@ -155,8 +173,8 @@ class hill_climb_optimize():
         # save to dataframe
         self.log_df = pd.concat([self.log_df, pd.Series([x['traffic'] for x in self.climb_path], name="iter%d" %self.iteration_time)], axis=1)
 
-    def hill_climb(self):
-        for i in range(10):
+    def hill_climb(self, seed_num=10):
+        for i in range(seed_num):
             # reset status
             self.reset()
 
@@ -190,7 +208,7 @@ class hill_climb_optimize():
             self.record()
     
     def savelog(self):
-        self.log_df.to_csv("./optimze.csv")
+        self.log_df.to_csv("./optimze_%s.csv"%(self.start_timestamp))
 
     def visualize(self):
         print(self.log_df)
@@ -198,14 +216,11 @@ class hill_climb_optimize():
         print("ploting result")
         plt.figure()
         self.log_df.plot.line(xlabel="iterations", ylabel="traffic",title="hill-climbing optimization", grid=True)
-        plt.savefig("./figures/hill_climbing/opt_%s.png" %self.end_time)
+        plt.savefig("./code/figures/hil_climbing/opt_%s.png" %self.end_time)
 
 if __name__ == "__main__":
     optimize = hill_climb_optimize()
-    optimize.hill_climb_specific_point([[1, 100, 0]])
-    #optimize.hill_climb()
-    optimize.visualize()
+    optimize.hill_climb_specific_point(init_list[optimize.init_config['caching_policy']])
+    optimize.hill_climb(3)
+    # optimize.visualize()
     optimize.savelog()
-
-    #social_config_list = ["PageRank","Degree","BetweennessCentrality","LaplacianCentrality","EffectiveSize"]
-    #for social in social_config_list:

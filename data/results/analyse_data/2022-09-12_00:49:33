@@ -1,0 +1,21 @@
+caching_policy:  PageRank
+cache_size_level_3:  15
+cache_size_level_2:  150
+cache_size_level_1:  1000000
+parameters:  [0, 64.5, 310000]
+dataset:  gtc_long_trace
+------
+三级CDN缓存命中率:  0.021636774773100394
+二级CDN缓存命中率:  0.14043280723139515
+一级CDN缓存命中率:  1.0
+总缓存命中率:  0.3546939291227415
+二三级缓存命中率:  0.08038517242729087
+------
+total_media_size:  117238317.13769531
+insert_all_media_size:  57638457.62109375
+level 1; media szie: 26162478.896484375
+level 2; media szie: 57638457.62109375
+level 3; media szie: 33437380.620117188
+------
+time_duration:  40.351563
+------
