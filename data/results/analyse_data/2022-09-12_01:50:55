@@ -1,0 +1,21 @@
+caching_policy:  FIFO
+cache_size_level_3:  50
+cache_size_level_2:  500
+cache_size_level_1:  1000000
+parameters:  [0, 6, 500]
+dataset:  gtc_long_trace
+------
+三级CDN缓存命中率:  0.09523898026825264
+二级CDN缓存命中率:  0.17249832240040536
+一级CDN缓存命中率:  1.0
+总缓存命中率:  0.3768675272643221
+二三级缓存命中率:  0.13193714893464778
+------
+total_media_size:  115897592.77050781
+insert_all_media_size:  56968095.4375
+level 1; media szie: 25942804.478515625
+level 2; media szie: 56968095.4375
+level 3; media szie: 32986692.854492188
+------
+time_duration:  34.337641
+------

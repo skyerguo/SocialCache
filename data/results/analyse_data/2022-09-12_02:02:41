@@ -1,0 +1,21 @@
+caching_policy:  LRU-social
+cache_size_level_3:  50
+cache_size_level_2:  500
+cache_size_level_1:  1000000
+parameters:  [0, 6, 500]
+dataset:  gtc_long_trace
+------
+三级CDN缓存命中率:  0.09019298082582164
+二级CDN缓存命中率:  0.28354209721735163
+一级CDN缓存命中率:  1.0
+总缓存命中率:  0.390374085825949
+二三级缓存命中率:  0.18230196433987572
+------
+total_media_size:  110220227.22753906
+insert_all_media_size:  54129412.666015625
+level 1; media szie: 22939748.71484375
+level 2; media szie: 54129412.666015625
+level 3; media szie: 33151065.846679688
+------
+time_duration:  829.685099
+------

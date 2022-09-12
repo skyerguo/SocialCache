@@ -21,7 +21,7 @@ raw_data = {
     'Media File Size (KB)': [
         4385835, 3190920, 3467542, 3500678, 3543355, 
         13072837, 10834993, 10019583, 10007388, 8491286,
-        136898589, 129580451, 131342355, 131635447, 125001941 
+        136898589, 129580451, 131342356, 131635447, 125001941 
     ]
 }
 result_path = './figures/results/result_fig_dataset_mediasize.eps'
@@ -32,7 +32,7 @@ if __name__ == '__main__':
     plt.rcParams["font.family"] = "Times New Roman"
     plt.rcParams["font.size"] = 14
     edgecolor_list = ["#cb364a", "#509a80", "#a05d46", "#5091c0", "#684e94"]
-    # print(df)
+    
     g = sns.barplot(x='Dataset', y='Media File Size (KB)', hue='Method', data=df, facecolor=(0, 0, 0, 0))
     g.spines['top'].set_visible(False)
     g.spines['right'].set_visible(False)

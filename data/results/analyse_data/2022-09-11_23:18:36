@@ -1,4 +1,4 @@
-caching_policy:  LRU-label
+caching_policy:  LRU
 cache_size_level_3:  10
 cache_size_level_2:  100
 cache_size_level_1:  1000000
@@ -17,5 +17,5 @@ level 1; media szie: 29659573.700195312
 level 2; media szie: 62708236.97363281
 level 3; media szie: 35010065.16894531
 ------
-time_duration:  626.872221
+time_duration:  37.601876
 ------
