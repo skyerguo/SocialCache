@@ -57,5 +57,7 @@ if __name__ == '__main__':
     g = sns.lineplot(data=df)
     g.spines['top'].set_visible(False)
     g.spines['right'].set_visible(False)
+    plt.xlabel('Iterations')
+    plt.ylabel('Media File Size (KB)')
     g.legend(loc='upper right', frameon=False, title=None)
     plt.savefig(result_path, dpi=600, bbox_inches='tight', format='eps')
