@@ -1,0 +1,21 @@
+caching_policy:  LRU-label
+cache_size_level_3:  15
+cache_size_level_2:  150
+cache_size_level_1:  1000000
+parameters:  [0, 6, 500]
+dataset:  naive
+------
+三级CDN缓存命中率:  0.17409326424870467
+二级CDN缓存命中率:  0.8684840880574883
+一级CDN缓存命中率:  1.0
+总缓存命中率:  0.5169223277331385
+二三级缓存命中率:  0.4881849138375813
+------
+total_media_size:  2364660.102687221
+insert_all_media_size:  1154798.9361586373
+level 1; media szie: 176169.7195520064
+level 2; media szie: 1154798.9361586433
+level 3; media szie: 1033691.4469765092
+------
+time_duration:  3.975359
+------

@@ -1,0 +1,21 @@
+caching_policy:  PageRank
+cache_size_level_3:  15
+cache_size_level_2:  150
+cache_size_level_1:  1000000
+parameters:  [0, 64.5, 310000]
+dataset:  naive
+------
+三级CDN缓存命中率:  0.0842832469775475
+二级CDN缓存命中率:  0.4093481019169439
+一级CDN缓存命中率:  1.0
+总缓存命中率:  0.4070688993992075
+二三级缓存命中率:  0.23966495098842736
+------
+total_media_size:  2509495.474091188
+insert_all_media_size:  1227216.6218606634
+level 1; media szie: 297817.0386714986
+level 2; media szie: 1227216.6218606434
+level 3; media szie: 984461.8135590149
+------
+time_duration:  4.121962
+------

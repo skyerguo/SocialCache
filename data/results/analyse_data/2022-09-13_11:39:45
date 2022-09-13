@@ -1,0 +1,21 @@
+caching_policy:  FIFO
+cache_size_level_3:  15
+cache_size_level_2:  150
+cache_size_level_1:  1000000
+parameters:  [0, 6, 500]
+dataset:  naive
+------
+三级CDN缓存命中率:  0.2355471816611713
+二级CDN缓存命中率:  0.8694544857048965
+一级CDN缓存命中率:  1.0
+总缓存命中率:  0.5364091161756531
+二三级缓存命中率:  0.5101888269946074
+------
+total_media_size:  2214202.1869713194
+insert_all_media_size:  1079569.9783006804
+level 1; media szie: 166133.11709490465
+level 2; media szie: 1079569.9783006841
+level 3; media szie: 968499.0915756593
+------
+time_duration:  2.711416
+------
