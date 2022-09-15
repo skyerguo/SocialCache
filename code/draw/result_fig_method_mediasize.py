@@ -20,7 +20,7 @@ raw_data = {
         'RAND', 'FIFO', 'LRU', 'LRU-social', 'SocialCache', 
         'RAND', 'FIFO', 'LRU', 'LRU-social', 'SocialCache'
     ],
-    'Media File Size (KB)': [
+    'Network Traffic (KB)': [
         135219910, 124954591, 124214721, 124075570, 115831643,
         32807150, 29475154, 28437740, 28417154, 25600410,
         66629254, 61496594, 61126659, 61057084, 56935121, 
@@ -36,7 +36,7 @@ if __name__ == '__main__':
     plt.rcParams["font.size"] = 14
     edgecolor_list = ["#cb364a", "#509a80", "#a05d46", "#5091c0", "#684e94"]
     # print(df)
-    g = sns.barplot(x='CDN Level', y='Media File Size (KB)', hue='Method', data=df, facecolor=(0, 0, 0, 0))
+    g = sns.barplot(x='CDN Level', y='Network Traffic (KB)', hue='Method', data=df, facecolor=(0, 0, 0, 0))
     g.spines['top'].set_visible(False)
     g.spines['right'].set_visible(False)
     hatches = ['--', '**', 'xx', 'oo', '\\\\']

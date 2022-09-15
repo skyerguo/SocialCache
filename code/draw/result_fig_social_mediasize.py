@@ -20,7 +20,7 @@ raw_data = {
         'Degree', 'PageRank', 'Laplacian Centrality', 'Betweenness Centrality', 'Effective Size', 
         'Degree', 'PageRank', 'Laplacian Centrality', 'Betweenness Centrality', 'Effective Size'
     ],
-    'Media File Size (KB)': [
+    'Network Traffic (KB)': [
         116792540, 117238317, 117606166, 117523695, 115831643, 
         26052466, 26162479, 26309065, 26313111, 25600410, 
         57415569, 57638458, 57822382, 57781147, 56935121, 
@@ -37,7 +37,7 @@ if __name__ == '__main__':
     plt.rcParams["font.size"] = 14
     edgecolor_list = ["#cb364a", "#509a80", "#a05d46", "#5091c0", "#684e94"]
     # print(df)
-    g = sns.barplot(x='CDN Level', y='Media File Size (KB)', hue='OSN Connectivity Metric', data=df, facecolor=(0, 0, 0, 0))
+    g = sns.barplot(x='CDN Level', y='Network Traffic (KB)', hue='OSN Connectivity Metric', data=df, facecolor=(0, 0, 0, 0))
     g.spines['top'].set_visible(False)
     g.spines['right'].set_visible(False)
     hatches = ['--', '**', 'xx', 'oo', '\\\\']

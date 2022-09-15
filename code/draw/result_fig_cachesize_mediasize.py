@@ -28,7 +28,7 @@ raw_data = {
         'RAND', 'FIFO', 'LRU', 'LRU-social', 'SocialCache',
         'RAND', 'FIFO', 'LRU', 'LRU-social', 'SocialCache'
     ],
-    'Media File Size (KB)': [
+    'Network Traffic (KB)': [
         136898589, 129580451, 131342356, 131635447, 125001941,
         135938238, 126947334, 127377876, 127647782, 119575117, 
         135219910, 124954591, 124214721, 124075570, 115831643,
@@ -47,7 +47,7 @@ if __name__ == '__main__':
     plt.rcParams["font.family"] = "Times New Roman"
     plt.rcParams["font.size"] = 14
 
-    g = sns.lineplot(x='L1 CDN Cache Size', y='Media File Size (KB)', hue='Method', style='Method', data=df)
+    g = sns.lineplot(x='L1 CDN Cache Size', y='Network Traffic (KB)', hue='Method', style='Method', data=df)
     g.spines['top'].set_visible(False)
     g.spines['right'].set_visible(False)
     g.set_ylim(0)

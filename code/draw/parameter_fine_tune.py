@@ -9,10 +9,10 @@ result_path = 'figures/parameter_fine_tune.eps'
 
 optimize_log_name = {
     "Degree": "optimize.log2022-09-08 22:04:57",
-    "Pagerank": "optimize.log2022-09-09 10:26:24",
-    "LaplacianCentrality": "optimize.log2022-09-09 11:29:30",
-    "BetweennessCentrality": "optimize.log2022-09-09 12:48:51",
-    "EffectiveSize": "optimize.log2022-09-09 13:44:49"
+    "PageRank": "optimize.log2022-09-09 10:26:24",
+    "Laplacian Centrality": "optimize.log2022-09-09 11:29:30",
+    "Betweenness Centrality": "optimize.log2022-09-09 12:48:51",
+    "Effective Size": "optimize.log2022-09-09 13:44:49"
 }
 
 def fetch_data(max_len=0):
@@ -58,6 +58,6 @@ if __name__ == '__main__':
     g.spines['top'].set_visible(False)
     g.spines['right'].set_visible(False)
     plt.xlabel('Iterations')
-    plt.ylabel('Media File Size (KB)')
+    plt.ylabel('Network Traffic (KB)')
     g.legend(loc='upper right', frameon=False, title=None)
     plt.savefig(result_path, dpi=600, bbox_inches='tight', format='eps')
