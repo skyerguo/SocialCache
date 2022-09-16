@@ -5,14 +5,22 @@ import json
 import pandas as pd
 import numpy as np
 import matplotlib as mpl
+optimize_log_root_path = 'data/optimize/'
 result_path = 'figures/parameter_fine_tune.eps'
 
+# optimize_log_name = {
+#     "Degree": "optimize.log2022-09-08 22:04:57",
+#     "PageRank": "optimize.log2022-09-09 10:26:24",
+#     "Laplacian Centrality": "optimize.log2022-09-09 11:29:30",
+#     "Betweenness Centrality": "optimize.log2022-09-09 12:48:51",
+#     "Effective Size": "optimize.log2022-09-09 13:44:49"
+# }
 optimize_log_name = {
-    "Degree": "optimize.log2022-09-08 22:04:57",
-    "PageRank": "optimize.log2022-09-09 10:26:24",
-    "Laplacian Centrality": "optimize.log2022-09-09 11:29:30",
-    "Betweenness Centrality": "optimize.log2022-09-09 12:48:51",
-    "Effective Size": "optimize.log2022-09-09 13:44:49"
+    "Degree": "optimize.log2022-09-15 21:51:44",
+    "PageRank": "optimize.log2022-09-15 23:23:37",
+    "Laplacian Centrality": "optimize.log2022-09-16 01:21:53",
+    "Betweenness Centrality": "optimize.log2022-09-16 02:41:06",
+    "Effective Size": "optimize.log2022-09-16 04:16:07"
 }
 
 def fetch_data(max_len=0):
@@ -20,7 +28,7 @@ def fetch_data(max_len=0):
     df_dict = {}
     for social_metric in optimize_log_name.keys():
         temp_iteration = []
-        with open(optimize_log_name[social_metric], 'r') as f_in:
+        with open(optimize_log_root_path + optimize_log_name[social_metric], 'r') as f_in:
             for line in f_in:
                 if "round" in line:
                     now = -1
@@ -40,17 +48,11 @@ def fetch_data(max_len=0):
         
     df = pd.DataFrame.from_dict(dict([(k,pd.Series(v)) for k,v in df_dict.items()]))
     df = df.fillna(method = 'ffill') # 使用前一列填充NAN
-    # print(df)
-    return df
     
-
-# data_path = 'code/optimize/optimize_trace.csv'
-# df = pd.read_csv(data_path)
-# df = df.fillna(method = 'ffill') # 使用前一列填充NAN
-# df = df.drop(['Unnamed: 0'], axis=1)  #删除a列
+    return df
 
 if __name__ == '__main__':
-    df = fetch_data(161)
+    df = fetch_data(200)
     mpl.rcParams['figure.figsize'] = (6, 5)
     plt.rcParams["font.family"] = "Times New Roman"
     plt.rcParams["font.size"] = 14

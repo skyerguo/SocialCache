@@ -14,12 +14,11 @@ ANALYZE_CMD="python3 -m code.analyze.get_media_size -n 0"
 LOG_FILENAME="./optimize.log"
 
 init_list = {
-    # "PageRank": [[0,10.5,1010000], [0,0,0]],
-    "PageRank": [],
-    "Degree": [[0,50,5], [0,0,0]],
-    "BetweennessCentrality": [[0,50,50000], [0,0,0]],
-    "LaplacianCentrality": [[0,50,50000], [0,0,0]],
-    "EffectiveSize": [[0, 60, 102], [0,0,0]]
+    "Degree": [[0, 56.0, 13], [0,0,0]],
+    "PageRank": [[0, 64.5, 310000], [0,0,0]],
+    "BetweennessCentrality": [[0, 57.5, 54000], [0,0,0]],
+    "LaplacianCentrality": [[0, 54.0, 52000], [0,0,0]],
+    "EffectiveSize": [[0, 60.0, 103], [0,0,0]]
 }
 
 step_social = {

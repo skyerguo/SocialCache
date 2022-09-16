@@ -1,8 +1,0 @@
-{
-    "Degree": [0, 56.0, 13],
-    "PageRank": [0, 64.5, 310000],
-    "LaplacianCentrality": [0, 57.5, 54000],
-    "BetweennessCentrality": [0, 54.0, 52000],
-    "EffectiveSize": [0, 60.0, 103]
-}
-  
