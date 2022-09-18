@@ -9,22 +9,22 @@ import math
 
 raw_data = {
     'Dataset': [
-        'Data-Alpha', 'Data-Alpha', 'Data-Alpha', 'Data-Alpha', 'Data-Alpha',
-        'Data-Beta', 'Data-Beta', 'Data-Beta', 'Data-Beta', 'Data-Beta', 
-        'Data-Gamma', 'Data-Gamma', 'Data-Gamma', 'Data-Gamma', 'Data-Gamma'
+        'Data-Random', 'Data-Random', 'Data-Random', 'Data-Random', 'Data-Random',
+        'Data-TwitterSmall', 'Data-TwitterSmall', 'Data-TwitterSmall', 'Data-TwitterSmall', 'Data-TwitterSmall', 
+        'Data-TwitterLarge', 'Data-TwitterLarge', 'Data-TwitterLarge', 'Data-TwitterLarge', 'Data-TwitterLarge'
     ],
     'Method': [
         'RAND', 'FIFO', 'LRU', 'LRU-social', 'SocialCache', 
         'RAND', 'FIFO', 'LRU', 'LRU-social', 'SocialCache', 
         'RAND', 'FIFO', 'LRU', 'LRU-social', 'SocialCache', 
     ],
-    'Network Traffic (KB)': [
+    'Network Traffic Volume (KB)': [
         3970424, 2214202, 2364660, 2363142, 1920556, 
         12015569, 8445286, 6949517, 6951902, 5966313,
         135219910, 124954591, 124214721, 124075570, 115831643,
     ]
 }
-result_path = './figures/results/result_fig_dataset_mediasize.eps'
+result_path = './figures/result_fig_dataset_mediasize.eps'
 
 if __name__ == '__main__':
     df = pd.DataFrame.from_dict(raw_data)
@@ -33,7 +33,7 @@ if __name__ == '__main__':
     plt.rcParams["font.size"] = 14
     edgecolor_list = ["#cb364a", "#509a80", "#a05d46", "#5091c0", "#684e94"]
     
-    g = sns.barplot(x='Dataset', y='Network Traffic (KB)', hue='Method', data=df, facecolor=(0, 0, 0, 0))
+    g = sns.barplot(x='Dataset', y='Network Traffic Volume (KB)', hue='Method', data=df, facecolor=(0, 0, 0, 0))
     g.spines['top'].set_visible(False)
     g.spines['right'].set_visible(False)
     hatches = ['--', '**', 'xx', 'oo', '\\\\']

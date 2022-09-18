@@ -8,20 +8,20 @@ import matplotlib as mpl
 optimize_log_root_path = 'data/optimize/'
 result_path = 'figures/parameter_fine_tune.eps'
 
-# optimize_log_name = {
-#     "Degree": "optimize.log2022-09-08 22:04:57",
-#     "PageRank": "optimize.log2022-09-09 10:26:24",
-#     "Laplacian Centrality": "optimize.log2022-09-09 11:29:30",
-#     "Betweenness Centrality": "optimize.log2022-09-09 12:48:51",
-#     "Effective Size": "optimize.log2022-09-09 13:44:49"
-# }
 optimize_log_name = {
-    "Degree": "optimize.log2022-09-15 21:51:44",
-    "PageRank": "optimize.log2022-09-15 23:23:37",
-    "Laplacian Centrality": "optimize.log2022-09-16 01:21:53",
-    "Betweenness Centrality": "optimize.log2022-09-16 02:41:06",
-    "Effective Size": "optimize.log2022-09-16 04:16:07"
+    "Degree": "optimize.log2022-09-08 22:04:57",
+    "PageRank": "optimize.log2022-09-09 10:26:24",
+    "Laplacian Centrality": "optimize.log2022-09-09 11:29:30",
+    "Betweenness Centrality": "optimize.log2022-09-09 12:48:51",
+    "Effective Size": "optimize.log2022-09-09 13:44:49"
 }
+# optimize_log_name = {
+#     "Degree": "optimize.log2022-09-15 21:51:44",
+#     "PageRank": "optimize.log2022-09-15 23:23:37",
+#     "Laplacian Centrality": "optimize.log2022-09-16 01:21:53",
+#     "Betweenness Centrality": "optimize.log2022-09-16 02:41:06",
+#     "Effective Size": "optimize.log2022-09-16 04:16:07"
+# }
 
 def fetch_data(max_len=0):
     df = pd.DataFrame()
@@ -60,6 +60,6 @@ if __name__ == '__main__':
     g.spines['top'].set_visible(False)
     g.spines['right'].set_visible(False)
     plt.xlabel('Iterations')
-    plt.ylabel('Network Traffic (KB)')
+    plt.ylabel('Network Traffic Volume (KB)')
     g.legend(loc='upper right', frameon=False, title=None)
     plt.savefig(result_path, dpi=600, bbox_inches='tight', format='eps')
