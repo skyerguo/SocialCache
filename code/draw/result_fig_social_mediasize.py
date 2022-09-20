@@ -20,11 +20,11 @@ raw_data = {
         'Degree', 'PageRank', 'Laplacian Centrality', 'Betweenness Centrality', 'Effective Size', 
         'Degree', 'PageRank', 'Laplacian Centrality', 'Betweenness Centrality', 'Effective Size'
     ],
-    'Network Traffic Volume (KB)': [
-        116792540, 117238317, 117606166, 117523695, 115831643, 
-        26052466, 26162479, 26309065, 26313111, 25600410, 
-        57415569, 57638458, 57822382, 57781147, 56935121, 
-        33324505, 33437381, 33474719, 33429438, 33296113
+    'Network Traffic Volume (GB)': [
+        116.792540, 117.238317, 117.606166, 117.523695, 115.831643, 
+        26.052466, 26.162479, 26.309065, 26.313111, 25.600410, 
+        57.415569, 57.638458, 57.822382, 57.781147, 56.935121, 
+        33.324505, 33.437381, 33.474719, 33.429438, 33.296113
     ]
 }
 result_path = './figures/result_fig_social_mediasize.eps'
@@ -37,7 +37,7 @@ if __name__ == '__main__':
     plt.rcParams["font.size"] = 14
     edgecolor_list = ["#cb364a", "#509a80", "#a05d46", "#5091c0", "#684e94"]
     # print(df)
-    g = sns.barplot(x='CDN Level', y='Network Traffic Volume (KB)', hue='OSN Connectivity Metric', data=df, facecolor=(0, 0, 0, 0))
+    g = sns.barplot(x='CDN Level', y='Network Traffic Volume (GB)', hue='OSN Connectivity Metric', data=df, facecolor=(0, 0, 0, 0))
     g.spines['top'].set_visible(False)
     g.spines['right'].set_visible(False)
     hatches = ['--', '**', 'xx', 'oo', '\\\\']

@@ -35,7 +35,7 @@ def fetch_data(max_len=0):
                 if "step" in line:
                     now += 1
                 if "traffic" in line and "optimize" not in line:
-                    curr_media_size = float(line.split(":")[1].strip())
+                    curr_media_size = float(line.split(":")[1].strip()) / 1000000 # 转换为GB
                     if now >= len(temp_iteration):
                         temp_iteration.append(curr_media_size)
                         if now > 0:
@@ -60,6 +60,6 @@ if __name__ == '__main__':
     g.spines['top'].set_visible(False)
     g.spines['right'].set_visible(False)
     plt.xlabel('Iterations')
-    plt.ylabel('Network Traffic Volume (KB)')
+    plt.ylabel('Network Traffic Volume (GB)')
     g.legend(loc='upper right', frameon=False, title=None)
     plt.savefig(result_path, dpi=600, bbox_inches='tight', format='eps')

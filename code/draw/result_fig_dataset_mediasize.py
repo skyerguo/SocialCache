@@ -9,9 +9,9 @@ import math
 
 raw_data = {
     'Dataset': [
-        'Data-Random', 'Data-Random', 'Data-Random', 'Data-Random', 'Data-Random',
-        'Data-TwitterSmall', 'Data-TwitterSmall', 'Data-TwitterSmall', 'Data-TwitterSmall', 'Data-TwitterSmall', 
-        'Data-TwitterLarge', 'Data-TwitterLarge', 'Data-TwitterLarge', 'Data-TwitterLarge', 'Data-TwitterLarge'
+        'Erdos', 'Erdos', 'Erdos', 'Erdos', 'Erdos',
+        'TwitterSmall', 'TwitterSmall', 'TwitterSmall', 'TwitterSmall', 'TwitterSmall', 
+        'TwitterLarge', 'TwitterLarge', 'TwitterLarge', 'TwitterLarge', 'TwitterLarge'
     ],
     'Method': [
         'RAND', 'FIFO', 'LRU', 'LRU-social', 'SocialCache', 
