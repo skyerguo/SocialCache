@@ -7,6 +7,9 @@ import numpy as np
 import matplotlib as mpl
 optimize_log_root_path = 'data/optimize/'
 result_path = 'figures/parameter_fine_tune.eps'
+mpl.rcParams['font.family'] = 'Times New Roman'
+mpl.rcParams['pdf.fonttype'] = 42
+mpl.rcParams['ps.fonttype'] = 42
 
 optimize_log_name = {
     "Degree": "optimize.log2022-09-08 22:04:57",
@@ -54,9 +57,11 @@ def fetch_data(max_len=0):
 if __name__ == '__main__':
     df = fetch_data(200)
     mpl.rcParams['figure.figsize'] = (6, 5)
-    plt.rcParams["font.family"] = "Times New Roman"
-    plt.rcParams["font.size"] = 14
-    g = sns.lineplot(data=df)
+    # plt.rcParams["font.family"] = "Times New Roman"
+    plt.rcParams["font.size"] = 16
+    color_list = ["#684e94", "#5091c0", "#a05d46", "#509a80", "#cb364a"]
+
+    g = sns.lineplot(data=df, palette=color_list)
     g.spines['top'].set_visible(False)
     g.spines['right'].set_visible(False)
     plt.xlabel('Iterations')
