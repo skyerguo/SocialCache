@@ -23,7 +23,7 @@ optimize_log_name = {
 #     "PageRank": "optimize.log2022-09-15 23:23:37",
 #     "Laplacian Centrality": "optimize.log2022-09-16 01:21:53",
 #     "Betweenness Centrality": "optimize.log2022-09-16 02:41:06",
-#     "Effective Size": "optimize.log2022-09-16 04:16:07"
+#     "Effective Size": "optimize.log2022-09-28 16:28:33"
 # }
 
 def fetch_data(max_len=0):
@@ -55,16 +55,16 @@ def fetch_data(max_len=0):
     return df
 
 if __name__ == '__main__':
-    df = fetch_data(200)
+    df = fetch_data(101)
     mpl.rcParams['figure.figsize'] = (6, 5)
     # plt.rcParams["font.family"] = "Times New Roman"
-    plt.rcParams["font.size"] = 16
+    plt.rcParams["font.size"] = 20
     color_list = ["#684e94", "#5091c0", "#a05d46", "#509a80", "#cb364a"]
 
     g = sns.lineplot(data=df, palette=color_list)
     g.spines['top'].set_visible(False)
     g.spines['right'].set_visible(False)
-    plt.xlabel('Iterations')
-    plt.ylabel('Network Traffic Volume (GB)')
-    g.legend(loc='upper right', frameon=False, title=None)
+    plt.xlabel('Iterations', fontsize=20)
+    plt.ylabel('Network Traffic Volume (GB)', fontsize=20)
+    g.legend(loc='upper right', frameon=False, title=None, fontsize=18)
     plt.savefig(result_path, dpi=600, bbox_inches='tight', format='eps')

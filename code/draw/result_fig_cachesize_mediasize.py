@@ -22,14 +22,14 @@ raw_data = {
         100, 100, 100, 100, 100
     ],
     'Method': [
-        'RAND', 'FIFO', 'LRU', 'LRU-social', 'SocialCache',
-        'RAND', 'FIFO', 'LRU', 'LRU-social', 'SocialCache',
-        'RAND', 'FIFO', 'LRU', 'LRU-social', 'SocialCache',
-        'RAND', 'FIFO', 'LRU', 'LRU-social', 'SocialCache',
-        'RAND', 'FIFO', 'LRU', 'LRU-social', 'SocialCache',
-        'RAND', 'FIFO', 'LRU', 'LRU-social', 'SocialCache',
-        'RAND', 'FIFO', 'LRU', 'LRU-social', 'SocialCache',
-        'RAND', 'FIFO', 'LRU', 'LRU-social', 'SocialCache'
+        'RAND', 'FIFO', 'LRU', 'LRU-Social', 'SocialCache',
+        'RAND', 'FIFO', 'LRU', 'LRU-Social', 'SocialCache',
+        'RAND', 'FIFO', 'LRU', 'LRU-Social', 'SocialCache',
+        'RAND', 'FIFO', 'LRU', 'LRU-Social', 'SocialCache',
+        'RAND', 'FIFO', 'LRU', 'LRU-Social', 'SocialCache',
+        'RAND', 'FIFO', 'LRU', 'LRU-Social', 'SocialCache',
+        'RAND', 'FIFO', 'LRU', 'LRU-Social', 'SocialCache',
+        'RAND', 'FIFO', 'LRU', 'LRU-Social', 'SocialCache'
     ],
     'Network Traffic Volume (GB)': [
         136.898589, 129.580451, 131.342356, 131.635447, 125.001941,
@@ -48,13 +48,13 @@ if __name__ == '__main__':
     df = pd.DataFrame.from_dict(raw_data)
     mpl.rcParams['figure.figsize'] = (6, 5)
     # plt.rcParams["font.family"] = "Times New Roman"
-    plt.rcParams["font.size"] = 16
+    plt.rcParams["font.size"] = 20
     color_list = ["#684e94", "#5091c0", "#a05d46", "#509a80", "#cb364a"]
     
     g = sns.lineplot(x='L1 CDN Cache Size', y='Network Traffic Volume (GB)', hue='Method', style='Method', palette=color_list, data=df)
     g.spines['top'].set_visible(False)
     g.spines['right'].set_visible(False)
     g.set_ylim(0)
-    g.legend(loc='lower left', frameon=False, title=None)
+    g.legend(loc='lower left', frameon=False, title=None, fontsize=18)
 
     plt.savefig(result_path, dpi=600, bbox_inches='tight', format='eps')

@@ -12,17 +12,17 @@ mpl.rcParams['ps.fonttype'] = 42
 
 
 raw_data = {
-    'CDN Level': [
+    'CDN Layer': [
         'L1 CDN', 'L1 CDN', 'L1 CDN', 'L1 CDN', 'L1 CDN',
         'L2 CDN', 'L2 CDN', 'L2 CDN', 'L2 CDN', 'L2 CDN', 
         'L3 CDN', 'L3 CDN', 'L3 CDN', 'L3 CDN', 'L3 CDN',
         'All', 'All', 'All', 'All', 'All'
     ],
-    'OSN Connectivity Metric': [
-        'Degree', 'PageRank', 'Laplacian Centrality', 'Betweenness Centrality', 'Effective Size', 
-        'Degree', 'PageRank', 'Laplacian Centrality', 'Betweenness Centrality', 'Effective Size', 
-        'Degree', 'PageRank', 'Laplacian Centrality', 'Betweenness Centrality', 'Effective Size', 
-        'Degree', 'PageRank', 'Laplacian Centrality', 'Betweenness Centrality', 'Effective Size'
+    'Social Connectivity Metric': [
+        'In-degree', 'PageRank', 'Laplacian centrality', 'Betweenness centrality', 'Effective size', 
+        'In-degree', 'PageRank', 'Laplacian centrality', 'Betweenness centrality', 'Effective size', 
+        'In-degree', 'PageRank', 'Laplacian centrality', 'Betweenness centrality', 'Effective size', 
+        'In-degree', 'PageRank', 'Laplacian centrality', 'Betweenness centrality', 'Effective size'
     ],
     'Network Traffic Volume (GB)': [
         33.324505, 33.437381, 33.474719, 33.429438, 33.296113,
@@ -38,17 +38,17 @@ if __name__ == '__main__':
 
     mpl.rcParams['figure.figsize'] = (6, 5)
     # plt.  ["font.family"] = "Times New Roman"
-    plt.rcParams["font.size"] = 16
+    plt.rcParams["font.size"] = 20
     # edgecolor_list = ["#cb364a", "#509a80", "#a05d46", "#5091c0", "#684e94"]
     edgecolor_list = ["#684e94", "#5091c0", "#a05d46", "#509a80", "#cb364a"]
     
-    g = sns.barplot(x='CDN Level', y='Network Traffic Volume (GB)', hue='OSN Connectivity Metric', data=df, facecolor=(0, 0, 0, 0))
+    g = sns.barplot(x='CDN Layer', y='Network Traffic Volume (GB)', hue='Social Connectivity Metric', data=df, facecolor=(0, 0, 0, 0))
     g.spines['top'].set_visible(False)
     g.spines['right'].set_visible(False)
     hatches = ['--', '**', 'xx', 'oo', '\\\\']
     for i,thisbar in enumerate(g.patches):
         thisbar.set_hatch(hatches[math.floor(i/4)])
         thisbar.set_edgecolor(edgecolor_list[math.floor(i/4)])
-    g.legend(loc='upper left', frameon=False, title=None)
+    g.legend(loc='upper left', frameon=False, title=None, fontsize=18)
 
     plt.savefig(result_path, dpi=600, bbox_inches='tight', format='eps')
