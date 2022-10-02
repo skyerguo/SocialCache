@@ -7,4 +7,6 @@ code/main/config_tmp.json
 code/main/config_tmp2.json
 data/traces/google_plus_trace/relations.txt
 data/traces/google_plus_trace/all_timeline.txt
+data/traces/GooglePlus/relations.txt
+data/traces/GooglePlus/relations.txt
 data/results/origin_data/*
