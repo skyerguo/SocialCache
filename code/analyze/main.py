@@ -11,7 +11,7 @@ p.add_argument('-l', '--detailoutput', default=False, dest="detailOutput", actio
 p.add_argument('-m', '--mediasize', default=False, dest="mediaSize", action="store_true", help="whether output media size")
 p.add_argument('-e', '--executiontime', default=False, dest="executionTime", action="store_true", help="whether output execution time")
 p.add_argument('-f', '--flow', default=False, dest="flow", action="store_true", help="whether output flow")
-p.add_argument('-c', '--cachehitration', default=False, dest="cacheHitRatio", action="store_true", help="whether output cache hit ratio")
+p.add_argument('-c', '--cachehitratio', default=False, dest="cacheHitRatio", action="store_true", help="whether output cache hit ratio")
 p.add_argument('-p', '--parameters', default=False, dest="parameters", action="store_true", help="whether output cache parameters")
 p.add_argument('-d', '--dataset', default=False, dest="dataset", action="store_true", help="whether output dataset")
 p.add_argument('-z', '--outputFile', default=False, dest="outputFile", action="store_true", help="whether output the result into files")
