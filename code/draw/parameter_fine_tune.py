@@ -12,11 +12,11 @@ mpl.rcParams['pdf.fonttype'] = 42
 mpl.rcParams['ps.fonttype'] = 42
 
 optimize_log_name = {
-    "Degree": "optimize.log2022-09-08 22:04:57",
+    "In-degree": "optimize.log2022-09-08 22:04:57",
     "PageRank": "optimize.log2022-09-09 10:26:24",
-    "Laplacian Centrality": "optimize.log2022-09-09 11:29:30",
-    "Betweenness Centrality": "optimize.log2022-09-09 12:48:51",
-    "Effective Size": "optimize.log2022-09-09 13:44:49"
+    "Laplacian centrality": "optimize.log2022-09-09 11:29:30",
+    "Betweenness centrality": "optimize.log2022-09-09 12:48:51",
+    "Effective size": "optimize.log2022-09-09 13:44:49"
 }
 # optimize_log_name = {
 #     "Degree": "optimize.log2022-09-15 21:51:44",
