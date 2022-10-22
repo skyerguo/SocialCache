@@ -18,7 +18,7 @@ init_list = {
     "PageRank": [[0, 64.5, 310000], [0,0,0]],
     "BetweennessCentrality": [[0, 57.5, 54000], [0,0,0]],
     "LaplacianCentrality": [[0, 54.0, 52000], [0,0,0]],
-    "EffectiveSize": [[0, 60.0, 103], [0,0,0]]
+    "EffectiveSize": [[0, 50.5, 10]]
 }
 
 step_social = {
@@ -42,7 +42,7 @@ class hill_climb_optimize():
         self.iteration_time = 0
 
         # define step length
-        self.step_len0 = 1        # location
+        self.step_len0 = 0.05        # location
         self.step_len1 = 0.5      # media_size
         self.step_len2 = step_social[self.init_config['caching_policy']]      # social_metric
         self.step_list = [self.step_len0, self.step_len1, self.step_len2]
@@ -220,6 +220,6 @@ class hill_climb_optimize():
 if __name__ == "__main__":
     optimize = hill_climb_optimize()
     optimize.hill_climb_specific_point(init_list[optimize.init_config['caching_policy']])
-    optimize.hill_climb(3)
+    optimize.hill_climb(0)
     # optimize.visualize()
-    optimize.savelog()
+    # optimize.savelog()
