@@ -8,3 +8,4 @@ code/main/config_tmp2.json
 data/traces/google_plus_trace/relations.txt
 data/traces/google_plus_trace/all_timeline.txt
 data/results/origin_data/*
+data/traces/LBSN_Gowalla_Bigraph/*
