@@ -76,3 +76,14 @@ def generate_adj_matrix_graph(relation_file_path, nodes_number):
     f_in.close()
 
     return A
+
+
+def display_timeline(time_list):
+    import seaborn as sns
+    import pandas as pd
+    import matplotlib.pyplot as plt
+    temp_df = pd.DataFrame(time_list)
+    # print(temp_df)
+    sns.displot(temp_df, kind="kde")
+    result_path = './figures/timeline.png'
+    plt.savefig(result_path, dpi=300, bbox_inches='tight', format='png')
