@@ -188,9 +188,9 @@ class Make_trace:
     def run(self):
         os.system("mkdir -p data/traces/" + self.dir_name)
         
-        # self.make_friend_relations()
-        # self.make_posts()
-        # self.make_checkins()
+        self.make_friend_relations()
+        self.make_posts()
+        self.make_checkins()
         self.G.add_edges_from_file("data/traces/" + self.dir_name + "/relations.txt")
         self.biG.add_edges_from_file("data/traces/" + self.dir_name + "/relations.txt")
-        # self.synthesis_timeline()
+        self.synthesis_timeline()

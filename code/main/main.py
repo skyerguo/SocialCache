@@ -1,5 +1,5 @@
 from code.build.build_main import Build_network
-from code.trace.make_trace import Make_trace
+from code.trace.make_trace_naive import Make_trace
 from code.cache.redis_cache.redis_cache import Redis_cache
 import easygraph as eg
 import networkx
@@ -29,8 +29,9 @@ class Main:
             self.level_3_area_location.append(self.topo["areaid2position"][str(area_id)])
 
         self.trace_dir = trace_dir
-        self.make_trace = Make_trace(self.trace_dir)
-        self.make_trace.run()
+        os.system("mkdir -p data/traces/" + self.trace_dir)
+        self.G = eg.DiGraph()
+        self.G.add_edges_from_file("data/traces/" + self.trace_dir + "/relations.txt")
 
         self.use_http_server = use_http_server
 
@@ -154,13 +155,13 @@ class Main:
             if os.path.exists(curr_social_metric_path):
                 page_rank_metrics = pickle.load(open(curr_social_metric_path, "rb"))
             else:
-                page_rank_metrics = eg.functions.not_sorted.pagerank(self.make_trace.G)
+                page_rank_metrics = eg.functions.not_sorted.pagerank(self.G)
                 pickle.dump(page_rank_metrics, open(curr_social_metric_path, "wb"))
             # print("page_rank_metrics: ", page_rank_metrics)
 
         elif caching_policy == "Degree":
             '''To use it, remember the key is str type, and the value is bool'''
-            degree_metrics = self.make_trace.G.in_degree()
+            degree_metrics = self.G.in_degree()
             # print("degree_metrics: ", degree_metrics)
 
         elif caching_policy == "BetweennessCentrality":
@@ -168,7 +169,7 @@ class Main:
             if os.path.exists(curr_social_metric_path):
                 betweenness_centrality_metrics = pickle.load(open(curr_social_metric_path, "rb"))
             else:
-                betweenness_centrality_metrics = eg.functions.centrality.betweenness.betweenness_centrality(self.make_trace.G)
+                betweenness_centrality_metrics = eg.functions.centrality.betweenness.betweenness_centrality(self.G)
                 pickle.dump(betweenness_centrality_metrics, open(curr_social_metric_path, "wb"))
             # print("betweenness_centrality_metrics: ", betweenness_centrality_metrics)
 
@@ -177,7 +178,7 @@ class Main:
             if os.path.exists(curr_social_metric_path):
                 laplacian_centrality_metrics = pickle.load(open(curr_social_metric_path, "rb"))
             else:
-                laplacian_centrality_metrics = eg.functions.not_sorted.laplacian(self.make_trace.G)
+                laplacian_centrality_metrics = eg.functions.not_sorted.laplacian(self.G)
                 pickle.dump(laplacian_centrality_metrics, open(curr_social_metric_path, "wb"))
             # print("laplacian_centrality_metrics: ", laplacian_centrality_metrics)
 
@@ -186,10 +187,9 @@ class Main:
             if os.path.exists(curr_social_metric_path):
                 effective_size_metrics = pickle.load(open(curr_social_metric_path, "rb"))
             else:
-                adj_matrix = util.generate_adj_matrix_graph("data/traces/" + self.make_trace.dir_name + "/relations.txt", len(self.make_trace.G.nodes))
+                adj_matrix = util.generate_adj_matrix_graph("data/traces/" + self.trace_dir + "/relations.txt", len(self.G.nodes))
                 networkx_graph = networkx.DiGraph(adj_matrix).reverse() ## 关注的方向，传播需要反向
                 '''easygraph的constraint只能针对无向图，networkx的constraint可以针对有向图'''
-                # constraint_metrics = eg.functions.structural_holes.evaluation.constraint(self.make_trace.biG) 
                 effective_size_metrics = networkx.effective_size(networkx_graph)
                 pickle.dump(effective_size_metrics, open(curr_social_metric_path, "wb"))
             # print("effective_size_metrics: ", effective_size_metrics)
@@ -199,15 +199,15 @@ class Main:
             if os.path.exists(curr_social_metric_path):
                 spreading_power_list = pickle.load(open(curr_social_metric_path, "rb"))
             else:
-                all_degree_dict = self.make_trace.G.degree()
+                all_degree_dict = self.G.degree()
                 parameter_k = np.mean(list(all_degree_dict.values()))
                 epidemic_threshold = parameter_k / (parameter_k * parameter_k - parameter_k)
                 # print("epidemic_threshold: ", epidemic_threshold)
 
-                adj_matrix = util.generate_adj_matrix_graph("data/traces/" + self.make_trace.dir_name + "/relations.txt", len(self.make_trace.G.nodes))
+                adj_matrix = util.generate_adj_matrix_graph("data/traces/" + self.trace_dir + "/relations.txt", len(self.G.nodes))
                 networkx_graph = networkx.DiGraph(adj_matrix)
-                spreading_power_list = [0 for _ in range(len(self.make_trace.G.nodes))]
-                for i in range(len(self.make_trace.G.nodes)):
+                spreading_power_list = [0 for _ in range(len(self.G.nodes))]
+                for i in range(len(self.G.nodes)):
                     spreading_number = SIR.SIR_network(networkx_graph, [i] , epidemic_threshold, 1, 1)
                     spreading_power_list[i] = (spreading_number - 1) / CONFIG['cache_size_level_3'] + 1 # 如果没有传播，设置为1，即和LRU等同。
                     # spreading_power_list[i] = SIR.SIR_network(networkx_graph, [i] , epidemic_threshold, 1, 1, 1)
