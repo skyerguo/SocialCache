@@ -43,6 +43,8 @@ class gen_trace_data:
         with open(filename, "r") as f_in:
             for line in f_in:
                 line_list = line.strip().split('\t')
+                if len(line_list) < 4: # 清洗错误数据
+                    continue
                 user_id = int(line_list[0])
                 timestamp = int(datetime.datetime.timestamp(datetime.datetime.strptime(line_list[1], '%Y-%m-%dT%H:%M:%SZ')))
                 latitude = line_list[2]
