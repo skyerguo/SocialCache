@@ -155,7 +155,9 @@ class Main:
             if os.path.exists(curr_social_metric_path):
                 page_rank_metrics = pickle.load(open(curr_social_metric_path, "rb"))
             else:
+                print("!!!!!!!")
                 page_rank_metrics = eg.functions.not_sorted.pagerank(self.G)
+                print("ok")
                 pickle.dump(page_rank_metrics, open(curr_social_metric_path, "wb"))
             # print("page_rank_metrics: ", page_rank_metrics)
 
