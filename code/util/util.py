@@ -78,6 +78,12 @@ def generate_adj_matrix_graph(relation_file_path, nodes_number):
     return A
 
 
+def random_percentage(ratio):
+    import random
+    coin = random.randint(1, 100)
+    return coin <= ratio
+
+
 def display_timeline(time_list):
     import seaborn as sns
     import pandas as pd
