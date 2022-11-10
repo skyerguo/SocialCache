@@ -27,7 +27,8 @@ pip3 install flask scrapy beautifulsoup4 dnspython gunicorn supervisor numpy
 pip3 install shapely geopandas matplotlib redis Python-EasyGraph networkx seaborn
 
 ## 安装apt
-sudo apt-get -yqq install wondershaper nload iftop zip unzip htop jq
+sudo apt-get -yqq install wondershaper nload iftop zip unzip htop jq msttcorefonts
+rm ~/.cache/matplotlib -rf
 
 ## 安装iperf3
 cd ~
