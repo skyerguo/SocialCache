@@ -1,5 +1,5 @@
 {
-  "trace_dir": "gtc_short_trace",
+  "trace_dir": "LBSN_Brightkite_Bigraph",
   "caching_policy": "PageRank",
   "use_http_server": false,
   "use_priority_queue": true,

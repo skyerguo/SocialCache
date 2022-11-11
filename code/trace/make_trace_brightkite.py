@@ -26,10 +26,13 @@ class gen_trace_data:
         self.media_size = sp.media_size_sample()
     
     
-    def load_network(self, filename):
+    def load_network(self, filename, use_community=True):
         self.G = eg.DiGraph()
         self.G.add_edges_from_file(filename)
-        print("load_network done!")
+        if use_community:
+            communities = eg.greedy_modularity_communities(self.G)
+            largest_community = communities[0]
+            self.G = self.G.nodes_subgraph(largest_community)
 
         
     def load_checkins(self, filename):
@@ -185,7 +188,7 @@ class gen_trace_data:
             
             
     def launch(self):
-        self.load_network(self.relation_filename)
+        self.load_network(self.relation_filename, use_community=False)
         self.load_checkins(self.location_filename)
         self.generate_initials()
         self.finish_views()

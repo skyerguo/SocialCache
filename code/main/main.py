@@ -223,6 +223,7 @@ class Main:
         f_out_time = open(self.result_path + 'time_log.txt', 'w')
         start_time = time.time()
         print("start_time: %f"%(start_time), file=f_out_time)
+        print("caching_policy: ", caching_policy)
         cnt_line = 0 
         print("cnt_line: ", cnt_line)
         last_timestamp = -1
