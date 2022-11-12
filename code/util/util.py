@@ -94,3 +94,22 @@ def display_timeline(time_list):
     sns.displot(temp_df, kind="kde")
     result_path = './figures/timeline.png'
     plt.savefig(result_path, dpi=300, bbox_inches='tight', format='png')
+
+def hash_relations(filename):
+    import re
+    import os
+    os.system("mv %s %s"%(filename, filename+'.bak'))
+    hash_user = {}
+    hash_number = 0
+    with open(filename, 'w') as f_out:
+        with open(filename+'.bak', 'r') as f_in:
+            for line in f_in:
+                user_list = re.split(' |\t',line.strip())
+                if int(user_list[0]) not in hash_user:
+                    hash_user[int(user_list[0])] = hash_number
+                    hash_number += 1
+                if int(user_list[1]) not in hash_user:
+                    hash_user[int(user_list[1])] = hash_number
+                    hash_number += 1
+                print(hash_user[int(user_list[0])], hash_user[int(user_list[1])], file=f_out)
+    return hash_user
