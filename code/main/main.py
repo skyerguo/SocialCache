@@ -190,9 +190,12 @@ class Main:
                 effective_size_metrics = pickle.load(open(curr_social_metric_path, "rb"))
             else:
                 adj_matrix = util.generate_adj_matrix_graph("data/traces/" + self.trace_dir + "/relations.txt", len(self.G.nodes))
+                print("11111")
                 networkx_graph = networkx.DiGraph(adj_matrix).reverse() ## 关注的方向，传播需要反向
+                print("2222")
                 '''easygraph的constraint只能针对无向图，networkx的constraint可以针对有向图'''
                 effective_size_metrics = networkx.effective_size(networkx_graph)
+                print("3333")
                 pickle.dump(effective_size_metrics, open(curr_social_metric_path, "wb"))
             # print("effective_size_metrics: ", effective_size_metrics)
 

@@ -1,0 +1,21 @@
+caching_policy:  FIFO
+cache_size_level_3:  15
+cache_size_level_2:  150
+cache_size_level_1:  1000000
+parameters:  [0, 6, 500]
+dataset:  LBSN_Brightkite_Bigraph
+------
+三级CDN缓存命中率:  0.7565600725895699
+二级CDN缓存命中率:  0.7621756132243157
+一级CDN缓存命中率:  1.0
+总缓存命中率:  0.7684411198078303
+二三级缓存命中率:  0.7576594797859754
+------
+total_media_size:  79903106511.0
+insert_all_media_size:  34278286116.0
+level 1; media szie: 13561968214.0
+level 2; media szie: 34278286116.0
+level 3; media szie: 32062852181.0
+------
+time_duration:  39.005799
+------

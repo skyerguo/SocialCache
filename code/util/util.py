@@ -68,11 +68,12 @@ def calculate_flow(host, eth_name, flow_direction, result_path=''):
 
 '''生成接表'''
 def generate_adj_matrix_graph(relation_file_path, nodes_number):
+    import re
     A = np.zeros((nodes_number, nodes_number), int)
     f_in = open(relation_file_path, "r")
     for line in f_in:
-        A[int(line.strip().split(' ')[1])][int(line.strip().split(' ')[0])] = 1 ## 原图是关注，为了SIR传播，需要改为反向图，发送关系。
-        # A[int(line.strip().split(' ')[0])][int(line.strip().split(' ')[1])] = 1
+        user_list = re.split(' |\t',line.strip())
+        A[int(user_list[1])][int(user_list[0])] = 1 ## 原图是关注，为了SIR传播，需要改为反向图，发送关系。
     f_in.close()
 
     return A
