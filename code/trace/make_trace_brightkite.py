@@ -27,14 +27,14 @@ class gen_trace_data:
         
         
     def generate_community(self, filename, new_filename):        
-        # self.G = eg.DiGraph()
-        # self.G.add_edges_from_file(filename)
-        # communities = eg.greedy_modularity_communities(self.G)
-        # largest_community = communities[0]
-        # self.G = self.G.nodes_subgraph(largest_community)
-        # with open(new_filename, "w") as f_out: ## 更新relations
-        #     for temp_edge in self.G.edges:
-        #         print(temp_edge[0], temp_edge[1], file=f_out)
+        self.G = eg.DiGraph()
+        self.G.add_edges_from_file(filename)
+        communities = eg.greedy_modularity_communities(self.G)
+        largest_community = communities[0]
+        self.G = self.G.nodes_subgraph(largest_community)
+        with open(new_filename, "w") as f_out: ## 更新relations
+            for temp_edge in self.G.edges:
+                print(temp_edge[0], temp_edge[1], file=f_out)
         
         self.hash_user = util.hash_relations(new_filename)
         self.relation_filename = new_filename
@@ -54,7 +54,7 @@ class gen_trace_data:
         temp_timeline = []
         
         self.start_time = 1262275200 #2010-1-1
-        self.end_time = 1264953600 #2010-2-1
+        self.end_time = 1293811200 #2011-1-1
         
         # cnt = 240
         with open(filename, "r") as f_in:
@@ -69,11 +69,9 @@ class gen_trace_data:
                 if timestamp > self.end_time or timestamp < self.start_time:
                     continue
                 if use_community:
-                    if user_id not in self.hash_user:
+                    if user_id not in self.hash_user.keys():
                         continue
                     user_id = self.hash_user[user_id]
-                    if user_id not in self.G.nodes:
-                        continue
 
                 self.checkins.append([user_id, timestamp, {'lat': latitude, 'lon': longtitude}])
                 # temp_timeline.append(timestamp)
@@ -208,7 +206,7 @@ class gen_trace_data:
         print("output_requests done!")
             
             
-    def launch(self, use_community, new_filename):
+    def launch(self, use_community, new_filename=''):
         if use_community:
             self.generate_community(self.relation_filename, new_filename=new_filename)
         self.load_network(self.relation_filename)

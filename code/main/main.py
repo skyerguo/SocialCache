@@ -232,7 +232,7 @@ class Main:
         last_timestamp = -1
         for line in f_in:
             cnt_line += 1
-            if cnt_line % 10000 == 0:
+            if cnt_line % 100000 == 0:
                 print("cnt_line: ", cnt_line)
             if CONFIG['max_trace_len'] and cnt_line > CONFIG['max_trace_len']:
                break 
@@ -244,6 +244,10 @@ class Main:
             last_timestamp = current_timestamp
 
             [selected_level_3_id, nearest_distance] = util.find_nearest_location(current_location, self.level_3_area_location)
+            if int(nearest_distance) == 0:
+                nearest_distance = 2
+            else:
+                nearest_distance = 1 / int(nearest_distance)
 
             if current_type == "post":
                 post_id = int(line.split('+')[4])
@@ -258,33 +262,34 @@ class Main:
 
                 elif caching_policy == 'PageRank':
                     sort_value = current_timestamp + \
-                                int(nearest_distance) * CONFIG['params'][0] + \
+                                nearest_distance * CONFIG['params'][0] + \
                                 media_size * CONFIG['params'][1] + \
                                 page_rank_metrics[str(user_id)] * CONFIG['params'][2]
 
                 elif caching_policy == "Degree":
                     sort_value = current_timestamp + \
-                                int(nearest_distance) * CONFIG['params'][0] + \
+                                nearest_distance * CONFIG['params'][0] + \
                                 media_size * CONFIG['params'][1] + \
                                 degree_metrics[str(user_id)] * CONFIG['params'][2]
 
                 elif caching_policy == "BetweennessCentrality":
                     sort_value = current_timestamp + \
-                                int(nearest_distance) * CONFIG['params'][0] + \
+                                nearest_distance * CONFIG['params'][0] + \
                                 media_size * CONFIG['params'][1] + \
                                 betweenness_centrality_metrics[str(user_id)] * CONFIG['params'][2]
                     
                 elif caching_policy == "LaplacianCentrality":
                     sort_value = current_timestamp + \
-                                int(nearest_distance) * CONFIG['params'][0] + \
+                                nearest_distance * CONFIG['params'][0] + \
                                 media_size * CONFIG['params'][1] + \
                                 laplacian_centrality_metrics[str(user_id)] * CONFIG['params'][2]
 
                 elif caching_policy == "EffectiveSize":
                     if math.isnan(effective_size_metrics[user_id]):
                         effective_size_metrics[user_id] = 0
+                    # print(current_timestamp, nearest_distance, media_size, effective_size_metrics[user_id])
                     sort_value = current_timestamp + \
-                                int(nearest_distance) * CONFIG['params'][0] + \
+                                nearest_distance * CONFIG['params'][0] + \
                                 media_size * CONFIG['params'][1] + \
                                 effective_size_metrics[user_id] * CONFIG['params'][2]
                     
