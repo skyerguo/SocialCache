@@ -190,9 +190,12 @@ class Main:
                 effective_size_metrics = pickle.load(open(curr_social_metric_path, "rb"))
             else:
                 adj_matrix = util.generate_adj_matrix_graph("data/traces/" + self.trace_dir + "/relations.txt", len(self.G.nodes))
+                print("11111")
                 networkx_graph = networkx.DiGraph(adj_matrix).reverse() ## 关注的方向，传播需要反向
+                print("2222")
                 '''easygraph的constraint只能针对无向图，networkx的constraint可以针对有向图'''
                 effective_size_metrics = networkx.effective_size(networkx_graph)
+                print("3333")
                 pickle.dump(effective_size_metrics, open(curr_social_metric_path, "wb"))
             # print("effective_size_metrics: ", effective_size_metrics)
 
@@ -223,12 +226,13 @@ class Main:
         f_out_time = open(self.result_path + 'time_log.txt', 'w')
         start_time = time.time()
         print("start_time: %f"%(start_time), file=f_out_time)
+        print("caching_policy: ", caching_policy)
         cnt_line = 0 
         print("cnt_line: ", cnt_line)
         last_timestamp = -1
         for line in f_in:
             cnt_line += 1
-            if cnt_line % 10000 == 0:
+            if cnt_line % 100000 == 0:
                 print("cnt_line: ", cnt_line)
             if CONFIG['max_trace_len'] and cnt_line > CONFIG['max_trace_len']:
                break 
@@ -240,6 +244,10 @@ class Main:
             last_timestamp = current_timestamp
 
             [selected_level_3_id, nearest_distance] = util.find_nearest_location(current_location, self.level_3_area_location)
+            if int(nearest_distance) == 0:
+                nearest_distance = 2
+            else:
+                nearest_distance = 1 / int(nearest_distance)
 
             if current_type == "post":
                 post_id = int(line.split('+')[4])
@@ -254,33 +262,34 @@ class Main:
 
                 elif caching_policy == 'PageRank':
                     sort_value = current_timestamp + \
-                                int(nearest_distance) * CONFIG['params'][0] + \
+                                nearest_distance * CONFIG['params'][0] + \
                                 media_size * CONFIG['params'][1] + \
                                 page_rank_metrics[str(user_id)] * CONFIG['params'][2]
 
                 elif caching_policy == "Degree":
                     sort_value = current_timestamp + \
-                                int(nearest_distance) * CONFIG['params'][0] + \
+                                nearest_distance * CONFIG['params'][0] + \
                                 media_size * CONFIG['params'][1] + \
                                 degree_metrics[str(user_id)] * CONFIG['params'][2]
 
                 elif caching_policy == "BetweennessCentrality":
                     sort_value = current_timestamp + \
-                                int(nearest_distance) * CONFIG['params'][0] + \
+                                nearest_distance * CONFIG['params'][0] + \
                                 media_size * CONFIG['params'][1] + \
                                 betweenness_centrality_metrics[str(user_id)] * CONFIG['params'][2]
                     
                 elif caching_policy == "LaplacianCentrality":
                     sort_value = current_timestamp + \
-                                int(nearest_distance) * CONFIG['params'][0] + \
+                                nearest_distance * CONFIG['params'][0] + \
                                 media_size * CONFIG['params'][1] + \
                                 laplacian_centrality_metrics[str(user_id)] * CONFIG['params'][2]
 
                 elif caching_policy == "EffectiveSize":
                     if math.isnan(effective_size_metrics[user_id]):
                         effective_size_metrics[user_id] = 0
+                    # print(current_timestamp, nearest_distance, media_size, effective_size_metrics[user_id])
                     sort_value = current_timestamp + \
-                                int(nearest_distance) * CONFIG['params'][0] + \
+                                nearest_distance * CONFIG['params'][0] + \
                                 media_size * CONFIG['params'][1] + \
                                 effective_size_metrics[user_id] * CONFIG['params'][2]
                     

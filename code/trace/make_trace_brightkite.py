@@ -24,20 +24,37 @@ class gen_trace_data:
         self.output_filename = output_filename
 
         self.media_size = sp.media_size_sample()
-    
+        
+        
+    def generate_community(self, filename, new_filename):        
+        self.G = eg.DiGraph()
+        self.G.add_edges_from_file(filename)
+        communities = eg.greedy_modularity_communities(self.G)
+        largest_community = communities[0]
+        self.G = self.G.nodes_subgraph(largest_community)
+        with open(new_filename, "w") as f_out: ## 更新relations
+            for temp_edge in self.G.edges:
+                print(temp_edge[0], temp_edge[1], file=f_out)
+        
+        self.hash_user = util.hash_relations(new_filename)
+        self.relation_filename = new_filename
+        
+        print("generate_community done!")
+       
     
     def load_network(self, filename):
         self.G = eg.DiGraph()
         self.G.add_edges_from_file(filename)
+        print("nodes number: ", self.G.number_of_nodes())
         print("load_network done!")
-
+         
         
-    def load_checkins(self, filename):
+    def load_checkins(self, filename, use_community):
         self.checkins = []
         temp_timeline = []
         
         self.start_time = 1262275200 #2010-1-1
-        self.end_time = 1264953600 #2010-2-1
+        self.end_time = 1293811200 #2011-1-1
         
         # cnt = 240
         with open(filename, "r") as f_in:
@@ -51,6 +68,11 @@ class gen_trace_data:
                 longtitude = line_list[3]
                 if timestamp > self.end_time or timestamp < self.start_time:
                     continue
+                if use_community:
+                    if user_id not in self.hash_user.keys():
+                        continue
+                    user_id = self.hash_user[user_id]
+
                 self.checkins.append([user_id, timestamp, {'lat': latitude, 'lon': longtitude}])
                 # temp_timeline.append(timestamp)
                 # cnt -= 1
@@ -184,17 +206,38 @@ class gen_trace_data:
         print("output_requests done!")
             
             
-    def launch(self):
+    def launch(self, use_community, new_filename=''):
+        if use_community:
+            self.generate_community(self.relation_filename, new_filename=new_filename)
         self.load_network(self.relation_filename)
-        self.load_checkins(self.location_filename)
+        self.load_checkins(self.location_filename, use_community=use_community)
         self.generate_initials()
         self.finish_views()
         self.output_requests()
         
     
 if __name__ == "__main__":
-    location_filename = "/proj/socnet-PG0/rawdata/LBSN-Brightkite/loc-brightkite_totalCheckins.txt"
-    relation_filename = "./data/traces/LBSN_Brightkite_Bigraph/relations.txt"
-    output_filename = "./data/traces/LBSN_Brightkite_Bigraph/all_timeline.txt"
-    trace_data = gen_trace_data(location_filename, relation_filename, output_filename)
-    trace_data.launch()
+    argpar = argparse.ArgumentParser(description="Make trace data for the system.")
+    argpar.add_argument('-G', help="add 'big' to use full usernet, generate to generate a community")
+    args = argpar.parse_args()
+    if args.G == 'big':
+        location_filename = "/proj/socnet-PG0/rawdata/LBSN-Brightkite/loc-brightkite_totalCheckins.txt"
+        relation_filename = "./data/traces/LBSN_Brightkite_Bigraph/relations.txt"
+        output_filename = "./data/traces/LBSN_Brightkite_Bigraph/all_timeline.txt"
+        trace_data = gen_trace_data(location_filename, relation_filename, output_filename)
+        trace_data.launch(use_community=False)
+        
+    elif args.G == "small":
+        location_filename = "/proj/socnet-PG0/rawdata/LBSN-Brightkite/loc-brightkite_totalCheckins.txt"
+        relation_filename = "./data/traces/LBSN_Brightkite_Bigraph_Community/relations.txt"
+        output_filename = "./data/traces/LBSN_Brightkite_Bigraph_Community/all_timeline.txt"
+        trace_data = gen_trace_data(location_filename, relation_filename, output_filename)
+        trace_data.launch(use_community=False)
+        
+    elif args.G == "generate":
+        location_filename = "/proj/socnet-PG0/rawdata/LBSN-Brightkite/loc-brightkite_totalCheckins.txt"
+        relation_old_filename = "./data/traces/LBSN_Brightkite_Bigraph/relations.txt"
+        relation_new_filename = "./data/traces/LBSN_Brightkite_Bigraph_Community/relations.txt"
+        output_filename = "./data/traces/LBSN_Brightkite_Bigraph_Community/all_timeline.txt"
+        trace_data = gen_trace_data(location_filename, relation_old_filename, output_filename)
+        trace_data.launch(use_community=True, new_filename=relation_new_filename)

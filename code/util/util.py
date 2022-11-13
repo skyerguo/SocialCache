@@ -68,11 +68,12 @@ def calculate_flow(host, eth_name, flow_direction, result_path=''):
 
 '''生成接表'''
 def generate_adj_matrix_graph(relation_file_path, nodes_number):
+    import re
     A = np.zeros((nodes_number, nodes_number), int)
     f_in = open(relation_file_path, "r")
     for line in f_in:
-        A[int(line.strip().split(' ')[1])][int(line.strip().split(' ')[0])] = 1 ## 原图是关注，为了SIR传播，需要改为反向图，发送关系。
-        # A[int(line.strip().split(' ')[0])][int(line.strip().split(' ')[1])] = 1
+        user_list = re.split(' |\t',line.strip())
+        A[int(user_list[1])][int(user_list[0])] = 1 ## 原图是关注，为了SIR传播，需要改为反向图，发送关系。
     f_in.close()
 
     return A
@@ -93,3 +94,22 @@ def display_timeline(time_list):
     sns.displot(temp_df, kind="kde")
     result_path = './figures/timeline.png'
     plt.savefig(result_path, dpi=300, bbox_inches='tight', format='png')
+
+def hash_relations(filename):
+    import re
+    import os
+    os.system("mv %s %s"%(filename, filename+'.bak'))
+    hash_user = {}
+    hash_number = 0
+    with open(filename, 'w') as f_out:
+        with open(filename+'.bak', 'r') as f_in:
+            for line in f_in:
+                user_list = re.split(' |\t',line.strip())
+                if int(user_list[0]) not in hash_user:
+                    hash_user[int(user_list[0])] = hash_number
+                    hash_number += 1
+                if int(user_list[1]) not in hash_user:
+                    hash_user[int(user_list[1])] = hash_number
+                    hash_number += 1
+                print(hash_user[int(user_list[0])], hash_user[int(user_list[1])], file=f_out)
+    return hash_user
