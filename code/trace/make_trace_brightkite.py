@@ -11,6 +11,7 @@ import datetime
 import copy
 import seaborn
 import code.util.util as util
+import os
 
 class gen_trace_data:
     def __init__(self, location_filename, relation_filename, output_filename):
@@ -221,23 +222,26 @@ if __name__ == "__main__":
     argpar.add_argument('-G', help="add 'big' to use full usernet, generate to generate a community")
     args = argpar.parse_args()
     if args.G == 'big':
-        location_filename = "/proj/socnet-PG0/rawdata/LBSN-Brightkite/loc-brightkite_totalCheckins.txt"
-        relation_filename = "./data/traces/LBSN_Brightkite_Bigraph/relations.txt"
-        output_filename = "./data/traces/LBSN_Brightkite_Bigraph/all_timeline.txt"
+        location_filename = "../socialnet/data/LBSN-Brightkite/loc-brightkite_totalCheckins.txt"
+        relation_filename = "./data/traces/Brightkite/relations.txt"
+        output_filename = "./data/traces/Brightkite/all_timeline.txt"
         trace_data = gen_trace_data(location_filename, relation_filename, output_filename)
         trace_data.launch(use_community=False)
         
     elif args.G == "small":
-        location_filename = "/proj/socnet-PG0/rawdata/LBSN-Brightkite/loc-brightkite_totalCheckins.txt"
-        relation_filename = "./data/traces/LBSN_Brightkite_Bigraph_Community/relations.txt"
-        output_filename = "./data/traces/LBSN_Brightkite_Bigraph_Community/all_timeline.txt"
+        location_filename = "../socialnet/data/LBSN-Brightkite/loc-brightkite_totalCheckins.txt"
+        relation_filename = "./data/traces/BrightkiteBigraphCommunity/relations.txt"
+        output_filename = "./data/traces/BrightkiteBigraphCommunity/all_timeline.txt"
         trace_data = gen_trace_data(location_filename, relation_filename, output_filename)
         trace_data.launch(use_community=False)
         
     elif args.G == "generate":
-        location_filename = "/proj/socnet-PG0/rawdata/LBSN-Brightkite/loc-brightkite_totalCheckins.txt"
-        relation_old_filename = "./data/traces/LBSN_Brightkite_Bigraph/relations.txt"
-        relation_new_filename = "./data/traces/LBSN_Brightkite_Bigraph_Community/relations.txt"
-        output_filename = "./data/traces/LBSN_Brightkite_Bigraph_Community/all_timeline.txt"
+        location_filename = "../socialnet/data/LBSN-Brightkite/loc-brightkite_totalCheckins.txt"
+        os.system("mkdir -p ./data/traces/BrightkiteBigraph/")
+        os.system("mkdir -p ./data/traces/BrightkiteBigraphCommunity/")
+        # os.system("cp ../socialnet/data/LBSN-Brightkite/loc-brightkite_edges.txt ./data/traces/BrightkiteBigraph/relations.txt")
+        relation_old_filename = "./data/traces/BrightkiteBigraph/relations.txt"
+        relation_new_filename = "./data/traces/BrightkiteBigraphCommunity/relations.txt"
+        output_filename = "./data/traces/BrightkiteBigraphCommunity/all_timeline.txt"
         trace_data = gen_trace_data(location_filename, relation_old_filename, output_filename)
         trace_data.launch(use_community=True, new_filename=relation_new_filename)

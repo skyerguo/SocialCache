@@ -10,7 +10,6 @@ data/traces/google_plus_trace/all_timeline.txt
 data/traces/GooglePlus/relations.txt
 data/traces/GooglePlus/all_timeline.txt
 data/results/origin_data/*
-data/results/origin_data/*
-data/traces/LBSN_Gowalla_Bigraph/*
-data/traces/LBSN_Brightkite_Bigraph/*
-data/traces/LBSN_Brightkite_Bigraph_Community/*
+data/traces/LBSNGowallaBigraph/*
+data/traces/BrightkiteBigraph/*
+data/traces/BrightkiteBigraphCommunity/*
