@@ -13,3 +13,5 @@ data/results/origin_data/*
 data/traces/LBSNGowallaBigraph/*
 data/traces/BrightkiteBigraph/*
 data/traces/BrightkiteBigraphCommunity/*
+data/traces/GowallaBigraph/*
+data/traces/GowallaBigraphCommunity/*
