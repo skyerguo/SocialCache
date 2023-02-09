@@ -24,6 +24,8 @@ class Redis_cache:
 
         '''设置优先队列'''
         self.use_priority_queue = use_priority_queue
+        if self.cache_size < 32:
+            self.use_priority_queue = False
         if self.use_priority_queue:
             self.priority_queue = queue.PriorityQueue()
 
@@ -62,6 +64,7 @@ class Redis_cache:
             remove_key = given_key
         else:
             '''否则寻找权值最小的key'''
+            # print(self.use_priority_queue)
             if self.use_priority_queue:
                 '''在优先队列中找到值最小的元素删除，同时要保证这个元素是有效的'''
                 a = self.priority_queue.get() ## 取出并在priority_queue中去掉该元素
@@ -82,6 +85,7 @@ class Redis_cache:
             print("Error Delete")
             exit(0)
         if use_LRU_social:
+            min_value = self.redis_fake[remove_key]['sort_value']
             if min_value > self.cache_size:
                 self.lru_social_parameter_s -= 1
         del self.redis_fake[remove_key]

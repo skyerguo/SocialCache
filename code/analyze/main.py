@@ -14,6 +14,7 @@ p.add_argument('-f', '--flow', default=False, dest="flow", action="store_true", 
 p.add_argument('-c', '--cachehitratio', default=False, dest="cacheHitRatio", action="store_true", help="whether output cache hit ratio")
 p.add_argument('-p', '--parameters', default=False, dest="parameters", action="store_true", help="whether output cache parameters")
 p.add_argument('-d', '--dataset', default=False, dest="dataset", action="store_true", help="whether output dataset")
+p.add_argument('-q', '--priority_queue', default=False, dest="priority_queue", action="store_true", help="output the setting of using priority_queue")
 p.add_argument('-z', '--outputFile', default=False, dest="outputFile", action="store_true", help="whether output the result into files")
 
 args = p.parse_args()
@@ -127,6 +128,11 @@ if __name__ == '__main__':
         print("cache_size_level_2: ", config_json['cache_size_level_2'])
         print("cache_size_level_1: ", config_json['cache_size_level_1'])
         print("parameters: ", config_json['params'])
+    
+    if args.priority_queue:
+        print("use_priority_queue: ", config_json['use_priority_queue'])
+        print("------")
+        
     if args.dataset:
         print("dataset: ", config_json['trace_dir'])
     print("------")

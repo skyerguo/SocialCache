@@ -15,10 +15,10 @@ raw_data = {
         'L1 CDN', 'L1 CDN', 'L1 CDN', 'L1 CDN', 'L1 CDN'
     ],
     'Method': [
-        'RAND', 'FIFO', 'LRU', 'LRU-social', 'SocialCache', 
-        'RAND', 'FIFO', 'LRU', 'LRU-social', 'SocialCache', 
-        'RAND', 'FIFO', 'LRU', 'LRU-social', 'SocialCache', 
-        'RAND', 'FIFO', 'LRU', 'LRU-social', 'SocialCache'
+        'RAND', 'FIFO', 'LRU', 'LRU-Social', 'SocialCache', 
+        'RAND', 'FIFO', 'LRU', 'LRU-Social', 'SocialCache', 
+        'RAND', 'FIFO', 'LRU', 'LRU-Social', 'SocialCache', 
+        'RAND', 'FIFO', 'LRU', 'LRU-Social', 'SocialCache'
     ],
     'Network Traffic Volume (KB)': [
         135219910, 124954591, 124214721, 124075570, 115831643,

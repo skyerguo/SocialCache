@@ -199,7 +199,7 @@ class Main:
                 pickle.dump(effective_size_metrics, open(curr_social_metric_path, "wb"))
             # print("effective_size_metrics: ", effective_size_metrics)
 
-        elif caching_policy == "LRU-social":
+        elif caching_policy == "LRU-Social":
             curr_social_metric_path = self.social_metric_dict_path + 'LRUSocial.pkl'
             if os.path.exists(curr_social_metric_path):
                 spreading_power_list = pickle.load(open(curr_social_metric_path, "rb"))
@@ -293,8 +293,8 @@ class Main:
                                 media_size * CONFIG['params'][1] + \
                                 effective_size_metrics[user_id] * CONFIG['params'][2]
                     
-                elif caching_policy == "LRU-social" or caching_policy == "LRU-label":
-                    '''LRU-social and LRU-label can adjust the sort_value automatically'''
+                elif caching_policy == "LRU-Social" or caching_policy == "LRU-label":
+                    '''LRU-Social and LRU-label can adjust the sort_value automatically'''
                     sort_value = 0
                     
                 '''记录redis_object，使用json形式保存'''
@@ -313,7 +313,7 @@ class Main:
                     print("temp_redis_object: ", temp_redis_object)
                 
                 '''往第三层级插入，后续的调整都由redis内部完成'''
-                if caching_policy == "LRU-social":
+                if caching_policy == "LRU-Social":
                     self.build_network.level_3_host[selected_level_3_id].redis_cache.insert(picture_hash=post_id, redis_object=temp_redis_object, need_uplift=True, use_LRU_label=False, use_LRU_social=True, first_insert=True, lru_social_parameter_sp=spreading_power_list[user_id])
                 elif caching_policy == "LRU-label":
                     self.build_network.level_3_host[selected_level_3_id].redis_cache.insert(picture_hash=post_id, redis_object=temp_redis_object, need_uplift=True, use_LRU_label=True, use_LRU_social=False)
@@ -324,7 +324,7 @@ class Main:
                 post_id = int(line.split('+')[1])
                 # user_id = int(line.split('+')[3])
                 '''往第三层级查询，后续的调整都由redis内部完成，这里先假设只有一个user节点'''
-                if caching_policy == "LRU-social":
+                if caching_policy == "LRU-Social":
                     find_result = self.build_network.level_3_host[selected_level_3_id].redis_cache.find(picture_hash=post_id, user_host=self.build_network.user_host[0], current_timestamp=current_timestamp, need_update_cache=need_update_cache, config_timestamp=1, use_LRU_label=False, use_LRU_social=True)
                 elif caching_policy == "LRU-label":
                     find_result = self.build_network.level_3_host[selected_level_3_id].redis_cache.find(picture_hash=post_id, user_host=self.build_network.user_host[0], current_timestamp=current_timestamp, need_update_cache=need_update_cache, config_timestamp=1, use_LRU_label=True, use_LRU_social=False)

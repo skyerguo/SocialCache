@@ -14,9 +14,9 @@ raw_data = {
         'TwitterLarge', 'TwitterLarge', 'TwitterLarge', 'TwitterLarge', 'TwitterLarge'
     ],
     'Method': [
-        'RAND', 'FIFO', 'LRU', 'LRU-social', 'SocialCache', 
-        'RAND', 'FIFO', 'LRU', 'LRU-social', 'SocialCache', 
-        'RAND', 'FIFO', 'LRU', 'LRU-social', 'SocialCache', 
+        'RAND', 'FIFO', 'LRU', 'LRU-Social', 'SocialCache', 
+        'RAND', 'FIFO', 'LRU', 'LRU-Social', 'SocialCache', 
+        'RAND', 'FIFO', 'LRU', 'LRU-Social', 'SocialCache', 
     ],
     'Network Traffic Volume (KB)': [
         3970424, 2214202, 2364660, 2363142, 1920556, 
