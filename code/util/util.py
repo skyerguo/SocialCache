@@ -115,5 +115,5 @@ def hash_relations(filename):
     return hash_user
 
 def distance_to_time(distance):
-    return 1/distance
+    return 0.007 * distance + 7.774
     
