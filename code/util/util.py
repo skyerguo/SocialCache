@@ -113,3 +113,7 @@ def hash_relations(filename):
                     hash_number += 1
                 print(hash_user[int(user_list[0])], hash_user[int(user_list[1])], file=f_out)
     return hash_user
+
+def distance_to_time(distance):
+    return 1/distance
+    

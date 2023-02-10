@@ -123,12 +123,14 @@ class Main:
             self.build_network.level_3_host[level_3_host_id].redis_cache.higher_cache_redis = self.build_network.level_2_host[bind_level_2_id].redis_cache
             self.build_network.level_3_host[level_3_host_id].redis_cache.higher_cache_id = bind_level_2_id
             self.build_network.level_3_host[level_3_host_id].redis_cache.higher_cache_level = 2
+            self.build_network.level_3_host[level_3_host_id].redis_cache.higher_cache_latency = self.topo["delay_topo"][self.topo["level_3_id"][level_3_host_id]][self.topo["level_2_id"][bind_level_2_id]]
 
         for level_2_host_id in range(self.build_network.level_2_host_number):
             bind_level_1_id = self.topo['up_bind_2_1'][level_2_host_id]
             self.build_network.level_2_host[level_2_host_id].redis_cache.higher_cache_redis = self.build_network.level_1_host[bind_level_1_id].redis_cache
             self.build_network.level_2_host[level_2_host_id].redis_cache.higher_cache_id = bind_level_1_id
             self.build_network.level_2_host[level_2_host_id].redis_cache.higher_cache_level = 1
+            self.build_network.level_2_host[level_2_host_id].redis_cache.higher_cache_latency = self.topo["delay_topo"][self.topo["level_2_id"][level_1_host_id]][self.topo["level_1_id"][bind_level_1_id]]
 
         self.find_success_number = [0, 0, 0, 0]
         self.find_fail_number = [0, 0, 0, 0]
@@ -224,6 +226,7 @@ class Main:
         f_out_find = open(self.result_path + 'find_log.txt', 'w')
         f_out_insert = open(self.result_path + 'insert_log.txt', 'w')
         f_out_time = open(self.result_path + 'time_log.txt', 'w')
+        f_out_latency = open(self.result_path + 'latency_log.txt', 'w')
         start_time = time.time()
         print("start_time: %f"%(start_time), file=f_out_time)
         print("caching_policy: ", caching_policy)
@@ -322,14 +325,15 @@ class Main:
 
             elif current_type == "view":
                 post_id = int(line.split('+')[1])
+                curr_view_start_time = time.time()
                 # user_id = int(line.split('+')[3])
                 '''往第三层级查询，后续的调整都由redis内部完成，这里先假设只有一个user节点'''
                 if caching_policy == "LRU-Social":
-                    find_result = self.build_network.level_3_host[selected_level_3_id].redis_cache.find(picture_hash=post_id, user_host=self.build_network.user_host[0], current_timestamp=current_timestamp, need_update_cache=need_update_cache, config_timestamp=1, use_LRU_label=False, use_LRU_social=True)
+                    find_result = self.build_network.level_3_host[selected_level_3_id].redis_cache.find(picture_hash=post_id, user_host=self.build_network.user_host[0], current_timestamp=current_timestamp, need_update_cache=need_update_cache, latency_CDN=2*util.distance_to_time(1/nearest_distance), config_timestamp=1, use_LRU_label=False, use_LRU_social=True)
                 elif caching_policy == "LRU-label":
-                    find_result = self.build_network.level_3_host[selected_level_3_id].redis_cache.find(picture_hash=post_id, user_host=self.build_network.user_host[0], current_timestamp=current_timestamp, need_update_cache=need_update_cache, config_timestamp=1, use_LRU_label=True, use_LRU_social=False)
+                    find_result = self.build_network.level_3_host[selected_level_3_id].redis_cache.find(picture_hash=post_id, user_host=self.build_network.user_host[0], current_timestamp=current_timestamp, need_update_cache=need_update_cache, latency_CDN=2*util.distance_to_time(1/nearest_distance),config_timestamp=1, use_LRU_label=True, use_LRU_social=False)
                 else:
-                    find_result = self.build_network.level_3_host[selected_level_3_id].redis_cache.find(picture_hash=post_id, user_host=self.build_network.user_host[0], current_timestamp=current_timestamp, need_update_cache=need_update_cache, config_timestamp=1, use_LRU_label=False, use_LRU_social=False)
+                    find_result = self.build_network.level_3_host[selected_level_3_id].redis_cache.find(picture_hash=post_id, user_host=self.build_network.user_host[0], current_timestamp=current_timestamp, need_update_cache=need_update_cache, latency_CDN=2*util.distance_to_time(1/nearest_distance),config_timestamp=1, use_LRU_label=False, use_LRU_social=False)
                 result_level = find_result[0]
                 
                 if self.if_debug:
@@ -339,6 +343,9 @@ class Main:
                     '''所有level的cache都没有找到'''
                     print("!!!! ", cnt_line)
                     continue
+                
+                curr_view_end_time = time.time()
+                latency = curr_view_end_time - curr_view_start_time + find_result[2]
 
                 print(cnt_line, selected_level_3_id, result_level, find_result[1], file=f_out_find)
                 
@@ -354,6 +361,7 @@ class Main:
         f_out_insert.close()
         f_out_find.close()
         f_out_time.close()
+        f_out_latency.close()
 
         if self.use_http_server == True:
             for level_3_host_id in range(self.build_network.level_3_host_number):

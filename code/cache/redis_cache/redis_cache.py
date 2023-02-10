@@ -234,7 +234,7 @@ class Redis_cache:
                 util.HTTP_GET(host=self.host, picture_hash=picture_hash, IP_address=self.higher_cache_redis.host_ip, port_number=self.higher_cache_redis.host_port, use_TLS=False, result_path=self.higher_cache_redis.result_path+'wget/'+self.host_ip, picture_path=self.picture_root_path+str(picture_hash))
             print(redis_object['media_size'], file=self.higher_cache_redis.file_insert_media_size)
 
-    def find(self, picture_hash, user_host, current_timestamp, need_update_cache=False, config_timestamp=1, use_LRU_label=False, use_LRU_social=False):
+    def find(self, picture_hash, user_host, current_timestamp, need_update_cache=False, latency_CDN=0, config_timestamp=1, use_LRU_label=False, use_LRU_social=False):
         if picture_hash in self.redis_fake.keys():
             '''如果找到了'''
             redis_object = copy.deepcopy(self.redis_fake[picture_hash])
@@ -266,7 +266,7 @@ class Redis_cache:
                 util.HTTP_GET(host=user_host, picture_hash=picture_hash, IP_address=self.host_ip, port_number=self.host_port, use_TLS=False, result_path=self.result_path+'wget/'+self.host_ip, picture_path='/dev/null')            
 
             '''返回一个list，分别表示[第几层命中的, 查到的redis_object]'''
-            return [result_level, new_redis_object]
+            return [result_level, new_redis_object, latency_CDN]
 
         else:
             result_level = 0
@@ -274,9 +274,10 @@ class Redis_cache:
 
             '''如果当前层没找到，有更高层，向上查询'''
             if self.cache_level > 1:
-                find_result = self.higher_cache_redis.find(picture_hash=picture_hash, user_host=user_host, current_timestamp=current_timestamp, need_update_cache=need_update_cache, config_timestamp=config_timestamp, use_LRU_label=use_LRU_label, use_LRU_social=use_LRU_social)
+                find_result = self.higher_cache_redis.find(picture_hash=picture_hash, user_host=user_host, current_timestamp=current_timestamp, need_update_cache=need_update_cache, latency_CDN=latency_CDN+2*self.higher_cache_latency,config_timestamp=config_timestamp, use_LRU_label=use_LRU_label, use_LRU_social=use_LRU_social)
                 result_level = copy.deepcopy(find_result[0])
                 redis_object = copy.deepcopy(find_result[1])
+                latency_CDN = copy.deepcopy(find_result[2])
 
                 '''上层已经操作完毕。根据上层的结果，当前层获取图片cache'''
                 if result_level != 0: 
@@ -288,5 +289,5 @@ class Redis_cache:
                     # print("------")
             
             '''返回一个list，分别表示[第几层命中的, 查到的redis_object]'''
-            return [result_level, redis_object]
+            return [result_level, redis_object, latency_CDN]
 
