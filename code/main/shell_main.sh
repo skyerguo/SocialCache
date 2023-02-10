@@ -5,48 +5,44 @@
 #     cat code/main/basic_config.json | jq ".cache_size_level_3=$cache_size" > code/main/config_tmp.json
 #     cat code/main/config_tmp.json | jq ".cache_size_level_2=$cache_size_higher" > code/main/basic_config.json
 
-#     sleep 5
-#     cat code/main/basic_config.json | jq '.caching_policy="RAND"' > code/main/config.json
-#     sudo python3 -m code.main.main
+# ## TwitterSmall
+# cat code/main/basic_config.json | jq '.trace_dir="TwitterSmall"' > code/main/config_tmp.json
+# cat code/main/config_tmp.json | jq '.params=[0.05, 50.5, 90]' > code/main/basic_config.json
 
-#     sleep 5
-#     cat code/main/basic_config.json | jq '.caching_policy="FIFO"' > code/main/config.json
-#     sudo python3 -m code.main.main
+# sleep 5
+# cat code/main/basic_config.json | jq '.caching_policy="RAND"' > code/main/config.json
+# sudo python3 -m code.main.main
 
-#     sleep 5
-#     cat code/main/basic_config.json | jq '.caching_policy="LRU"' > code/main/config.json
-#     sudo python3 -m code.main.main
+# sleep 5
+# cat code/main/basic_config.json | jq '.caching_policy="FIFO"' > code/main/config.json
+# sudo python3 -m code.main.main
 
-#     sleep 5
-#     cat code/main/basic_config.json | jq '.caching_policy="LRU-label"' > code/main/config_tmp.json
-#     cat code/main/config_tmp.json | jq '.use_priority_queue=false' > code/main/config.json
-#     sudo python3 -m code.main.main
+# sleep 5
+# cat code/main/basic_config.json | jq '.caching_policy="LRU"' > code/main/config.json
+# sudo python3 -m code.main.main
 
-#     sleep 5
-#     cat code/main/basic_config.json | jq '.caching_policy="LRU-Social"' > code/main/config_tmp.json
-#     cat code/main/config_tmp.json | jq '.use_priority_queue=false' > code/main/config.json
-#     sudo python3 -m code.main.main
+# sleep 5
+# cat code/main/basic_config.json | jq '.caching_policy="LRU-Social"' > code/main/config_tmp.json
+# cat code/main/config_tmp.json | jq '.use_priority_queue=false' > code/main/config.json
+# sudo python3 -m code.main.main
 
-#     sleep 5
-#     cat code/main/basic_config.json | jq '.caching_policy="PageRank"' > code/main/config_tmp.json
-#     cat code/main/config_tmp.json | jq '.params=[0, 64.5, 310000]' > code/main/config.json
-#     sudo python3 -m code.main.main
+# sleep 5
+# cat code/main/basic_config.json | jq '.caching_policy="EffectiveSize"' > code/main/config.json
+# sudo python3 -m code.main.main
 
-#     sleep 5
-#     cat code/main/basic_config.json | jq '.caching_policy="EffectiveSize"' > code/main/config_tmp.json
-#     cat code/main/config_tmp.json | jq '.params=[0, 60.0, 103]' > code/main/config.json
-#     sudo python3 -m code.main.main
+# sleep 5
+# cat code/main/basic_config.json | jq '.caching_policy="EffectiveSize"' > code/main/config_tmp.json
+# cat code/main/config_tmp.json | jq '.use_priority_queue=false' > code/main/config.json
+# sudo python3 -m code.main.main
+
+# for i in `seq 0 5`; do
+#     # echo $i
+#     python3 -m code.analyze.main -l -m -e -c -p -d -q -y -z -n $i
 # done
 
-# for i in `seq 0 20`; do
-#     echo $i
-#     # break
-#     python3 -m code.analyze.main -l -m -e -c -p -d -z -n -y $i
-# done
-
-## TwitterSmall
-cat code/main/basic_config.json | jq '.trace_dir="TwitterSmall"' > code/main/config_tmp.json
-cat code/main/config_tmp.json | jq '.params=[0, 60.0, 103]' > code/main/config.json
+## TwitterLarge
+cat code/main/basic_config.json | jq '.trace_dir="TwitterLarge"' > code/main/config_tmp.json
+cat code/main/config_tmp.json | jq '.params=[0.05, 50.5, 90]' > code/main/basic_config.json
 
 sleep 5
 cat code/main/basic_config.json | jq '.caching_policy="RAND"' > code/main/config.json
@@ -66,8 +62,7 @@ cat code/main/config_tmp.json | jq '.use_priority_queue=false' > code/main/confi
 sudo python3 -m code.main.main
 
 sleep 5
-cat code/main/basic_config.json | jq '.caching_policy="EffectiveSize"' > code/main/config_tmp.json
-cat code/main/config_tmp.json | jq '.use_priority_queue=true' > code/main/config.json
+cat code/main/basic_config.json | jq '.caching_policy="EffectiveSize"' > code/main/config.json
 sudo python3 -m code.main.main
 
 sleep 5

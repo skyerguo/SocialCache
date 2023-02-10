@@ -1,0 +1,25 @@
+caching_policy:  RAND
+cache_size_level_3:  15
+cache_size_level_2:  150
+cache_size_level_1:  1000000
+parameters:  [0.05, 50.5, 90]
+use_priority_queue:  True
+------
+dataset:  TwitterSmall
+------
+三级CDN缓存命中率:  0.06006957210328347
+二级CDN缓存命中率:  0.24089062735068453
+一级CDN缓存命中率:  1.0
+总缓存命中率:  0.37686921117423233
+二三级缓存命中率:  0.14768055515059625
+------
+total_media_size:  11866893.124023438
+insert_all_media_size:  5840985.32421875
+level 1; media szie: 2523951.560546875
+level 2; media szie: 5840985.32421875
+level 3; media szie: 3501956.2392578125
+------
+time_duration:  3.757361
+------
+latency_average:  211.09596337566106
+------
