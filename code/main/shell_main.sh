@@ -75,7 +75,7 @@ cat code/main/basic_config.json | jq '.caching_policy="EffectiveSize"' > code/ma
 cat code/main/config_tmp.json | jq '.use_priority_queue=false' > code/main/config.json
 sudo python3 -m code.main.main
 
-for i in `seq 0 20`; do
-    echo $i
+for i in `seq 0 5`; do
+    # echo $i
     python3 -m code.analyze.main -l -m -e -c -p -d -q -y -z -n $i
 done
