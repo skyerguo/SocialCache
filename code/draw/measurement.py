@@ -38,13 +38,13 @@ distance_bandwidth = {
 }
 
 latency_bandwidth = {
-    'Latency(ms)': [
+    'Latency': [
         
     ],
-    'Bandwidth(Mbps)': [
+    'Bandwidth': [
         
     ],
-    'Geolocation Classification': [
+    'Classification': [
         
     ]
 }
@@ -68,6 +68,7 @@ def plot_distance_latency():
 
     plt.savefig(result_path, dpi=300, bbox_inches='tight', format='pdf')
     
+    
 def plot_distance_bandwidth():
     result_path = './figures/implementation_distance_bandwidth.pdf'
     df = pd.DataFrame.from_dict(distance_bandwidth)
@@ -85,6 +86,32 @@ def plot_distance_bandwidth():
     g.spines['top'].set_visible(False)
     g.spines['right'].set_visible(False)
     g.legend(loc='upper right', frameon=False, title=None, fontsize=14)
+
+    plt.savefig(result_path, dpi=300, bbox_inches='tight', format='pdf')
+    
+    
+def plot_latency_bandwidth():
+    result_path = './figures/implementation_latency_bandwidth.pdf'
+    df = pd.DataFrame.from_dict(latency_bandwidth)
+    mpl.rcParams['figure.figsize'] = (6, 5)
+    plt.rcParams["font.size"] = 14
+    
+    y, X = dmatrices('Bandwidth ~ Latency', data=df, return_type='dataframe')
+    rlm_model = sm.RLM(y, X) #Robust linear regression model
+    rlm_results = rlm_model.fit() 
+
+    df.rename(columns = {'Bandwidth' : 'Bandwidth(Mbps)', 'Latency' : 'Latency(ms)', 'Classification': 'Geolocation Classification'}, inplace = True)
+    g = sns.lmplot(x='Latency(ms)', y='Bandwidth(Mbps)', hue='Geolocation Classification', markers=['.','+'], robust=True, data=df, legend=True)
+    
+    ax = g.axes[0, 0]
+    ax.set_ylim(0)
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    # ax.legend(loc='upper right', frameon=False, title=None, fontsize=14)
+    # g.set(ylim=(0, None))
+    # g.spines['top'].set_visible(False)
+    # g.spines['right'].set_visible(False)
+    # g.legend(loc='upper right', frameon=False, title=None, fontsize=14)
 
     plt.savefig(result_path, dpi=300, bbox_inches='tight', format='pdf')
 
@@ -132,6 +159,10 @@ if __name__ == '__main__':
             distance_bandwidth['Distance'].append(curr_distance)
             distance_bandwidth['Bandwidth'].append(curr_bandwidth)
             
-    # plot_distance_latency()
-    plot_distance_bandwidth()
-    
+            latency_bandwidth['Latency'].append(curr_latency)
+            latency_bandwidth['Bandwidth'].append(curr_bandwidth)
+            latency_bandwidth['Classification'].append(curr_type)
+            
+    # plot_distance_latency_linear()
+    # plot_distance_bandwidth_linear()
+    # plot_latency_bandwidth_linear()
