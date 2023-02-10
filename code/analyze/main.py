@@ -3,6 +3,7 @@ import os
 import json
 import math
 import sys
+import numpy as np
 
 p = argparse.ArgumentParser(description='Analyze the result')
 p.add_argument('-t', '--timestamp', type=str, default="", dest="timestamp", action="store", help="the timestamp of data file")
@@ -16,6 +17,7 @@ p.add_argument('-p', '--parameters', default=False, dest="parameters", action="s
 p.add_argument('-d', '--dataset', default=False, dest="dataset", action="store_true", help="whether output dataset")
 p.add_argument('-q', '--priority_queue', default=False, dest="priority_queue", action="store_true", help="output the setting of using priority_queue")
 p.add_argument('-z', '--outputFile', default=False, dest="outputFile", action="store_true", help="whether output the result into files")
+p.add_argument('-y', '--latency', default=False, dest="latency", action="store_true", help="whether output latency")
 
 args = p.parse_args()
 
@@ -34,6 +36,7 @@ media_size_path = experiment_path + '/mediaSize/'
 execution_time_path = experiment_path + '/time_log.txt'
 flow_path = experiment_path + '/flow/'
 cache_hit_ratio_path = experiment_path + '/find_log.txt'
+latency_path = experiment_path + '/latency_log.txt'
 config_path = experiment_path + '/config.json'
 config_json = json.load(open(config_path, 'r'))
 
@@ -68,6 +71,14 @@ def get_execution_time():
         if 'time_duration' in line:
             time_duration = float(line.split(" ")[-1].strip())
     print("time_duration: ", time_duration)
+    f_in.close()
+    
+def get_latency():
+    f_in = open(latency_path, 'r')
+    latency_list = []
+    for line in f_in:
+        latency_list.append(float(line.split(' ')[1].strip()))
+    print("latency_average: ", np.mean(latency_list))
     f_in.close()
 
 def get_flow():
@@ -147,6 +158,10 @@ if __name__ == '__main__':
 
     if args.executionTime:
         get_execution_time()
+        print("------")
+    
+    if args.latency:
+        get_latency()
         print("------")
 
     if args.flow:

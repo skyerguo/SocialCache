@@ -348,6 +348,7 @@ class Main:
                 latency = curr_view_end_time - curr_view_start_time + find_result[2]
 
                 print(cnt_line, selected_level_3_id, result_level, find_result[1], file=f_out_find)
+                print(cnt_line, find_result[2], file=f_out_latency)
                 
                 for temp_level in range(3, result_level, -1):
                     self.find_fail_number[temp_level] += 1
