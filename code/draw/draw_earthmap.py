@@ -14,7 +14,6 @@ def draw_all():
     region2position = {}
     geometry = []
 
-    measure_path_name = 'data/static/measure.csv'
     position_path_name = 'data/static/position-gcp-list.csv'  
 
     with open(position_path_name, 'r') as csv_file:

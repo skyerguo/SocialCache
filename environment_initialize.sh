@@ -54,6 +54,9 @@ echo "export PYTHONWARNINGS=ignore" >> ~/.zshrc
 echo "export PYTHONPATH=$PYTHONPATH:$HOME/mininet" >> ~/.zshrc 
 source ~/.zshrc
 
+# 目录权限管理
+sudo chown -R gtc:socnet-PG0 .config
+
 ## 设置进程限制
 echo 530603 | sudo tee /sys/fs/cgroup/pids/user.slice/user-${UID}.slice/pids.max 
 sudo sed -i 's/#UserTasksMax=33%/UserTasksMax=infinity/g' /etc/systemd/logind.conf
@@ -77,5 +80,6 @@ echo "gtc            hard    nofile          102400" | sudo tee -a /etc/security
 # cd PyMimircache
 # sudo python3 setup.py install
 
-## Matlab缺少字体
-## https://stackoverflow.com/questions/42097053/matplotlib-cannot-find-basic-fonts
+## Matlab字体
+## 缺少字体：https://stackoverflow.com/questions/42097053/matplotlib-cannot-find-basic-fonts
+## 中文字体：https://blog.csdn.net/weixin_45772050/article/details/121222052
