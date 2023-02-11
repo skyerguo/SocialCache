@@ -55,7 +55,7 @@ echo "export PYTHONPATH=$PYTHONPATH:$HOME/mininet" >> ~/.zshrc
 source ~/.zshrc
 
 # 目录权限管理
-sudo chown -R gtc:socnet-PG0 .config
+sudo chown -R gtc:socnet-PG0 ~/.config
 
 ## 设置进程限制
 echo 530603 | sudo tee /sys/fs/cgroup/pids/user.slice/user-${UID}.slice/pids.max 

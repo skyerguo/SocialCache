@@ -14,11 +14,11 @@ ANALYZE_CMD="python3 -m code.analyze.get_media_size -n 0"
 LOG_FILENAME="./optimize.log"
 
 init_list = {
-    "Degree": [[0, 56.0, 13], [0,0,0]],
-    "PageRank": [[0, 64.5, 310000], [0,0,0]],
-    "BetweennessCentrality": [[0, 57.5, 54000], [0,0,0]],
-    "LaplacianCentrality": [[0, 54.0, 52000], [0,0,0]],
-    "EffectiveSize": [[0, 50.5, 10]]
+    # "Degree": [[0, 56.0, 13], [0,0,0]],
+    # "PageRank": [[0, 64.5, 310000], [0,0,0]],
+    # "BetweennessCentrality": [[0, 57.5, 54000], [0,0,0]],
+    # "LaplacianCentrality": [[0, 54.0, 52000], [0,0,0]],
+    "EffectiveSize": [[0, 50.5, 10], [200,0.0035,10],  [10,50,100], [50, 50, 50]]
 }
 
 step_social = {
@@ -220,6 +220,6 @@ class hill_climb_optimize():
 if __name__ == "__main__":
     optimize = hill_climb_optimize()
     optimize.hill_climb_specific_point(init_list[optimize.init_config['caching_policy']])
-    optimize.hill_climb(0)
+    optimize.hill_climb(10)
     # optimize.visualize()
     # optimize.savelog()
