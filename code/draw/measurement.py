@@ -198,7 +198,7 @@ def plot_latency_bandwidth_linear():
     ax.set_ylim(0)
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
-    ax.legend(loc='upper right', labels=["y={0:.3f}x+{1:.3f}".format(rlm_results1.params[1],rlm_results1.params[0]), "y={0:.3f}x+{1:.3f}".format(rlm_results2.params[1],rlm_results2.params[0])], frameon=False, title=None, fontsize=16)
+    ax.legend(loc='upper right', labels=['Different Continent','Same Continent'], frameon=False, title=None, fontsize=16)
 
     plt.savefig(result_path, dpi=300, bbox_inches='tight', format='pdf')
     
@@ -253,7 +253,7 @@ def plot_latency_bandwidth_pow():
     g.spines['right'].set_visible(False)
     plt.plot(x1, y1)
     plt.plot(x2, y2)
-    plt.legend(loc='upper right', labels=['$y=%.3fx^{%.3f}$'%(a1,b1),'$y=%.3fx^{%.3f}$'%(a2,b2)], frameon=False, title=None, fontsize=16)
+    plt.legend(loc='upper right', labels=['Different Continent','Same Continent'], frameon=False, title=None, fontsize=16)
 
     plt.savefig(result_path, dpi=300, bbox_inches='tight', format='pdf')
     
@@ -314,6 +314,6 @@ if __name__ == '__main__':
     # plot_distance_latency_pow()
     # plot_distance_bandwidth_pow()
     
-    # plot_latency_bandwidth_linear()
+    plot_latency_bandwidth_linear()
     # plot_latency_bandwidth_log_log()
     # plot_latency_bandwidth_pow()
