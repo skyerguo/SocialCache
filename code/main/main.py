@@ -198,6 +198,17 @@ class Main:
                 degree_centrality_metrics = networkx.in_degree_centrality(networkx_graph)
                 pickle.dump(degree_centrality_metrics, open(curr_social_metric_path, "wb"))
             # print("degree_centrality_metrics: ", degree_centrality_metrics)   
+            
+        elif caching_policy == "ClosenessCentrality":
+            curr_social_metric_path = self.social_metric_dict_path + 'ClosenessCentrality.pkl'
+            if os.path.exists(curr_social_metric_path):
+                closeness_centrality_metrics = pickle.load(open(curr_social_metric_path, "rb"))
+            else:
+                adj_matrix = util.generate_adj_matrix_graph("data/traces/" + self.trace_dir + "/relations.txt", len(self.G.nodes))
+                networkx_graph = networkx.DiGraph(adj_matrix)
+                closeness_centrality_metrics = networkx.closeness_centrality(networkx_graph)
+                pickle.dump(closeness_centrality_metrics, open(curr_social_metric_path, "wb"))
+            # print("closeness_centrality_metrics: ", closeness_centrality_metrics)
 
         elif caching_policy == "BetweennessCentrality":
             curr_social_metric_path = self.social_metric_dict_path + 'BetweennessCentrality.pkl'
@@ -285,6 +296,8 @@ class Main:
                 user_id = int(line.split('+')[3])
                 media_size = float(line.split('+')[1])
 
+                '''如果使用networkx，图中用户的编号是数字；如果使用easygraph，图中用户的编号是字符串，记得类型转换'''
+
                 if caching_policy == 'RAND':
                     sort_value = random.randint(0, 1000)
 
@@ -320,6 +333,12 @@ class Main:
                                 nearest_distance * CONFIG['params'][0] + \
                                 media_size * CONFIG['params'][1] + \
                                 degree_centrality_metrics[user_id] * CONFIG['params'][2]
+                                
+                elif caching_policy == "ClosenessCentrality":
+                    sort_value = current_timestamp + \
+                                nearest_distance * CONFIG['params'][0] + \
+                                media_size * CONFIG['params'][1] + \
+                                closeness_centrality_metrics[user_id] * CONFIG['params'][2]
 
                 elif caching_policy == "BetweennessCentrality":
                     sort_value = current_timestamp + \
