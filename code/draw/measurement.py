@@ -49,69 +49,154 @@ latency_bandwidth = {
     ]
 }
 
-def plot_distance_latency():
-    result_path = './figures/implementation_distance_latency.pdf'
+def plot_distance_latency_linear():
+    result_path = './figures/implementation_distance_latency_linear.pdf'
     df = pd.DataFrame.from_dict(distance_latency)
     mpl.rcParams['figure.figsize'] = (6, 5)
-    plt.rcParams["font.size"] = 14
+    plt.rcParams["font.size"] = 18
     
     y, X = dmatrices('Latency ~ Distance', data=df, return_type='dataframe')
     rlm_model = sm.RLM(y, X) #Robust linear regression model
     rlm_results = rlm_model.fit() 
 
     df.rename(columns = {'Latency' : 'Latency(ms)', 'Distance' : 'Geolocation Distance(km)'}, inplace = True)
-    g = sns.regplot(x='Geolocation Distance(km)', y='Latency(ms)', marker='.', color='b', robust=True, line_kws={'label':"y={0:.3f}x+{1:.3f}".format(rlm_results.params[1],rlm_results.params[0])}, data=df)
+    g = sns.regplot(x='Geolocation Distance(km)', y='Latency(ms)', marker='.', color='b', robust=True, line_kws={'label':"y={0:.3f}x+{1:.3f}".format(rlm_results.params[1],rlm_results.params[0]), 'color':'red'}, data=df)
     
     g.spines['top'].set_visible(False)
     g.spines['right'].set_visible(False)
-    g.legend(loc='upper right', frameon=False, title=None, fontsize=14)
+    g.legend(loc='upper right', frameon=False, title=None, fontsize=18)
 
     plt.savefig(result_path, dpi=300, bbox_inches='tight', format='pdf')
     
     
-def plot_distance_bandwidth():
-    result_path = './figures/implementation_distance_bandwidth.pdf'
+def plot_distance_latency_log_log():
+    result_path = './figures/implementation_distance_latency_log_log.pdf'
+    df = pd.DataFrame.from_dict(distance_latency)
+    df['Distance'] = np.log(df['Distance'])
+    df['Latency'] = np.log(df['Latency'])
+    mpl.rcParams['figure.figsize'] = (6, 5)
+    plt.rcParams["font.size"] = 18
+    
+    y, X = dmatrices('Latency ~ Distance', data=df, return_type='dataframe')
+    rlm_model = sm.RLM(y, X) #Robust linear regression model
+    rlm_results = rlm_model.fit() 
+
+    df.rename(columns = {'Latency' : 'Latency(ms) - Log Scale', 'Distance' : 'Geolocation Distance(km) - Log Scale'}, inplace = True)
+    g = sns.regplot(x='Geolocation Distance(km)', y='Latency(ms)', marker='.', color='b', robust=True, line_kws={'label':"y={0:.3f}x+{1:.3f}".format(rlm_results.params[1],rlm_results.params[0]), 'color':'red'}, data=df)
+    
+    g.spines['top'].set_visible(False)
+    g.spines['right'].set_visible(False)
+    g.legend(loc='upper right', frameon=False, title=None, fontsize=18)
+
+    plt.savefig(result_path, dpi=300, bbox_inches='tight', format='pdf')
+    
+def plot_distance_latency_pow():
+    result_path = './figures/implementation_distance_latency_pow.pdf'
+    df = pd.DataFrame.from_dict(distance_latency)
+    mpl.rcParams['figure.figsize'] = (6, 5)
+    plt.rcParams["font.size"] = 18
+    
+    a = 0.024
+    b = 0.889
+    x = np.linspace(0, 20000, 1000)
+    y = a * pow(x, b)
+
+    df.rename(columns = {'Latency' : 'Latency(ms)', 'Distance' : 'Geolocation Distance(km)'}, inplace = True)
+    g = sns.scatterplot(x='Geolocation Distance(km)', y='Latency(ms)', marker='o', color='b', data=df)
+    
+    g.spines['top'].set_visible(False)
+    g.spines['right'].set_visible(False)
+    plt.plot(x, y, color='red',label='$y=%.3fx^{%.3f}$'%(a,b),linewidth=1)
+    plt.legend(loc='upper right', frameon=False, title=None, fontsize=18)
+
+    plt.savefig(result_path, dpi=300, bbox_inches='tight', format='pdf')
+    
+    
+def plot_distance_bandwidth_linear():
+    result_path = './figures/implementation_distance_bandwidth_linear.pdf'
     df = pd.DataFrame.from_dict(distance_bandwidth)
     mpl.rcParams['figure.figsize'] = (6, 5)
-    plt.rcParams["font.size"] = 14
+    plt.rcParams["font.size"] = 18
     
     y, X = dmatrices('Bandwidth ~ Distance', data=df, return_type='dataframe')
     rlm_model = sm.RLM(y, X) #Robust linear regression model
     rlm_results = rlm_model.fit() 
 
     df.rename(columns = {'Bandwidth' : 'Bandwidth(Mbps)', 'Distance' : 'Geolocation Distance(km)'}, inplace = True)
-    g = sns.regplot(x='Geolocation Distance(km)', y='Bandwidth(Mbps)', marker='.', color='b', robust=True, line_kws={'label':"y={0:.3f}x+{1:.3f}".format(rlm_results.params[1],rlm_results.params[0])}, data=df)
+    g = sns.regplot(x='Geolocation Distance(km)', y='Bandwidth(Mbps)', marker='.', color='b', robust=True, line_kws={'label':"y={0:.3f}x+{1:.3f}".format(rlm_results.params[1],rlm_results.params[0]), 'color':'red'}, data=df)
     
     g.set_ylim(0)
     g.spines['top'].set_visible(False)
     g.spines['right'].set_visible(False)
-    g.legend(loc='upper right', frameon=False, title=None, fontsize=14)
+    g.legend(loc='upper right', frameon=False, title=None, fontsize=18)
+
+    plt.savefig(result_path, dpi=300, bbox_inches='tight', format='pdf')
+    
+
+def plot_distance_bandwidth_log_log():
+    result_path = './figures/implementation_distance_bandwidth_log_log.pdf'
+    df = pd.DataFrame.from_dict(distance_bandwidth)
+    df['Distance'] = np.log(df['Distance'])
+    df['Bandwidth'] = np.log(df['Bandwidth'])
+    mpl.rcParams['figure.figsize'] = (6, 5)
+    plt.rcParams["font.size"] = 18
+    
+    y, X = dmatrices('Bandwidth ~ Distance', data=df, return_type='dataframe')
+    rlm_model = sm.RLM(y, X) #Robust linear regression model
+    rlm_results = rlm_model.fit() 
+
+    df.rename(columns = {'Bandwidth' : 'Bandwidth(Mbps) - Log Scale', 'Distance' : 'Geolocation Distance(km) - Log Scale'}, inplace = True)
+    g = sns.regplot(x='Geolocation Distance(km) - Log Scale', y='Bandwidth(Mbps) - Log Scale', marker='.', color='b', robust=True, line_kws={'label':"y={0:.3f}x+{1:.3f}".format(rlm_results.params[1],rlm_results.params[0]), 'color':'red'}, data=df)
+    
+    g.set_ylim(0)
+    g.spines['top'].set_visible(False)
+    g.spines['right'].set_visible(False)
+    g.legend(loc='upper right', frameon=False, title=None, fontsize=18)
 
     plt.savefig(result_path, dpi=300, bbox_inches='tight', format='pdf')
     
     
-def plot_latency_bandwidth():
-    result_path = './figures/implementation_latency_bandwidth.pdf'
+def plot_distance_bandwidth_pow():
+    result_path = './figures/implementation_distance_bandwidth_pow.pdf'
+    df = pd.DataFrame.from_dict(distance_bandwidth)
+    mpl.rcParams['figure.figsize'] = (6, 5)
+    plt.rcParams["font.size"] = 18
+    
+    a = 228433.404
+    b = -0.819
+    x = np.linspace(60, 20000, 1000)
+    y = a * pow(x, b)
+
+    df.rename(columns = {'Bandwidth' : 'Bandwidth(Mbps)', 'Distance' : 'Geolocation Distance(km)'}, inplace = True)
+    g = sns.scatterplot(x='Geolocation Distance(km)', y='Bandwidth(Mbps)', marker='o', color='b', data=df)
+    
+    g.set_ylim(0)
+    g.spines['top'].set_visible(False)
+    g.spines['right'].set_visible(False)
+    plt.plot(x, y, color='red',label='$y=%.3fx^{%.3f}$'%(a,b),linewidth=3)
+    plt.legend(loc='upper right', frameon=False, title=None, fontsize=18)
+
+    plt.savefig(result_path, dpi=300, bbox_inches='tight', format='pdf')
+    
+    
+def plot_latency_bandwidth_linear():
+    result_path = './figures/implementation_latency_bandwidth_linear.pdf'
     df = pd.DataFrame.from_dict(latency_bandwidth)
     mpl.rcParams['figure.figsize'] = (6, 5)
-    plt.rcParams["font.size"] = 14
+    plt.rcParams["font.size"] = 18
     
     y, X = dmatrices('Bandwidth ~ Latency', data=df, return_type='dataframe')
     rlm_model = sm.RLM(y, X) #Robust linear regression model
     rlm_results = rlm_model.fit() 
 
     df.rename(columns = {'Bandwidth' : 'Bandwidth(Mbps)', 'Latency' : 'Latency(ms)', 'Classification': 'Geolocation Classification'}, inplace = True)
-    g = sns.lmplot(x='Latency(ms)', y='Bandwidth(Mbps)', hue='Geolocation Classification', markers=['.','+'], robust=True, data=df, legend=True)
+    g = sns.lmplot(x='Latency(ms)', y='Bandwidth(Mbps)', hue='Geolocation Classification', markers=['.','+'], robust=True, data=df, legend=False)
     
     ax = g.axes[0, 0]
     ax.set_ylim(0)
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
-    # ax.legend(loc='upper right', frameon=False, title=None, fontsize=14)
-    # g.set(ylim=(0, None))
-    # g.spines['top'].set_visible(False)
-    # g.spines['right'].set_visible(False)
-    # g.legend(loc='upper right', frameon=False, title=None, fontsize=14)
+    ax.legend(loc='upper right', frameon=False, title=None, fontsize=18)
 
     plt.savefig(result_path, dpi=300, bbox_inches='tight', format='pdf')
 
@@ -143,8 +228,9 @@ if __name__ == '__main__':
             curr_distance = util.calc_geolocation_distance(region2position[area1],region2position[area2])
             curr_latency = float(line.split(',')[2]) / 2
             
-            distance_latency['Distance'].append(curr_distance)
-            distance_latency['Latency'].append(curr_latency)
+            if curr_distance > 0.001: #防止出现0
+                distance_latency['Distance'].append(curr_distance) 
+                distance_latency['Latency'].append(curr_latency)
             
             curr_bandwidth = line.split(',')[3].strip()
             if not curr_bandwidth:
@@ -155,9 +241,10 @@ if __name__ == '__main__':
                 line[3] = float(curr_bandwidth.split('_')[0]) * 1000
             elif 'Kb' in curr_bandwidth:
                 line[3] = float(curr_bandwidth.split('_')[0]) / 1000
-                
-            distance_bandwidth['Distance'].append(curr_distance)
-            distance_bandwidth['Bandwidth'].append(curr_bandwidth)
+            
+            if curr_distance > 0.001: #防止出现0
+                distance_bandwidth['Distance'].append(curr_distance)
+                distance_bandwidth['Bandwidth'].append(curr_bandwidth)
             
             latency_bandwidth['Latency'].append(curr_latency)
             latency_bandwidth['Bandwidth'].append(curr_bandwidth)
@@ -165,4 +252,9 @@ if __name__ == '__main__':
             
     # plot_distance_latency_linear()
     # plot_distance_bandwidth_linear()
+    # plot_distance_latency_log_log()
+    # plot_distance_bandwidth_log_log()
+    # plot_distance_latency_pow()
+    # plot_distance_bandwidth_pow()
+    
     # plot_latency_bandwidth_linear()
