@@ -222,10 +222,10 @@ class Main:
                 pickle.dump(clustering_coefficient_metrics, open(curr_social_metric_path, "wb"))
             # print("clustering_coefficient_metrics: ", clustering_coefficient_metrics)
             
-        # elif caching_policy == "Degree":
-        #     '''To use it, remember the key is str type, and the value is bool'''
-        #     degree_metrics = self.G.in_degree()
-        #     # print("degree_metrics: ", degree_metrics)
+        elif caching_policy == "Degree":
+            '''To use it, remember the key is str type, and the value is bool'''
+            degree_metrics = self.G.in_degree()
+            # print("degree_metrics: ", degree_metrics)
         
         elif caching_policy == "DegreeCentrality":
             curr_social_metric_path = self.social_metric_dict_path + 'DegreeCentrality.pkl'
@@ -286,7 +286,7 @@ class Main:
                 ego_betweenness_centrality_metrics = {}
                 for curr_node in self.G.nodes:
                     ego_betweenness_centrality_metrics[curr_node] = self.ego_betweenness(self.G, curr_node)
-                pickle.dump(betweenness_centrality_metrics, open(curr_social_metric_path, "wb"))
+                pickle.dump(ego_betweenness_centrality_metrics, open(curr_social_metric_path, "wb"))
             # print("ego_betweenness_centrality_metrics: ", ego_betweenness_centrality_metrics)
 
         elif caching_policy == "LRU-Social":
@@ -382,11 +382,11 @@ class Main:
                                 media_size * CONFIG['params'][1] + \
                                 clustering_coefficient_metrics[user_id] * CONFIG['params'][2]
 
-                # elif caching_policy == "Degree":
-                #     sort_value = current_timestamp + \
-                #                 nearest_distance * CONFIG['params'][0] + \
-                #                 media_size * CONFIG['params'][1] + \
-                #                 degree_metrics[str(user_id)] * CONFIG['params'][2]
+                elif caching_policy == "Degree":
+                    sort_value = current_timestamp + \
+                                nearest_distance * CONFIG['params'][0] + \
+                                media_size * CONFIG['params'][1] + \
+                                degree_metrics[str(user_id)] * CONFIG['params'][2]
                 
                 elif caching_policy == "DegreeCentrality":
                     sort_value = current_timestamp + \
@@ -421,6 +421,12 @@ class Main:
                 elif caching_policy == "LRU-Social" or caching_policy == "LRU-label":
                     '''LRU-Social and LRU-label can adjust the sort_value automatically'''
                     sort_value = 0
+                    
+                elif caching_policy == "EgoBetweennessCentrality":
+                    sort_value = current_timestamp + \
+                                nearest_distance * CONFIG['params'][0] + \
+                                media_size * CONFIG['params'][1] + \
+                                ego_betweenness_centrality_metrics[str(user_id)] * CONFIG['params'][2]          
 
                 elif caching_policy == "EffectiveSize":
                     if math.isnan(effective_size_metrics[user_id]):
@@ -430,12 +436,6 @@ class Main:
                                 nearest_distance * CONFIG['params'][0] + \
                                 media_size * CONFIG['params'][1] + \
                                 effective_size_metrics[user_id] * CONFIG['params'][2]
-     
-                elif caching_policy == "EgoBetweennessCentrality":
-                    sort_value = current_timestamp + \
-                                nearest_distance * CONFIG['params'][0] + \
-                                media_size * CONFIG['params'][1] + \
-                                ego_betweenness_centrality_metrics[str(user_id)] * CONFIG['params'][2]          
                     
                 '''记录redis_object，使用json形式保存'''
                 temp_redis_object = {

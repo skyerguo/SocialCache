@@ -18,15 +18,27 @@ init_list = {
     # "PageRank": [[0, 64.5, 310000], [0,0,0]],
     # "BetweennessCentrality": [[0, 57.5, 54000], [0,0,0]],
     # "LaplacianCentrality": [[0, 54.0, 52000], [0,0,0]],
-    "EffectiveSize": [[0, 50.5, 10], [200,0.0035,10],  [10,50,100], [50, 50, 50]]
+    # "EffectiveSize": [[0, 50.5, 10], [200,0.0035,10],  [10,50,100], [50, 50, 50]],
+    "HITS": [[0, 64.5, 310000]],
+    "ClusteringCoefficient": [[0, 64.5, 310]],
+    "DegreeCentrality": [[0, 64.5, 310]],
+    "ClosenessCentrality": [[0, 54.0, 52000]],
+    "EigenvectorCentrality": [[0, 54.0, 52000]],
+    "EgoBetweennessCentrality": [[0, 57.5, 54000]],
 }
 
 step_social = {
-    "PageRank": 10000,
-    "Degree": 1,
-    "BetweennessCentrality": 1000,
-    "LaplacianCentrality": 1000,
-    "EffectiveSize": 1
+    # "PageRank": 10000,
+    # "Degree": 1,
+    # "BetweennessCentrality": 1000,
+    # "LaplacianCentrality": 1000,
+    # "EffectiveSize": 1,
+    "HITS": 10000,
+    "ClusteringCoefficient": 10,
+    "DegreeCentrality": 10,
+    "ClosenessCentrality": 1000,
+    "EigenvectorCentrality": 1000,
+    "EgoBetweennessCentrality": 1000,
 }
 
 class hill_climb_optimize():
@@ -220,6 +232,6 @@ class hill_climb_optimize():
 if __name__ == "__main__":
     optimize = hill_climb_optimize()
     optimize.hill_climb_specific_point(init_list[optimize.init_config['caching_policy']])
-    optimize.hill_climb(10)
+    optimize.hill_climb(0)
     # optimize.visualize()
     # optimize.savelog()
