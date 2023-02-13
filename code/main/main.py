@@ -137,7 +137,46 @@ class Main:
         
         if self.use_http_server:
             time.sleep(5) ## 等待5秒，让HTTP server启动
-
+            
+    def ego_betweenness(self, G, node):
+        """
+        ego networks are networks consisting of a single actor (ego) together with the actors they are connected to (alters) and all the links among those alters.[1]
+        Burt (1992), in his book Structural Holes, provides ample evidence that having high betweenness centrality, which is highly correlated with having many structural holes, can bring benefits to ego.[1]
+        Returns the betweenness centrality of a ego network whose ego is set
+        Parameters
+        ----------
+        G : graph
+        node : int
+        Returns
+        -------
+        sum : float
+            the betweenness centrality of a ego network whose ego is set
+        Examples
+        --------
+        Returns the betwenness centrality of node 1.
+        >>> ego_betweenness(G,node=1)
+        Reference
+        ---------
+        .. [1] Martin Everett, Stephen P. Borgatti. "Ego network betweenness." Social Networks, Volume 27, Issue 1, Pages 31-38, 2005.
+        """
+        g = G.ego_subgraph(node)
+        n = len(g) + 1
+        A = np.matlib.zeros((n, n))
+        for i in range(n):
+            for j in range(n):
+                if g.has_edge(i, j):
+                    A[i, j] = 1
+        B = A * A
+        C = 1 - A
+        sum = 0
+        flag = G.is_directed()
+        for i in range(n):
+            for j in range(n):
+                if i != j and C[i, j] == 1 and B[i, j] != 0:
+                    sum += 1.0 / B[i, j]
+        if flag == False:
+            sum /= 2
+        return sum
 
     def main(self, caching_policy):
         '''read_trace'''
@@ -238,18 +277,17 @@ class Main:
                 laplacian_centrality_metrics = eg.functions.not_sorted.laplacian(self.G)
                 pickle.dump(laplacian_centrality_metrics, open(curr_social_metric_path, "wb"))
             # print("laplacian_centrality_metrics: ", laplacian_centrality_metrics)
-
-        elif caching_policy == "EffectiveSize":
-            curr_social_metric_path = self.social_metric_dict_path + 'EffectiveSize.pkl'
+            
+        elif caching_policy == "EgoBetweennessCentrality":
+            curr_social_metric_path = self.social_metric_dict_path + 'EgoBetweennessCentrality.pkl'
             if os.path.exists(curr_social_metric_path):
-                effective_size_metrics = pickle.load(open(curr_social_metric_path, "rb"))
+                ego_betweenness_centrality_metrics = pickle.load(open(curr_social_metric_path, "rb"))
             else:
-                adj_matrix = util.generate_adj_matrix_graph("data/traces/" + self.trace_dir + "/relations.txt", len(self.G.nodes))
-                networkx_graph = networkx.DiGraph(adj_matrix).reverse() ## 关注的方向，传播需要反向
-                '''easygraph的constraint只能针对无向图，networkx的constraint可以针对有向图'''
-                effective_size_metrics = networkx.effective_size(networkx_graph)
-                pickle.dump(effective_size_metrics, open(curr_social_metric_path, "wb"))
-            # print("effective_size_metrics: ", effective_size_metrics)
+                ego_betweenness_centrality_metrics = {}
+                for curr_node in self.G.nodes:
+                    ego_betweenness_centrality_metrics[curr_node] = self.ego_betweenness(self.G, curr_node)
+                pickle.dump(betweenness_centrality_metrics, open(curr_social_metric_path, "wb"))
+            # print("ego_betweenness_centrality_metrics: ", ego_betweenness_centrality_metrics)
 
         elif caching_policy == "LRU-Social":
             curr_social_metric_path = self.social_metric_dict_path + 'LRUSocial.pkl'
@@ -269,8 +307,19 @@ class Main:
                     spreading_power_list[i] = (spreading_number - 1) / CONFIG['cache_size_level_3'] + 1 # 如果没有传播，设置为1，即和LRU等同。
                     # spreading_power_list[i] = SIR.SIR_network(networkx_graph, [i] , epidemic_threshold, 1, 1, 1)
                 pickle.dump(spreading_power_list, open(curr_social_metric_path, "wb"))
-                
             # print("spreading_power_list: ", spreading_power_list)
+            
+        elif caching_policy == "EffectiveSize":
+            curr_social_metric_path = self.social_metric_dict_path + 'EffectiveSize.pkl'
+            if os.path.exists(curr_social_metric_path):
+                effective_size_metrics = pickle.load(open(curr_social_metric_path, "rb"))
+            else:
+                adj_matrix = util.generate_adj_matrix_graph("data/traces/" + self.trace_dir + "/relations.txt", len(self.G.nodes))
+                networkx_graph = networkx.DiGraph(adj_matrix).reverse() ## 关注的方向，传播需要反向
+                '''easygraph的constraint只能针对无向图，networkx的constraint可以针对有向图'''
+                effective_size_metrics = networkx.effective_size(networkx_graph)
+                pickle.dump(effective_size_metrics, open(curr_social_metric_path, "wb"))
+            # print("effective_size_metrics: ", effective_size_metrics)
 
         f_in = open("data/traces/" + self.trace_dir + "/all_timeline.txt", "r")
         f_out_find = open(self.result_path + 'find_log.txt', 'w')
@@ -368,6 +417,10 @@ class Main:
                                 nearest_distance * CONFIG['params'][0] + \
                                 media_size * CONFIG['params'][1] + \
                                 laplacian_centrality_metrics[str(user_id)] * CONFIG['params'][2]
+                            
+                elif caching_policy == "LRU-Social" or caching_policy == "LRU-label":
+                    '''LRU-Social and LRU-label can adjust the sort_value automatically'''
+                    sort_value = 0
 
                 elif caching_policy == "EffectiveSize":
                     if math.isnan(effective_size_metrics[user_id]):
@@ -377,10 +430,12 @@ class Main:
                                 nearest_distance * CONFIG['params'][0] + \
                                 media_size * CONFIG['params'][1] + \
                                 effective_size_metrics[user_id] * CONFIG['params'][2]
-                    
-                elif caching_policy == "LRU-Social" or caching_policy == "LRU-label":
-                    '''LRU-Social and LRU-label can adjust the sort_value automatically'''
-                    sort_value = 0
+     
+                elif caching_policy == "EgoBetweennessCentrality":
+                    sort_value = current_timestamp + \
+                                nearest_distance * CONFIG['params'][0] + \
+                                media_size * CONFIG['params'][1] + \
+                                ego_betweenness_centrality_metrics[str(user_id)] * CONFIG['params'][2]          
                     
                 '''记录redis_object，使用json形式保存'''
                 temp_redis_object = {
