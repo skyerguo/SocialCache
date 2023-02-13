@@ -11,8 +11,6 @@ import statsmodels.api as sm
 from patsy import dmatrices
 
 mpl.rcParams['font.family'] = 'Times New Roman'
-# mpl.rcParams['pdf.fonttype'] = 42
-# mpl.rcParams['ps.fonttype'] = 42
 
 area_all = ['asia-east1','asia-east2','asia-northeast1','asia-northeast2','asia-northeast3','asia-south1','asia-south2','asia-southeast2','australia-southeast1','australia-southeast2','europe-central2','europe-north1','europe-west1','europe-west2','europe-west3','europe-west4','europe-west6','northamerica-northeast1','northamerica-northeast2','southamerica-east1','southamerica-west1','us-east1','us-east4','us-west1','us-west2','us-west3','us-west4']
 
@@ -318,4 +316,4 @@ if __name__ == '__main__':
     
     # plot_latency_bandwidth_linear()
     # plot_latency_bandwidth_log_log()
-    plot_latency_bandwidth_pow()
+    # plot_latency_bandwidth_pow()
