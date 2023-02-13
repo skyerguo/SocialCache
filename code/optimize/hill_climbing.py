@@ -14,31 +14,29 @@ ANALYZE_CMD="python3 -m code.analyze.get_media_size -n 0"
 LOG_FILENAME="./optimize.log"
 
 init_list = {
-    # "Degree": [[0, 56.0, 13], [0,0,0]],
-    # "PageRank": [[0, 64.5, 310000], [0,0,0]],
-    # "BetweennessCentrality": [[0, 57.5, 54000], [0,0,0]],
-    # "LaplacianCentrality": [[0, 54.0, 52000], [0,0,0]],
-    # "EffectiveSize": [[0, 50.5, 10], [200,0.0035,10],  [10,50,100], [50, 50, 50]],
-    "HITS": [[0, 64.5, 310000]],
-    "ClusteringCoefficient": [[0, 64.5, 310]],
-    "DegreeCentrality": [[0, 64.5, 310]],
-    "ClosenessCentrality": [[0, 54.0, 52000]],
-    "EigenvectorCentrality": [[0, 54.0, 52000]],
-    "EgoBetweennessCentrality": [[0, 57.5, 54000]],
+    "PageRank": [[10000, 64.5, 310000]],
+    "HITS": [[15000, 64.5, 310000]],
+    "ClusteringCoefficient": [[15000, 64.5, 310]],
+    "DegreeCentrality": [[15000, 64.5, 310]],
+    "BetweennessCentrality": [[15000, 57.5, 54000]],
+    "ClosenessCentrality": [[15000, 54.0, 52000]],
+    "EigenvectorCentrality": [[15000, 54.0, 52000]],
+    "LaplacianCentrality": [[15000, 54.0, 52000]],
+    "EgoBetweennessCentrality": [[15000, 57.5, 54000]],
+    "EffectiveSize": [[15000, 64.5, 10]],
 }
 
 step_social = {
-    # "PageRank": 10000,
-    # "Degree": 1,
-    # "BetweennessCentrality": 1000,
-    # "LaplacianCentrality": 1000,
-    # "EffectiveSize": 1,
-    "HITS": 10000,
-    "ClusteringCoefficient": 10,
-    "DegreeCentrality": 10,
-    "ClosenessCentrality": 1000,
-    "EigenvectorCentrality": 1000,
-    "EgoBetweennessCentrality": 1000,
+    "PageRank": 50000,
+    "HITS": 50000,
+    "ClusteringCoefficient": 30,
+    "DegreeCentrality": 30,
+    "ClosenessCentrality": 5000,
+    "BetweennessCentrality": 5000,
+    "EigenvectorCentrality": 5000,
+    "LaplacianCentrality": 5000,
+    "EgoBetweennessCentrality": 5000,
+    "EffectiveSize": 1,
 }
 
 class hill_climb_optimize():
@@ -54,8 +52,8 @@ class hill_climb_optimize():
         self.iteration_time = 0
 
         # define step length
-        self.step_len0 = 0.05        # location
-        self.step_len1 = 0.5      # media_size
+        self.step_len0 = 1000       # location
+        self.step_len1 = 0.1      # media_size
         self.step_len2 = step_social[self.init_config['caching_policy']]      # social_metric
         self.step_list = [self.step_len0, self.step_len1, self.step_len2]
 

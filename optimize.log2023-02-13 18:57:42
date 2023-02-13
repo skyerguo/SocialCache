@@ -1,0 +1,13 @@
+
+
+
+===================== round =====================
+start :2023-02-13 18:57:59
+end   :2023-02-13 18:58:56
+cache policy     :ClosenessCentrality
+optimize traffic : 6076068.7392578125
+optimize params  : [15000, 54.0, 57000]
+
+------ [step1] ------
+params  :[15000, 54.0, 52000]
+traffic :6076068.7392578125

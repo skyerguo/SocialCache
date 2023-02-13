@@ -1,0 +1,13 @@
+
+
+
+===================== round =====================
+start :2023-02-13 17:03:24
+end   :2023-02-13 17:04:09
+cache policy     :EgoBetweennessCentrality
+optimize traffic : 6012243.2880859375
+optimize params  : [10000, 57.5, 55000]
+
+------ [step1] ------
+params  :[10000, 57.5, 54000]
+traffic :6012243.2880859375
