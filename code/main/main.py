@@ -157,11 +157,20 @@ class Main:
             if os.path.exists(curr_social_metric_path):
                 page_rank_metrics = pickle.load(open(curr_social_metric_path, "rb"))
             else:
-                print("!!!!!!!")
                 page_rank_metrics = eg.functions.not_sorted.pagerank(self.G)
-                print("ok")
                 pickle.dump(page_rank_metrics, open(curr_social_metric_path, "wb"))
             # print("page_rank_metrics: ", page_rank_metrics)
+            
+        elif caching_policy == 'HITS':
+            curr_social_metric_path = self.social_metric_dict_path + 'HITS.pkl'
+            if os.path.exists(curr_social_metric_path):
+                hits_metrics = pickle.load(open(curr_social_metric_path, "rb"))
+            else:
+                adj_matrix = util.generate_adj_matrix_graph("data/traces/" + self.trace_dir + "/relations.txt", len(self.G.nodes))
+                networkx_graph = networkx.DiGraph(adj_matrix)
+                hits_metrics = networkx.hits(networkx_graph)[0]
+                pickle.dump(hits_metrics, open(curr_social_metric_path, "wb"))
+            print("hits_metrics: ", hits_metrics)
 
         elif caching_policy == "Degree":
             '''To use it, remember the key is str type, and the value is bool'''
@@ -268,6 +277,12 @@ class Main:
                                 nearest_distance * CONFIG['params'][0] + \
                                 media_size * CONFIG['params'][1] + \
                                 page_rank_metrics[str(user_id)] * CONFIG['params'][2]
+                                
+                elif caching_policy == 'HITS':
+                    sort_value = current_timestamp + \
+                                nearest_distance * CONFIG['params'][0] + \
+                                media_size * CONFIG['params'][1] + \
+                                hits_metrics[user_id] * CONFIG['params'][2]
 
                 elif caching_policy == "Degree":
                     sort_value = current_timestamp + \
