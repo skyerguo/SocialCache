@@ -170,7 +170,18 @@ class Main:
                 networkx_graph = networkx.DiGraph(adj_matrix)
                 hits_metrics = networkx.hits(networkx_graph)[0]
                 pickle.dump(hits_metrics, open(curr_social_metric_path, "wb"))
-            print("hits_metrics: ", hits_metrics)
+            # print("hits_metrics: ", hits_metrics)
+            
+        elif caching_policy == 'ClusteringCoefficient':
+            curr_social_metric_path = self.social_metric_dict_path + 'ClusteringCoefficient.pkl'
+            if os.path.exists(curr_social_metric_path):
+                clustering_coefficient_metrics = pickle.load(open(curr_social_metric_path, "rb"))
+            else:
+                adj_matrix = util.generate_adj_matrix_graph("data/traces/" + self.trace_dir + "/relations.txt", len(self.G.nodes))
+                networkx_graph = networkx.DiGraph(adj_matrix)
+                clustering_coefficient_metrics = networkx.clustering(networkx_graph)
+                pickle.dump(clustering_coefficient_metrics, open(curr_social_metric_path, "wb"))
+            # print("clustering_coefficient_metrics: ", clustering_coefficient_metrics)
 
         elif caching_policy == "Degree":
             '''To use it, remember the key is str type, and the value is bool'''
@@ -201,12 +212,9 @@ class Main:
                 effective_size_metrics = pickle.load(open(curr_social_metric_path, "rb"))
             else:
                 adj_matrix = util.generate_adj_matrix_graph("data/traces/" + self.trace_dir + "/relations.txt", len(self.G.nodes))
-                print("11111")
                 networkx_graph = networkx.DiGraph(adj_matrix).reverse() ## 关注的方向，传播需要反向
-                print("2222")
                 '''easygraph的constraint只能针对无向图，networkx的constraint可以针对有向图'''
                 effective_size_metrics = networkx.effective_size(networkx_graph)
-                print("3333")
                 pickle.dump(effective_size_metrics, open(curr_social_metric_path, "wb"))
             # print("effective_size_metrics: ", effective_size_metrics)
 
@@ -283,6 +291,12 @@ class Main:
                                 nearest_distance * CONFIG['params'][0] + \
                                 media_size * CONFIG['params'][1] + \
                                 hits_metrics[user_id] * CONFIG['params'][2]
+                                
+                elif caching_policy == 'ClusteringCoefficient':
+                    sort_value = current_timestamp + \
+                                nearest_distance * CONFIG['params'][0] + \
+                                media_size * CONFIG['params'][1] + \
+                                clustering_coefficient_metrics[user_id] * CONFIG['params'][2]
 
                 elif caching_policy == "Degree":
                     sort_value = current_timestamp + \
