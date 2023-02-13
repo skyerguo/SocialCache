@@ -314,6 +314,6 @@ if __name__ == '__main__':
     # plot_distance_latency_pow()
     # plot_distance_bandwidth_pow()
     
-    plot_latency_bandwidth_linear()
+    # plot_latency_bandwidth_linear()
     # plot_latency_bandwidth_log_log()
     # plot_latency_bandwidth_pow()
