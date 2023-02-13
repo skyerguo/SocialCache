@@ -57,7 +57,8 @@ def draw_all():
     plt.xticks([])
     plt.yticks([])
     plt.axis('off')
-    plt.savefig('figures/machine_distribution.pdf', dpi=600, bbox_inches='tight')
+    # plt.title('off')
+    plt.savefig('figures/implementation_machine_distribution.pdf', dpi=300, bbox_inches='tight')
 
 if __name__ == '__main__':
     draw_all()

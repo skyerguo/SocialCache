@@ -1,0 +1,53 @@
+
+
+
+===================== round =====================
+start :2023-02-11 16:47:03
+end   :2023-02-11 17:00:32
+cache policy     :EffectiveSize
+optimize traffic : 589440198316.0
+optimize params  : [0.0, 50.5, 11]
+
+------ [step1] ------
+params  :[0.0, 50.5, 10]
+traffic :589440198316.0
+
+
+===================== round =====================
+start :2023-02-11 17:02:59
+end   :2023-02-11 17:16:18
+cache policy     :EffectiveSize
+optimize traffic : 220076401510.0
+optimize params  : [200.0, 0.0, 11]
+
+------ [step1] ------
+params  :[200.0, 0.0, 10]
+traffic :220076401510.0
+
+
+===================== round =====================
+start :2023-02-11 17:19:43
+end   :2023-02-11 17:43:22
+cache policy     :EffectiveSize
+optimize traffic : 589409707766.0
+optimize params  : [10.0, 50.0, 102]
+
+------ [step1] ------
+params  :[10.0, 50.0, 100]
+traffic :589409827104.0
+
+------ [step2] ------
+params  :[10.0, 50.0, 101]
+traffic :589409707766.0
+
+
+===================== round =====================
+start :2023-02-11 17:46:48
+end   :2023-02-11 18:00:23
+cache policy     :EffectiveSize
+optimize traffic : 589428729806.0
+optimize params  : [50.0, 50.0, 51]
+
+------ [step1] ------
+params  :[50.0, 50.0, 50]
+traffic :589428729806.0
