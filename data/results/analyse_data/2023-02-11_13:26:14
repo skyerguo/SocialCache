@@ -1,0 +1,25 @@
+caching_policy:  RAND
+cache_size_level_3:  15
+cache_size_level_2:  150
+cache_size_level_1:  1000000
+parameters:  [200, 0.0035, 10]
+use_priority_queue:  True
+------
+dataset:  GowallaBigraphCommunity
+------
+三级CDN缓存命中率:  0.056918902130024686
+二级CDN缓存命中率:  0.007250685114341727
+一级CDN缓存命中率:  1.0
+总缓存命中率:  0.34730371659771464
+二三级缓存命中率:  0.03281226207071774
+------
+total_media_size:  384422766717.0
+insert_all_media_size:  176984499613.0
+level 1; media szie: 88271940882.0
+level 2; media szie: 176984499613.0
+level 3; media szie: 119166326222.0
+------
+time_duration:  99.651483
+------
+latency_average:  189.44259014924884
+------
