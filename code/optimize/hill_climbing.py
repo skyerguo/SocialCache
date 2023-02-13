@@ -35,7 +35,7 @@ step_social = {
     "BetweennessCentrality": 5000,
     "EigenvectorCentrality": 5000,
     "LaplacianCentrality": 5000,
-    "EgoBetweennessCentrality": 5000,
+    "EgoBetweennessCentrality": 7000,
     "EffectiveSize": 1,
 }
 
@@ -52,8 +52,8 @@ class hill_climb_optimize():
         self.iteration_time = 0
 
         # define step length
-        self.step_len0 = 1000       # location
-        self.step_len1 = 0.1      # media_size
+        self.step_len0 = 3000       # location
+        self.step_len1 = 1      # media_size
         self.step_len2 = step_social[self.init_config['caching_policy']]      # social_metric
         self.step_list = [self.step_len0, self.step_len1, self.step_len2]
 
