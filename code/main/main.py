@@ -218,6 +218,17 @@ class Main:
                 betweenness_centrality_metrics = eg.functions.centrality.betweenness.betweenness_centrality(self.G)
                 pickle.dump(betweenness_centrality_metrics, open(curr_social_metric_path, "wb"))
             # print("betweenness_centrality_metrics: ", betweenness_centrality_metrics)
+        
+        elif caching_policy == "EigenvectorCentrality":
+            curr_social_metric_path = self.social_metric_dict_path + 'EigenvectorCentrality.pkl'
+            if os.path.exists(curr_social_metric_path):
+                eigenvector_centrality_metrics = pickle.load(open(curr_social_metric_path, "rb"))
+            else:
+                adj_matrix = util.generate_adj_matrix_graph("data/traces/" + self.trace_dir + "/relations.txt", len(self.G.nodes))
+                networkx_graph = networkx.DiGraph(adj_matrix)
+                eigenvector_centrality_metrics = networkx.algorithms.centrality.eigenvector_centrality(networkx_graph)
+                pickle.dump(eigenvector_centrality_metrics, open(curr_social_metric_path, "wb"))
+            # print("eigenvector_centrality_metrics: ", eigenvector_centrality_metrics)
 
         elif caching_policy == "LaplacianCentrality":
             curr_social_metric_path = self.social_metric_dict_path + 'LaplacianCentrality.pkl'
@@ -345,6 +356,12 @@ class Main:
                                 nearest_distance * CONFIG['params'][0] + \
                                 media_size * CONFIG['params'][1] + \
                                 betweenness_centrality_metrics[str(user_id)] * CONFIG['params'][2]
+                                
+                elif caching_policy == "EigenvectorCentrality":
+                    sort_value = current_timestamp + \
+                                nearest_distance * CONFIG['params'][0] + \
+                                media_size * CONFIG['params'][1] + \
+                                eigenvector_centrality_metrics[user_id] * CONFIG['params'][2]
                     
                 elif caching_policy == "LaplacianCentrality":
                     sort_value = current_timestamp + \
