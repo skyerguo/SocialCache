@@ -1,0 +1,25 @@
+caching_policy:  EffectiveSize
+cache_size_level_3:  15
+cache_size_level_2:  150
+cache_size_level_1:  1000000
+parameters:  [100, 0.00035, 1]
+use_priority_queue:  True
+------
+dataset:  BrightkiteBigraphCommunity
+------
+三级CDN缓存命中率:  0.6765932495995467
+二级CDN缓存命中率:  0.7890034945327472
+一级CDN缓存命中率:  1.0
+总缓存命中率:  0.7185743484228709
+二三级缓存命中率:  0.7040634374420712
+------
+total_media_size:  227356022822.0
+insert_all_media_size:  100879433864.0
+level 1; media szie: 34595230077.0
+level 2; media szie: 100879433864.0
+level 3; media szie: 91881358881.0
+------
+time_duration:  129.775342
+------
+latency_average:  72.14138347588126
+------
