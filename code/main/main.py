@@ -207,7 +207,7 @@ class Main:
             else:
                 adj_matrix = util.generate_adj_matrix_graph("data/traces/" + self.trace_dir + "/relations.txt", len(self.G.nodes))
                 networkx_graph = networkx.DiGraph(adj_matrix)
-                hits_metrics = networkx.hits(networkx_graph)[0]
+                hits_metrics = networkx.hits(networkx_graph, max_iter=500)[0]
                 pickle.dump(hits_metrics, open(curr_social_metric_path, "wb"))
             # print("hits_metrics: ", hits_metrics)
             
@@ -265,7 +265,7 @@ class Main:
             else:
                 adj_matrix = util.generate_adj_matrix_graph("data/traces/" + self.trace_dir + "/relations.txt", len(self.G.nodes))
                 networkx_graph = networkx.DiGraph(adj_matrix)
-                eigenvector_centrality_metrics = networkx.algorithms.centrality.eigenvector_centrality(networkx_graph)
+                eigenvector_centrality_metrics = networkx.algorithms.centrality.eigenvector_centrality(networkx_graph, max_iter=500)
                 pickle.dump(eigenvector_centrality_metrics, open(curr_social_metric_path, "wb"))
             # print("eigenvector_centrality_metrics: ", eigenvector_centrality_metrics)
 

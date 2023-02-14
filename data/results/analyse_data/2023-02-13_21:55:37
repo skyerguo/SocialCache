@@ -1,0 +1,25 @@
+caching_policy:  BetweennessCentrality
+cache_size_level_3:  15
+cache_size_level_2:  150
+cache_size_level_1:  1000000
+parameters:  [0, 60, 54000]
+use_priority_queue:  True
+------
+dataset:  TwitterLarge
+------
+三级CDN缓存命中率:  0.022392590527522224
+二级CDN缓存命中率:  0.1429811692611874
+一级CDN缓存命中率:  1.0
+总缓存命中率:  0.3551848538959432
+二三级缓存命中率:  0.0820041633316678
+------
+total_media_size:  117320381.07128906
+insert_all_media_size:  57679489.587890625
+level 1; media szie: 26206370.309570312
+level 2; media szie: 57679489.587890625
+level 3; media szie: 33434521.173828125
+------
+time_duration:  53.777269
+------
+latency_average:  222.23172118762196
+------

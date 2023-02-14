@@ -1,0 +1,25 @@
+caching_policy:  PageRank
+cache_size_level_3:  15
+cache_size_level_2:  150
+cache_size_level_1:  1000000
+parameters:  [12000, 64.9, 510000]
+use_priority_queue:  True
+------
+dataset:  TwitterLarge
+------
+三级CDN缓存命中率:  0.022008487439209492
+二级CDN缓存命中率:  0.14162008076648983
+一级CDN缓存命中率:  1.0
+总缓存命中率:  0.354927124664813
+二三级缓存命中率:  0.0811488438740594
+------
+total_media_size:  117127971.39355469
+insert_all_media_size:  57583284.74902344
+level 1; media szie: 26129411.295898438
+level 2; media szie: 57583284.74902344
+level 3; media szie: 33415275.348632812
+------
+time_duration:  55.321876
+------
+latency_average:  222.36018590279718
+------
