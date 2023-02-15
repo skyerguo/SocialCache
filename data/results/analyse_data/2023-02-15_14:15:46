@@ -3,7 +3,7 @@ cache_size_level_3:  15
 cache_size_level_2:  150
 cache_size_level_1:  1000000
 parameters:  [0.05, 50.5, 90]
-use_priority_queue:  False
+use_priority_queue:  True
 ------
 dataset:  TwitterSmall
 ------
@@ -19,7 +19,7 @@ level 1; media szie: 613059.1298828125
 level 2; media szie: 2901639.423828125
 level 3; media szie: 2473502.76953125
 ------
-time_duration:  3.26244
+time_duration:  3.416482
 ------
 latency_average:  161.65931853276393
 ------

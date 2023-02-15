@@ -24,8 +24,8 @@ class Redis_cache:
 
         '''设置优先队列'''
         self.use_priority_queue = use_priority_queue
-        # if self.cache_size != 150:
-            # self.use_priority_queue = False
+        if self.cache_size == 1000000 or self.cache_size == 15:
+            self.use_priority_queue = False
         if self.use_priority_queue:
             self.priority_queue = queue.PriorityQueue()
 
