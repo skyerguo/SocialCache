@@ -60,6 +60,7 @@ class Main:
         self.result_path = '/proj/socnet-PG0/data/' + str(time.strftime("%Y-%m-%d_%H:%M:%S", time.localtime())) + '/'
         util.reflush_path(self.result_path)
         os.system("cp ./code/main/config.json %s"%(self.result_path)) ## 保存config文件，为了之后实验的分析方便
+        os.system("cp ./code/build/topo.json %s"%(self.result_path)) ## 保存topo文件
         
         os.system("ps -ef |grep simple_httpserver.py | grep -v grep | awk '{print $2}' | xargs sudo kill -9 > /dev/null 2>&1 && sleep 3") ## 删除之前的HTTP_server
         host_all = []

@@ -18,6 +18,7 @@ p.add_argument('-d', '--dataset', default=False, dest="dataset", action="store_t
 p.add_argument('-q', '--priority_queue', default=False, dest="priority_queue", action="store_true", help="output the setting of using priority_queue")
 p.add_argument('-z', '--outputFile', default=False, dest="outputFile", action="store_true", help="whether output the result into files")
 p.add_argument('-y', '--latency', default=False, dest="latency", action="store_true", help="whether output latency")
+p.add_argument('-a', '--case', default=False, dest="case", action="store_true", help="whether output detailed case for each CDN node")
 
 args = p.parse_args()
 
@@ -38,22 +39,32 @@ flow_path = experiment_path + '/flow/'
 cache_hit_ratio_path = experiment_path + '/find_log.txt'
 latency_path = experiment_path + '/latency_log.txt'
 config_path = experiment_path + '/config.json'
+topo_path = experiment_path + '/topo.json'
 config_json = json.load(open(config_path, 'r'))
+if args.case:
+    topo_json = json.load(open(topo_path, 'r'))
 
 def get_media_size():
     ## all = insert_all * 2 + insert[level_3];
     total_media_size = 0
     insert_all_media_size = 0
     media_size_each_level = [0 for _ in range(3)]
+    if args.case:
+        media_size_each_node = [[0 for _ in range(len(topo_json['level_1_id']))], [0 for _ in range(len(topo_json['level_2_id']))], [0 for _ in range(len(topo_json['level_3_id']))]]
     for ip_address in os.listdir(media_size_path):
         curr_path = media_size_path + ip_address + '/'
         curr_level = math.floor(int(ip_address.split('.')[-1]) / 2)
+        if args.case:
+            curr_node = (int(ip_address.split('.')[-2]))
+        # print(curr_level, curr_node, ip_address)
         for file_name in os.listdir(curr_path):
             for line in open(curr_path + file_name, 'r'):
                 curr_media_size = line.strip()
                 if curr_media_size:
                     total_media_size += float(curr_media_size)
                     media_size_each_level[curr_level] += float(curr_media_size)
+                    if args.case:
+                        media_size_each_node[curr_level][curr_node] += float(curr_media_size)
                     if "insert" in file_name:
                         insert_all_media_size += float(curr_media_size)
 
@@ -61,8 +72,11 @@ def get_media_size():
     print("insert_all_media_size: ", insert_all_media_size)
     if args.detailOutput:
         for i in range(3):
-            print("level %i; media szie: %s"%(i + 1, media_size_each_level[i]))
-
+            print("level %i; media size: %s"%(i + 1, media_size_each_level[i]))
+    if args.case:
+        for i in range(3):
+            for j in range(len(media_size_each_node[i])):
+                print("level %i; node %i; media size: %s"%(i + 1, j + 1, media_size_each_node[i][j]))
 
 def get_execution_time():
     f_in = open(execution_time_path, 'r')
@@ -98,35 +112,59 @@ def get_flow():
             print("level %s flow %s"%(str(i), flow_each_level[i]))
 
 def get_cache_hit_ratio():
-    #  print(cnt_line, selected_level_3_id, result_level, find_result[1], file=f_out_find)
-    find_success_number = [0, 0, 0, 0]
-    find_fail_number = [0, 0, 0, 0]
+    find_success_number_each_level = [0 for _ in range(4)]
+    find_fail_number_each_level = [0 for _ in range(4)]
+    if args.case:
+        find_success_number_each_node = [[], [0 for _ in range(len(topo_json['level_1_id']))], [0 for _ in range(len(topo_json['level_2_id']))], [0 for _ in range(len(topo_json['level_3_id']))]]
+        find_fail_number_each_node = [[], [0 for _ in range(len(topo_json['level_1_id']))], [0 for _ in range(len(topo_json['level_2_id']))], [0 for _ in range(len(topo_json['level_3_id']))]]
+        level_node = [0 for _ in range(4)]
+    
     f_in = open(cache_hit_ratio_path, 'r')
     for line in f_in:
+        # print(line)
         result_level = int(line.split(" ")[2].strip())
+        if args.case:
+            level_node[3] = int(line.split(" ")[1].strip())
+            level_node[2] = topo_json['up_bind_3_2'][level_node[3]]
+            level_node[1] = topo_json['up_bind_2_1'][level_node[2]]
+            
         for temp_level in range(3, result_level, -1):
-            find_fail_number[temp_level] += 1
-        find_success_number[result_level] += 1
+            find_fail_number_each_level[temp_level] += 1
+            if args.case:
+                find_fail_number_each_node[temp_level][level_node[temp_level]] += 1
+        find_success_number_each_level[result_level] += 1
+        if args.case:
+            find_success_number_each_node[result_level][level_node[result_level]] += 1
     f_in.close()
+    # print(find_fail_number_each_node)
+    # print(find_success_number_each_node)
 
-    if find_success_number[3] + find_fail_number[3] > 0:
-        print('三级CDN缓存命中率: ', find_success_number[3] / (find_success_number[3] + find_fail_number[3]))
+    if find_success_number_each_level[3] + find_fail_number_each_level[3] > 0:
+        print('三级CDN缓存命中率: ', find_success_number_each_level[3] / (find_success_number_each_level[3] + find_fail_number_each_level[3]))
     else:
         print('未经过三级CDN缓存')
 
-    if find_success_number[2] + find_fail_number[2] > 0:
-        print('二级CDN缓存命中率: ', find_success_number[2] / (find_success_number[2] + find_fail_number[2]))
+    if find_success_number_each_level[2] + find_fail_number_each_level[2] > 0:
+        print('二级CDN缓存命中率: ', find_success_number_each_level[2] / (find_success_number_each_level[2] + find_fail_number_each_level[2]))
     else:
         print('未经过二级CDN缓存')
         
-    if find_success_number[1] + find_fail_number[1] > 0:
-        print('一级CDN缓存命中率: ', find_success_number[1] / (find_success_number[1] + find_fail_number[1]))
+    if find_success_number_each_level[1] + find_fail_number_each_level[1] > 0:
+        print('一级CDN缓存命中率: ', find_success_number_each_level[1] / (find_success_number_each_level[1] + find_fail_number_each_level[1]))
     else:
         print('未经过一级CDN缓存')
 
-    print("总缓存命中率: ", (find_success_number[3] + find_success_number[2] + find_success_number[1]) / (find_success_number[3] + find_success_number[2] + find_success_number[1] + find_fail_number[3] + find_fail_number[2] + find_fail_number[1]))
+    print("总缓存命中率: ", (find_success_number_each_level[3] + find_success_number_each_level[2] + find_success_number_each_level[1]) / (find_success_number_each_level[3] + find_success_number_each_level[2] + find_success_number_each_level[1] + find_fail_number_each_level[3] + find_fail_number_each_level[2] + find_fail_number_each_level[1]))
 
-    print("二三级缓存命中率: ", (find_success_number[3] + find_success_number[2]) / (find_success_number[3] + find_success_number[2] + find_fail_number[3] + find_fail_number[2]))
+    print("二三级缓存命中率: ", (find_success_number_each_level[3] + find_success_number_each_level[2]) / (find_success_number_each_level[3] + find_success_number_each_level[2] + find_fail_number_each_level[3] + find_fail_number_each_level[2]))
+    
+    if args.case:
+         for i in range(1,4):
+            for j in range(len(find_success_number_each_node[i])):
+                if find_success_number_each_node[i][j] + find_fail_number_each_node[i][j] > 0:
+                    print("level %i; node %i; 缓存命中率: %s"%(i, j + 1, find_success_number_each_node[i][j] / (find_success_number_each_node[i][j] + find_fail_number_each_node[i][j])))
+                else:
+                    print("level %i; node %i; 缓存命中率: %s"%(i, j + 1, -1))
 
 if __name__ == '__main__':
     if args.outputFile:
