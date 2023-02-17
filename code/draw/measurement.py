@@ -195,7 +195,7 @@ def plot_latency_bandwidth_linear():
     g = sns.lmplot(x='Latency(ms)', y='Bandwidth(Mbps)', hue='Geolocation Classification', markers=['.','+'], robust=True, data=df, legend=False)
     
     ax = g.axes[0, 0]
-    ax.set_ylim(0)
+    ax.set_ylim(0, 1000)
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
     ax.legend(loc='upper right', labels=['Different Continent','Same Continent'], frameon=False, title=None, fontsize=16)
@@ -233,6 +233,7 @@ def plot_latency_bandwidth_pow():
     result_path = './figures/implementation_latency_bandwidth_pow.pdf'
     df = pd.DataFrame.from_dict(latency_bandwidth)
     mpl.rcParams['figure.figsize'] = (6, 5)
+    plt.rcParams['figure.figsize'] = (6, 5)
     plt.rcParams["font.size"] = 18
     
     a1 = 21633.536
@@ -246,13 +247,18 @@ def plot_latency_bandwidth_pow():
     y2 = a2 * pow(x2, b2)   
 
     df.rename(columns = {'Bandwidth' : 'Bandwidth(Mbps)', 'Latency' : 'Latency(ms)', 'Classification': 'Geolocation Classification'}, inplace = True)
-    g = sns.scatterplot(x='Latency(ms)', y='Bandwidth(Mbps)', hue='Geolocation Classification', markers=['o','+'], data=df, legend=False)
+    # g = sns.scatterplot(x='Latency(ms)', y='Bandwidth(Mbps)', hue='Geolocation Classification', markers=['.','+'], data=df, legend=False)
+    g = sns.lmplot(x='Latency(ms)', y='Bandwidth(Mbps)', hue='Geolocation Classification', markers=['.','+'], fit_reg=False, scatter=True, data=df, legend=False)
+    ax = g.axes[0, 0]
+    ax.set_ylim(0, 1000)
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.plot(x1, y1)
+    ax.plot(x2, y2)
     
-    g.set_ylim(0)
-    g.spines['top'].set_visible(False)
-    g.spines['right'].set_visible(False)
-    plt.plot(x1, y1)
-    plt.plot(x2, y2)
+    # g.set_ylim(0, 1000)
+    # g.spines['top'].set_visible(False)
+    # g.spines['right'].set_visible(False)
     plt.legend(loc='upper right', labels=['Different Continent','Same Continent'], frameon=False, title=None, fontsize=16)
 
     plt.savefig(result_path, dpi=300, bbox_inches='tight', format='pdf')
@@ -316,4 +322,4 @@ if __name__ == '__main__':
     
     # plot_latency_bandwidth_linear()
     # plot_latency_bandwidth_log_log()
-    # plot_latency_bandwidth_pow()
+    plot_latency_bandwidth_pow()
