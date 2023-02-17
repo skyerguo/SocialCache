@@ -59,7 +59,7 @@ def plot_distance_latency_linear():
 
     df.rename(columns = {'Latency' : 'Latency(ms)', 'Distance' : 'Geolocation Distance(km)'}, inplace = True)
     g = sns.regplot(x='Geolocation Distance(km)', y='Latency(ms)', marker='.', color='b', robust=True, line_kws={'label':"y={0:.3f}x+{1:.3f}".format(rlm_results.params[1],rlm_results.params[0]), 'color':'red'}, data=df)
-    
+
     g.spines['top'].set_visible(False)
     g.spines['right'].set_visible(False)
     g.legend(loc='upper right', frameon=False, title=None, fontsize=18)
@@ -100,11 +100,11 @@ def plot_distance_latency_pow():
     y = a * pow(x, b)
 
     df.rename(columns = {'Latency' : 'Latency(ms)', 'Distance' : 'Geolocation Distance(km)'}, inplace = True)
-    g = sns.scatterplot(x='Geolocation Distance(km)', y='Latency(ms)', marker='o', color='b', data=df)
+    g = sns.regplot(x='Geolocation Distance(km)', y='Latency(ms)', marker='.', color='b', fit_reg=False, data=df)
     
     g.spines['top'].set_visible(False)
     g.spines['right'].set_visible(False)
-    plt.plot(x, y, color='red',label='$y=%.3fx^{%.3f}$'%(a,b),linewidth=1)
+    plt.plot(x, y, color='red',label='$\mathregular{y=%.3fx^{%.3f}}$'%(a,b),linewidth=3)
     plt.legend(loc='upper right', frameon=False, title=None, fontsize=18)
 
     plt.savefig(result_path, dpi=300, bbox_inches='tight', format='pdf')
@@ -166,12 +166,12 @@ def plot_distance_bandwidth_pow():
     y = a * pow(x, b)
 
     df.rename(columns = {'Bandwidth' : 'Bandwidth(Mbps)', 'Distance' : 'Geolocation Distance(km)'}, inplace = True)
-    g = sns.scatterplot(x='Geolocation Distance(km)', y='Bandwidth(Mbps)', marker='o', color='b', data=df)
+    g = sns.regplot(x='Geolocation Distance(km)', y='Bandwidth(Mbps)', marker='.', color='b', fit_reg=False, data=df)
     
     g.set_ylim(0)
     g.spines['top'].set_visible(False)
     g.spines['right'].set_visible(False)
-    plt.plot(x, y, color='red',label='$y=%.3fx^{%.3f}$'%(a,b),linewidth=3)
+    plt.plot(x, y, color='red',label='$\mathregular{y=%.3fx^{%.3f}}$'%(a,b),linewidth=3)
     plt.legend(loc='upper right', frameon=False, title=None, fontsize=18)
 
     plt.savefig(result_path, dpi=300, bbox_inches='tight', format='pdf')
@@ -247,7 +247,6 @@ def plot_latency_bandwidth_pow():
     y2 = a2 * pow(x2, b2)   
 
     df.rename(columns = {'Bandwidth' : 'Bandwidth(Mbps)', 'Latency' : 'Latency(ms)', 'Classification': 'Geolocation Classification'}, inplace = True)
-    # g = sns.scatterplot(x='Latency(ms)', y='Bandwidth(Mbps)', hue='Geolocation Classification', markers=['.','+'], data=df, legend=False)
     g = sns.lmplot(x='Latency(ms)', y='Bandwidth(Mbps)', hue='Geolocation Classification', markers=['.','+'], fit_reg=False, scatter=True, data=df, legend=False)
     ax = g.axes[0, 0]
     ax.set_ylim(0, 1000)
@@ -256,9 +255,6 @@ def plot_latency_bandwidth_pow():
     ax.plot(x1, y1)
     ax.plot(x2, y2)
     
-    # g.set_ylim(0, 1000)
-    # g.spines['top'].set_visible(False)
-    # g.spines['right'].set_visible(False)
     plt.legend(loc='upper right', labels=['Different Continent','Same Continent'], frameon=False, title=None, fontsize=16)
 
     plt.savefig(result_path, dpi=300, bbox_inches='tight', format='pdf')
@@ -322,4 +318,4 @@ if __name__ == '__main__':
     
     # plot_latency_bandwidth_linear()
     # plot_latency_bandwidth_log_log()
-    plot_latency_bandwidth_pow()
+    # plot_latency_bandwidth_pow()
