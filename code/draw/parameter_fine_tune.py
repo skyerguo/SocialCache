@@ -54,10 +54,10 @@ def fetch_data(max_len=0):
 
 if __name__ == '__main__':
     df = fetch_data(31)
-    mpl.rcParams['figure.figsize'] = (6, 5)
+    mpl.rcParams['figure.figsize'] = (16, 9)
     plt.rcParams["font.family"] = "Times New Roman"
     plt.rcParams["font.size"] = 20
-    color_list = ["#684e94", "#5091c0", "#a05d46", "#509a80", "#cb364a"]
+    # color_list = ["#684e94", "#5091c0", "#a05d46", "#509a80", "#cb364a"]
 
     # g = sns.lineplot(data=df, palette=color_list)
     g = sns.lineplot(data=df)
