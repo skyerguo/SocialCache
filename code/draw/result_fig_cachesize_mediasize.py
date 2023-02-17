@@ -42,19 +42,19 @@ raw_data = {
         124.006822, 107.198527, 97.511786, 97.726852, 90.978330
     ]
 }
-result_path = './figures/result_fig_cachesize_mediasize.eps'
+result_path = './figures/experiment_cachesize.pdf'
 
 if __name__ == '__main__':
     df = pd.DataFrame.from_dict(raw_data)
-    mpl.rcParams['figure.figsize'] = (6, 5)
+    mpl.rcParams['figure.figsize'] = (16, 9)
     # plt.rcParams["font.family"] = "Times New Roman"
-    plt.rcParams["font.size"] = 20
+    plt.rcParams["font.size"] = 32
     color_list = ["#684e94", "#5091c0", "#a05d46", "#509a80", "#cb364a"]
     
-    g = sns.lineplot(x='L1 CDN Cache Size', y='Network Traffic Volume (GB)', hue='Method', style='Method', palette=color_list, data=df)
+    g = sns.lineplot(x='L1 CDN Cache Size', y='Network Traffic Volume (GB)', hue='Method', style='Method', palette=color_list, data=df, linewidth=2)
     g.spines['top'].set_visible(False)
     g.spines['right'].set_visible(False)
     g.set_ylim(0)
-    g.legend(loc='lower left', frameon=False, title=None, fontsize=18)
+    g.legend(loc='lower left', frameon=False, title=None, fontsize=24)
 
-    plt.savefig(result_path, dpi=600, bbox_inches='tight', format='eps')
+    plt.savefig(result_path, dpi=300, bbox_inches='tight', format='pdf')
