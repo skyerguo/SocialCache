@@ -114,6 +114,9 @@ def hash_relations(filename):
                 print(hash_user[int(user_list[0])], hash_user[int(user_list[1])], file=f_out)
     return hash_user
 
-def distance_to_time(distance):
-    return 0.007 * distance + 7.774
-    
+def distance_to_latency(distance):
+    # return 0.007 * distance + 7.774
+    return 0.024 * (distance ** 0.889) # ms
+
+def distance_to_bandwidth(distance):
+    return 228433.404 * (distance ** -0.819) # Mbps

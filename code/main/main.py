@@ -467,11 +467,11 @@ class Main:
                 # user_id = int(line.split('+')[3])
                 '''往第三层级查询，后续的调整都由redis内部完成，这里先假设只有一个user节点'''
                 if caching_policy == "LRU-Social":
-                    find_result = self.build_network.level_3_host[selected_level_3_id].redis_cache.find(picture_hash=post_id, user_host=self.build_network.user_host[0], current_timestamp=current_timestamp, need_update_cache=need_update_cache, latency_CDN=2*util.distance_to_time(1/nearest_distance), config_timestamp=1, use_LRU_label=False, use_LRU_social=True)
+                    find_result = self.build_network.level_3_host[selected_level_3_id].redis_cache.find(picture_hash=post_id, user_host=self.build_network.user_host[0], current_timestamp=current_timestamp, need_update_cache=need_update_cache, latency_CDN=2*util.distance_to_latency(1/nearest_distance), config_timestamp=1, use_LRU_label=False, use_LRU_social=True)
                 elif caching_policy == "LRU-label":
-                    find_result = self.build_network.level_3_host[selected_level_3_id].redis_cache.find(picture_hash=post_id, user_host=self.build_network.user_host[0], current_timestamp=current_timestamp, need_update_cache=need_update_cache, latency_CDN=2*util.distance_to_time(1/nearest_distance),config_timestamp=1, use_LRU_label=True, use_LRU_social=False)
+                    find_result = self.build_network.level_3_host[selected_level_3_id].redis_cache.find(picture_hash=post_id, user_host=self.build_network.user_host[0], current_timestamp=current_timestamp, need_update_cache=need_update_cache, latency_CDN=2*util.distance_to_latency(1/nearest_distance),config_timestamp=1, use_LRU_label=True, use_LRU_social=False)
                 else:
-                    find_result = self.build_network.level_3_host[selected_level_3_id].redis_cache.find(picture_hash=post_id, user_host=self.build_network.user_host[0], current_timestamp=current_timestamp, need_update_cache=need_update_cache, latency_CDN=2*util.distance_to_time(1/nearest_distance),config_timestamp=1, use_LRU_label=False, use_LRU_social=False)
+                    find_result = self.build_network.level_3_host[selected_level_3_id].redis_cache.find(picture_hash=post_id, user_host=self.build_network.user_host[0], current_timestamp=current_timestamp, need_update_cache=need_update_cache, latency_CDN=2*util.distance_to_latency(1/nearest_distance),config_timestamp=1, use_LRU_label=False, use_LRU_social=False)
                 result_level = find_result[0]
                 
                 if self.if_debug:
