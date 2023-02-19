@@ -59,11 +59,12 @@ def plot_distance_latency_linear():
     rlm_results = rlm_model.fit() 
 
     df.rename(columns = {'Latency' : 'Latency(ms)', 'Distance' : 'Geolocation Distance(km)'}, inplace = True)
-    g = sns.regplot(x='Geolocation Distance(km)', y='Latency(ms)', marker='.', color='b', robust=True, line_kws={'label':"y={0:.3f}x+{1:.3f}".format(rlm_results.params[1],rlm_results.params[0]), 'color':'red'}, data=df)
+    # g = sns.regplot(x='Geolocation Distance(km)', y='Latency(ms)', marker='.', color='b', robust=True, line_kws={'label':"y={0:.3f}x+{1:.3f}".format(rlm_results.params[1],rlm_results.params[0]), 'color':'red'}, data=df)
+    g = sns.jointplot(x='Geolocation Distance(km)', y='Latency(ms)', kind='reg', marker='.', color='b', robust=True, line_kws={'label':"y={0:.3f}x+{1:.3f}".format(rlm_results.params[1],rlm_results.params[0]), 'color':'red'}, data=df)
 
-    g.spines['top'].set_visible(False)
-    g.spines['right'].set_visible(False)
-    g.legend(loc='upper right', frameon=False, title=None, fontsize=18)
+    # g.spines['top'].set_visible(False)
+    # g.spines['right'].set_visible(False)
+    g.ax_joint.legend(loc='upper right', frameon=False, title=None, fontsize=18)
 
     plt.savefig(result_path, dpi=300, bbox_inches='tight', format='pdf')
     
@@ -135,12 +136,16 @@ def plot_distance_bandwidth_linear():
     rlm_results = rlm_model.fit() 
 
     df.rename(columns = {'Bandwidth' : 'Bandwidth(Mbps)', 'Distance' : 'Geolocation Distance(km)'}, inplace = True)
-    g = sns.regplot(x='Geolocation Distance(km)', y='Bandwidth(Mbps)', marker='.', color='b', robust=True, line_kws={'label':"y={0:.3f}x+{1:.3f}".format(rlm_results.params[1],rlm_results.params[0]), 'color':'red'}, data=df)
+    # g = sns.regplot(x='Geolocation Distance(km)', y='Bandwidth(Mbps)', marker='.', color='b', robust=True, line_kws={'label':"y={0:.3f}x+{1:.3f}".format(rlm_results.params[1],rlm_results.params[0]), 'color':'red'}, data=df)
+    g = sns.jointplot(x='Geolocation Distance(km)', y='Bandwidth(Mbps)', kind='reg', marker='.', color='b', robust=True, line_kws={'label':"y={0:.3f}x+{1:.3f}".format(rlm_results.params[1],rlm_results.params[0]), 'color':'red'}, data=df)
+
+    # g.spines['top'].set_visible(False)
+    # g.spines['right'].set_visible(False)
+    g.ax_joint.legend(loc='upper right', frameon=False, title=None, fontsize=18)
     
-    g.set_ylim(0)
-    g.spines['top'].set_visible(False)
-    g.spines['right'].set_visible(False)
-    g.legend(loc='upper right', frameon=False, title=None, fontsize=18)
+    # g.spines['top'].set_visible(False)
+    # g.spines['right'].set_visible(False)
+    # g.legend(loc='upper right', frameon=False, title=None, fontsize=18)
 
     plt.savefig(result_path, dpi=300, bbox_inches='tight', format='pdf')
     
@@ -327,7 +332,7 @@ if __name__ == '__main__':
             latency_bandwidth['Classification'].append(curr_type)
             
     # plot_distance_latency_linear()
-    # plot_distance_bandwidth_linear()
+    plot_distance_bandwidth_linear()
     # plot_distance_latency_log_log()
     # plot_distance_bandwidth_log_log()
     # plot_distance_latency_pow()
