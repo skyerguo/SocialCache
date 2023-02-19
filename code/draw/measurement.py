@@ -9,6 +9,7 @@ import math
 import code.util.util as util
 import statsmodels.api as sm
 from patsy import dmatrices
+import matplotlib.ticker as mtick
 
 mpl.rcParams['font.family'] = 'Times New Roman'
 
@@ -66,21 +67,34 @@ def plot_distance_latency_linear():
 
     plt.savefig(result_path, dpi=300, bbox_inches='tight', format='pdf')
     
+def ticks(y, pos):
+    return r'$\mathregular{e^{%.0f}}$'%(y)
     
 def plot_distance_latency_log_log():
     result_path = './figures/implementation_distance_latency_log_log.pdf'
-    df = pd.DataFrame.from_dict(distance_latency)
-    df['Distance'] = np.log(df['Distance'])
-    df['Latency'] = np.log(df['Latency'])
+    df1 = pd.DataFrame.from_dict(distance_latency)
+    df1['Distance'] = np.log(df1['Distance'])
+    df1['Latency'] = np.log(df1['Latency'])
     mpl.rcParams['figure.figsize'] = (6, 5)
     plt.rcParams["font.size"] = 18
     
-    y, X = dmatrices('Latency ~ Distance', data=df, return_type='dataframe')
+    y, X = dmatrices('Latency ~ Distance', data=df1, return_type='dataframe')
     rlm_model = sm.RLM(y, X) #Robust linear regression model
     rlm_results = rlm_model.fit() 
 
-    df.rename(columns = {'Latency' : 'Latency(ms) - Log Scale', 'Distance' : 'Geolocation Distance(km) - Log Scale'}, inplace = True)
-    g = sns.regplot(x='Geolocation Distance(km) - Log Scale', y='Latency(ms) - Log Scale', marker='.', color='b', robust=True, line_kws={'label':"y={0:.3f}x{1:.3f}".format(rlm_results.params[1],rlm_results.params[0]), 'color':'red'}, data=df)
+    # df2 = pd.DataFrame.from_dict(distance_latency)
+    df1.rename(columns = {'Latency' : 'Latency(ms) - Log Scale', 'Distance' : 'Geolocation Distance(km) - Log Scale'}, inplace = True)
+    
+    g = sns.regplot(x='Geolocation Distance(km) - Log Scale', y='Latency(ms) - Log Scale', marker='.', color='b', robust=True, line_kws={'label':"y={0:.3f}x{1:.3f}".format(rlm_results.params[1],rlm_results.params[0]), 'color':'red'}, data=df1)
+    
+    # g.set_xlim(np.e)
+    # g.set_ylim(np.e)    
+    
+    # plt.xscale('log', basex=np.e)
+    # plt.yscale('log', basey=np.e)
+    
+    g.xaxis.set_major_formatter(mtick.FuncFormatter(ticks))
+    g.yaxis.set_major_formatter(mtick.FuncFormatter(ticks))
     
     g.spines['top'].set_visible(False)
     g.spines['right'].set_visible(False)
@@ -146,7 +160,10 @@ def plot_distance_bandwidth_log_log():
     df.rename(columns = {'Bandwidth' : 'Bandwidth(Mbps) - Log Scale', 'Distance' : 'Geolocation Distance(km) - Log Scale'}, inplace = True)
     g = sns.regplot(x='Geolocation Distance(km) - Log Scale', y='Bandwidth(Mbps) - Log Scale', marker='.', color='b', robust=True, line_kws={'label':"y={0:.3f}x+{1:.3f}".format(rlm_results.params[1],rlm_results.params[0]), 'color':'red'}, data=df)
     
-    g.set_ylim(0)
+    # g.set_ylim(0)
+    g.xaxis.set_major_formatter(mtick.FuncFormatter(ticks))
+    g.yaxis.set_major_formatter(mtick.FuncFormatter(ticks))
+    
     g.spines['top'].set_visible(False)
     g.spines['right'].set_visible(False)
     g.legend(loc='upper right', frameon=False, title=None, fontsize=18)
