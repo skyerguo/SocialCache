@@ -7,7 +7,7 @@ import seaborn as sns
 import matplotlib as mpl
 import math
 
-result_path = 'figures/mediasize_distribution.pdf'
+result_path = 'figures/experiment_url.pdf'
 
 def calc_mediasize(data_path):
     f_out = open(data_path, 'w')
@@ -54,7 +54,7 @@ def new():
 
     mpl.rcParams['figure.figsize'] = (16, 9)
     plt.rcParams["font.family"] = "Times New Roman"
-    plt.rcParams["font.size"] = 14
+    plt.rcParams["font.size"] = 28
 
     ax = sns.kdeplot(data=df, x="Media File Size (KB)", shade=False, color='grey', cumulative=True, log_scale=True)
     kdeline = ax.lines[0]
@@ -74,6 +74,7 @@ def new():
     ax.fill_between(xs, 0, ys, facecolor='darkblue', alpha=0.2)
     ax.fill_between(xs, 0, ys, where=(left <= xs) & (xs <= right) & (y_left <= ys) & (ys <= y_right), interpolate=True, facecolor='crimson', alpha=0.2)
     
+    plt.ylabel('Cumulative Probability')
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
     
