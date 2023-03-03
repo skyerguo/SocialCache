@@ -118,7 +118,6 @@ def draw_cache(dataset):
                     raw_data['CDN Level'].append('Hot L%s CDN'%(4-curr_level))
         f_in.close()
 
-    print(raw_data)
     df = pd.DataFrame.from_dict(raw_data)
     mpl.rcParams['figure.figsize'] = (16, 9)
     plt.rcParams["font.size"] = 32
@@ -126,12 +125,12 @@ def draw_cache(dataset):
     g = sns.boxplot(x='CDN Level', y='Cache Hit Ratio (%)', hue='Method', width=0.5, linewidth=0.5, data=df)
     g.spines['top'].set_visible(False)
     g.spines['right'].set_visible(False)
-    g.set_ylim(0)
+    g.set_ylim(0, 20, 4)
+    # g.set_yscale()
     g.legend(loc='upper right', frameon=False, title=None, fontsize=26)
 
     plt.savefig(result_path, dpi=300, bbox_inches='tight', format='pdf')
 
 if __name__ == '__main__':
     # draw_flow('TwitterFull')
-    # draw_flow('Gowalla')
-    draw_cache('TwitterFull')
+    # draw_cache('TwitterFull')
