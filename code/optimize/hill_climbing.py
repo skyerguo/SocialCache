@@ -14,16 +14,16 @@ ANALYZE_CMD="python3 -m code.analyze.get_media_size -n 0"
 LOG_FILENAME="./optimize.log"
 
 init_list = {
-    "PageRank": [[10000, 64.5, 310000]],
-    "HITS": [[15000, 64.5, 310000]],
-    "ClusteringCoefficient": [[15000, 64.5, 310]],
-    "DegreeCentrality": [[15000, 64.5, 310]],
-    "BetweennessCentrality": [[15000, 57.5, 54000]],
-    "ClosenessCentrality": [[15000, 54.0, 52000]],
-    "EigenvectorCentrality": [[15000, 54.0, 52000]],
-    "LaplacianCentrality": [[15000, 54.0, 52000]],
-    "EgoBetweennessCentrality": [[15000, 57.5, 54000]],
-    "EffectiveSize": [[15000, 64.5, 10]],
+    "PageRank": [[3000, 25.5, 50000]],
+    "HITS": [[3000, 25.5, 50000]],
+    # "ClusteringCoefficient": [[15000, 64.5, 310]],
+    # "DegreeCentrality": [[15000, 64.5, 310]],
+    # "BetweennessCentrality": [[15000, 57.5, 54000]],
+    # "ClosenessCentrality": [[15000, 54.0, 52000]],
+    "EigenvectorCentrality": [[15000, 62.0, 52000]],
+    # "LaplacianCentrality": [[15000, 54.0, 52000]],
+    "EgoBetweennessCentrality": [[15000, 53.5, 40000]],
+    "EffectiveSize": [[3000, 40.5, 80]],
 }
 
 step_social = {
@@ -36,7 +36,7 @@ step_social = {
     "EigenvectorCentrality": 5000,
     "LaplacianCentrality": 5000,
     "EgoBetweennessCentrality": 7000,
-    "EffectiveSize": 1,
+    "EffectiveSize": 2.5,
 }
 
 class hill_climb_optimize():
@@ -53,7 +53,7 @@ class hill_climb_optimize():
 
         # define step length
         self.step_len0 = 3000       # location
-        self.step_len1 = 1      # media_size
+        self.step_len1 = 1       # media_size
         self.step_len2 = step_social[self.init_config['caching_policy']]      # social_metric
         self.step_list = [self.step_len0, self.step_len1, self.step_len2]
 
