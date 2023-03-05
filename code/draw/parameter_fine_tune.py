@@ -6,7 +6,7 @@ import pandas as pd
 import numpy as np
 import matplotlib as mpl
 optimize_log_root_path = 'data/optimize/'
-result_path = 'figures/parameter_fine_tune.pdf'
+result_path = 'figures/experiment_tuning.pdf'
 # mpl.rcParams['font.family'] = 'Times New Roman'
 # mpl.rcParams['pdf.fonttype'] = 42
 # mpl.rcParams['ps.fonttype'] = 42
@@ -17,7 +17,7 @@ optimize_log_name = {
     "clustering coefficient": "optimize.log2023-02-13 15:19:13",
     "degree centrality": "optimize.log2023-02-13 15:22:09",
     "betweenness centrality": "optimize.log2023-02-13 15:24:33",
-    "closeness centrality": "optimize.log2023-02-13 15:28:00",
+    "closeness centrality": "optimize.log2023-03-05 18:40:27",
     "eigenvector centrality": "optimize.log2023-03-04 14:39:09",
     "Laplacian centrality": "optimize.log2023-02-13 19:00:25",
     "ego betweenness centrality": "optimize.log2023-03-04 16:39:25",
@@ -63,7 +63,7 @@ if __name__ == '__main__':
     g = sns.lineplot(data=df)
     g.spines['top'].set_visible(False)
     g.spines['right'].set_visible(False)
-    plt.xlabel('Iterations', fontsize=28)
-    plt.ylabel('Network Traffic Volume (GB)', fontsize=28)
-    g.legend(loc='best', frameon=False, title=None, fontsize=18)
+    plt.xlabel('Iterations', fontsize=32)
+    plt.ylabel('Network Traffic Volume (GB)', fontsize=32)
+    g.legend(loc='best', frameon=False, title=None, fontsize=22)
     plt.savefig(result_path, dpi=300, bbox_inches='tight', format='pdf')
