@@ -6,9 +6,9 @@ import scipy
 import seaborn as sns
 import matplotlib as mpl
 import math
-mpl.rcParams['font.family'] = 'Times New Roman'
-mpl.rcParams['pdf.fonttype'] = 42
-mpl.rcParams['ps.fonttype'] = 42
+# mpl.rcParams['font.family'] = 'Times New Roman'
+# mpl.rcParams['pdf.fonttype'] = 42
+# mpl.rcParams['ps.fonttype'] = 42
 
 raw_data = {
     'L1 CDN Cache Size': [
@@ -47,8 +47,8 @@ result_path = './figures/experiment_cachesize.pdf'
 if __name__ == '__main__':
     df = pd.DataFrame.from_dict(raw_data)
     mpl.rcParams['figure.figsize'] = (16, 9)
-    # plt.rcParams["font.family"] = "Times New Roman"
-    plt.rcParams["font.size"] = 32
+    plt.rcParams["font.family"] = "Times New Roman"
+    plt.rcParams["font.size"] = 28
     color_list = ["#684e94", "#5091c0", "#a05d46", "#509a80", "#cb364a"]
     
     g = sns.lineplot(x='L1 CDN Cache Size', y='Network Traffic Volume (GB)', hue='Method', style='Method', palette=color_list, data=df, linewidth=2)

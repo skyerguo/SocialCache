@@ -52,16 +52,16 @@ def plot_distance_latency_linear():
     result_path = './figures/implementation_distance_latency_linear.pdf'
     df = pd.DataFrame.from_dict(distance_latency)
     mpl.rcParams['figure.figsize'] = (6, 5)
-    plt.rcParams["font.size"] = 18
+    plt.rcParams["font.size"] = 24
     
     y, X = dmatrices('Latency ~ Distance', data=df, return_type='dataframe')
     rlm_model = sm.RLM(y, X) #Robust linear regression model
     rlm_results = rlm_model.fit() 
 
     df.rename(columns = {'Latency' : 'Latency(ms)', 'Distance' : 'Geolocation Distance(km)'}, inplace = True)
-    g = sns.jointplot(x='Geolocation Distance(km)', y='Latency(ms)', kind='reg', marker='.', color='b', robust=True, line_kws={'label':"y={0:.3f}x+{1:.3f}".format(rlm_results.params[1],rlm_results.params[0]), 'color':'red'}, data=df)
+    g = sns.jointplot(x='Geolocation Distance(km)', y='Latency(ms)', kind='reg', marker='.', color='b', robust=True, line_kws={'label':"y={0:.2f}x+{1:.2f}".format(rlm_results.params[1],rlm_results.params[0]), 'color':'red'}, data=df)
 
-    g.ax_joint.legend(loc='upper right', frameon=False, title=None, fontsize=18)
+    g.ax_joint.legend(loc='upper left', frameon=False, title=None, fontsize=20)
 
     plt.savefig(result_path, dpi=300, bbox_inches='tight', format='pdf')
     
@@ -74,14 +74,14 @@ def plot_distance_latency_log_log():
     df['Distance'] = np.log(df['Distance'])
     df['Latency'] = np.log(df['Latency'])
     mpl.rcParams['figure.figsize'] = (6, 5)
-    plt.rcParams["font.size"] = 18
+    plt.rcParams["font.size"] = 24
     
     y, X = dmatrices('Latency ~ Distance', data=df, return_type='dataframe')
     rlm_model = sm.RLM(y, X) #Robust linear regression model
     rlm_results = rlm_model.fit() 
 
     df.rename(columns = {'Latency' : 'Latency(ms) - Log Scale', 'Distance' : 'Geolocation Distance(km) - Log Scale'}, inplace = True)
-    g = sns.regplot(x='Geolocation Distance(km) - Log Scale', y='Latency(ms) - Log Scale', marker='.', color='b', robust=True, line_kws={'label':"y={0:.3f}x{1:.3f}".format(rlm_results.params[1],rlm_results.params[0]), 'color':'red'}, data=df)
+    g = sns.regplot(x='Geolocation Distance(km) - Log Scale', y='Latency(ms) - Log Scale', marker='.', color='b', robust=True, line_kws={'label':"y={0:.2f}x{1:.2f}".format(rlm_results.params[1],rlm_results.params[0]), 'color':'red'}, data=df)
     
     # g.set_xlim(np.e)
     # g.set_ylim(np.e)    
@@ -94,7 +94,7 @@ def plot_distance_latency_log_log():
     
     g.spines['top'].set_visible(False)
     g.spines['right'].set_visible(False)
-    g.legend(loc='upper right', frameon=False, title=None, fontsize=18)
+    g.legend(loc='upper left', frameon=False, title=None, fontsize=20)
 
     plt.savefig(result_path, dpi=300, bbox_inches='tight', format='pdf')
     
@@ -102,7 +102,7 @@ def plot_distance_latency_pow():
     result_path = './figures/implementation_distance_latency_pow.pdf'
     df = pd.DataFrame.from_dict(distance_latency)
     mpl.rcParams['figure.figsize'] = (6, 5)
-    plt.rcParams["font.size"] = 18
+    plt.rcParams["font.size"] = 24
     
     a = 0.024
     b = 0.889
@@ -114,8 +114,8 @@ def plot_distance_latency_pow():
     
     g.spines['top'].set_visible(False)
     g.spines['right'].set_visible(False)
-    plt.plot(x, y, color='red',label='$\mathregular{y=%.3fx^{%.3f}}$'%(a,b),linewidth=3)
-    plt.legend(loc='upper right', frameon=False, title=None, fontsize=18)
+    plt.plot(x, y, color='red',label='$\mathregular{y=%.2fx^{%.2f}}$'%(a,b),linewidth=3)
+    plt.legend(loc='upper left', frameon=False, title=None, fontsize=20)
 
     plt.savefig(result_path, dpi=300, bbox_inches='tight', format='pdf')
     
@@ -124,16 +124,16 @@ def plot_distance_bandwidth_linear():
     result_path = './figures/implementation_distance_bandwidth_linear.pdf'
     df = pd.DataFrame.from_dict(distance_bandwidth)
     mpl.rcParams['figure.figsize'] = (6, 5)
-    plt.rcParams["font.size"] = 18
+    plt.rcParams["font.size"] = 24
     
     y, X = dmatrices('Bandwidth ~ Distance', data=df, return_type='dataframe')
     rlm_model = sm.RLM(y, X) #Robust linear regression model
     rlm_results = rlm_model.fit() 
 
     df.rename(columns = {'Bandwidth' : 'Bandwidth(Mbps)', 'Distance' : 'Geolocation Distance(km)'}, inplace = True)
-    g = sns.jointplot(x='Geolocation Distance(km)', y='Bandwidth(Mbps)', kind='reg', marker='.', color='b', robust=True, line_kws={'label':"y={0:.3f}x+{1:.3f}".format(rlm_results.params[1],rlm_results.params[0]), 'color':'red'}, data=df)
+    g = sns.jointplot(x='Geolocation Distance(km)', y='Bandwidth(Mbps)', kind='reg', marker='.', color='b', robust=True, line_kws={'label':"y={0:.2f}x+{1:.2f}".format(rlm_results.params[1],rlm_results.params[0]), 'color':'red'}, data=df)
 
-    g.ax_joint.legend(loc='upper right', frameon=False, title=None, fontsize=18)
+    g.ax_joint.legend(loc='upper right', frameon=False, title=None, fontsize=20)
     
     plt.savefig(result_path, dpi=300, bbox_inches='tight', format='pdf')
     
@@ -144,14 +144,14 @@ def plot_distance_bandwidth_log_log():
     df['Distance'] = np.log(df['Distance'])
     df['Bandwidth'] = np.log(df['Bandwidth'])
     mpl.rcParams['figure.figsize'] = (6, 5)
-    plt.rcParams["font.size"] = 18
+    plt.rcParams["font.size"] = 24
     
     y, X = dmatrices('Bandwidth ~ Distance', data=df, return_type='dataframe')
     rlm_model = sm.RLM(y, X) #Robust linear regression model
     rlm_results = rlm_model.fit() 
 
     df.rename(columns = {'Bandwidth' : 'Bandwidth(Mbps) - Log Scale', 'Distance' : 'Geolocation Distance(km) - Log Scale'}, inplace = True)
-    g = sns.regplot(x='Geolocation Distance(km) - Log Scale', y='Bandwidth(Mbps) - Log Scale', marker='.', color='b', robust=True, line_kws={'label':"y={0:.3f}x+{1:.3f}".format(rlm_results.params[1],rlm_results.params[0]), 'color':'red'}, data=df)
+    g = sns.regplot(x='Geolocation Distance(km) - Log Scale', y='Bandwidth(Mbps) - Log Scale', marker='.', color='b', robust=True, line_kws={'label':"y={0:.2f}x+{1:.2f}".format(rlm_results.params[1],rlm_results.params[0]), 'color':'red'}, data=df)
     
     # g.set_ylim(0)
     g.xaxis.set_major_formatter(mtick.FuncFormatter(ticks))
@@ -159,7 +159,7 @@ def plot_distance_bandwidth_log_log():
     
     g.spines['top'].set_visible(False)
     g.spines['right'].set_visible(False)
-    g.legend(loc='upper right', frameon=False, title=None, fontsize=18)
+    g.legend(loc='upper right', frameon=False, title=None, fontsize=20)
 
     plt.savefig(result_path, dpi=300, bbox_inches='tight', format='pdf')
     
@@ -168,7 +168,7 @@ def plot_distance_bandwidth_pow():
     result_path = './figures/implementation_distance_bandwidth_pow.pdf'
     df = pd.DataFrame.from_dict(distance_bandwidth)
     mpl.rcParams['figure.figsize'] = (6, 5)
-    plt.rcParams["font.size"] = 18
+    plt.rcParams["font.size"] = 24
     
     a = 228433.404
     b = -0.819
@@ -181,8 +181,8 @@ def plot_distance_bandwidth_pow():
     g.set_ylim(0)
     g.spines['top'].set_visible(False)
     g.spines['right'].set_visible(False)
-    plt.plot(x, y, color='red',label='$\mathregular{y=%.3fx^{%.3f}}$'%(a,b),linewidth=3)
-    plt.legend(loc='upper right', frameon=False, title=None, fontsize=18)
+    plt.plot(x, y, color='red',label='$\mathregular{y=%.2fx^{%.2f}}$'%(a,b),linewidth=3)
+    plt.legend(loc='upper right', frameon=False, title=None, fontsize=20)
 
     plt.savefig(result_path, dpi=300, bbox_inches='tight', format='pdf')
     
@@ -235,7 +235,7 @@ def plot_latency_bandwidth_log_log():
     ax.set_ylim(0)
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
-    ax.legend(loc='upper right', labels=["y={0:.3f}x+{1:.3f}".format(rlm_results1.params[1],rlm_results1.params[0]), "y={0:.3f}x+{1:.3f}".format(rlm_results2.params[1],rlm_results2.params[0])], frameon=False, title=None, fontsize=16)
+    ax.legend(loc='upper right', labels=["y={0:.2f}x+{1:.2f}".format(rlm_results1.params[1],rlm_results1.params[0]), "y={0:.2f}x+{1:.2f}".format(rlm_results2.params[1],rlm_results2.params[0])], frameon=False, title=None, fontsize=16)
 
     plt.savefig(result_path, dpi=300, bbox_inches='tight', format='pdf')
     

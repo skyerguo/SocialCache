@@ -38,6 +38,9 @@ class Main:
         self.social_metric_dict_path = 'data/social_metric_dict/' + self.trace_dir + '/'
         os.system("mkdir -p %s"%(self.social_metric_dict_path))
 
+        # being valid only if when using Second-Hit-LRU
+        self.post_history = set()
+
     def start_http_server(self, host, db, host_ip, temp_picture_path):
         '''
             在每个节点启动HTTP server.
@@ -181,7 +184,7 @@ class Main:
 
     def main(self, caching_policy):
         '''read_trace'''
-        if caching_policy == "LRU":
+        if caching_policy == "LRU" or caching_policy == "Second-Hit-LRU":
             self.reflush_cache(use_LRU_cache=True)
         else:
             self.reflush_cache(use_LRU_cache=False)
@@ -321,6 +324,10 @@ class Main:
                 effective_size_metrics = networkx.effective_size(networkx_graph)
                 pickle.dump(effective_size_metrics, open(curr_social_metric_path, "wb"))
             # print("effective_size_metrics: ", effective_size_metrics)
+        
+        elif caching_policy == "OPT": #optimal algorithm, performance upper limit
+            # pre calculate sort_value for each post
+            
 
         f_in = open("data/traces/" + self.trace_dir + "/all_timeline.txt", "r")
         f_out_find = open(self.result_path + 'find_log.txt', 'w')
@@ -362,7 +369,7 @@ class Main:
                 if caching_policy == 'RAND':
                     sort_value = random.randint(0, 1000)
 
-                elif caching_policy == 'FIFO' or caching_policy == 'LRU':
+                elif caching_policy == 'FIFO' or caching_policy == 'LRU' or caching_policy == 'Second-Hit-LRU':
                     sort_value = current_timestamp
 
                 elif caching_policy == 'PageRank':
@@ -437,7 +444,7 @@ class Main:
                                 nearest_distance * CONFIG['params'][0] + \
                                 media_size * CONFIG['params'][1] + \
                                 effective_size_metrics[user_id] * CONFIG['params'][2]
-                    
+
                 '''记录redis_object，使用json形式保存'''
                 temp_redis_object = {
                     'sort_value': sort_value,
@@ -458,6 +465,11 @@ class Main:
                     self.build_network.level_3_host[selected_level_3_id].redis_cache.insert(picture_hash=post_id, redis_object=temp_redis_object, need_uplift=True, use_LRU_label=False, use_LRU_social=True, first_insert=True, lru_social_parameter_sp=spreading_power_list[user_id])
                 elif caching_policy == "LRU-label":
                     self.build_network.level_3_host[selected_level_3_id].redis_cache.insert(picture_hash=post_id, redis_object=temp_redis_object, need_uplift=True, use_LRU_label=True, use_LRU_social=False)
+                elif caching_policy == "Second-Hit-LRU":
+                    if post_id in self.post_history:
+                        self.build_network.level_3_host[selected_level_3_id].redis_cache.insert(picture_hash=post_id, redis_object=temp_redis_object, need_uplift=True, use_LRU_label=False, use_LRU_social=False)
+                    else:
+                        self.post_history.add(post_id)
                 else:
                     self.build_network.level_3_host[selected_level_3_id].redis_cache.insert(picture_hash=post_id, redis_object=temp_redis_object, need_uplift=True, use_LRU_label=False, use_LRU_social=False)
 
