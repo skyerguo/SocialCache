@@ -114,9 +114,13 @@ def hash_relations(filename):
                 print(hash_user[int(user_list[0])], hash_user[int(user_list[1])], file=f_out)
     return hash_user
 
-def distance_to_latency(distance):
+def distance_to_delay(distance):
     # return 0.007 * distance + 7.774
-    return 0.024 * (distance ** 0.889) # ms
+    return 0.02 * (distance ** 0.89) # ms
 
 def distance_to_bandwidth(distance):
-    return 228433.404 * (distance ** -0.819) # Mbps
+    return 228433.40 * (distance ** -0.82) # Mbps
+
+# 传一个文件所需时间
+def distance_latency(distance, media_size):
+    return 2 * distance_to_delay(1/distance) + distance_to_bandwidth(distance) / media_size * 1024 * 1000 ## 转换单位，Mbps/kb
