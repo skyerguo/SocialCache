@@ -116,11 +116,15 @@ def hash_relations(filename):
 
 def distance_to_delay(distance):
     # return 0.007 * distance + 7.774
-    return 0.02 * (distance ** 0.89) # ms
+    return 0.02 * (distance ** 0.89) ## ms
 
 def distance_to_bandwidth(distance):
-    return 228433.40 * (distance ** -0.82) # Mbps
+    return 228433.40 * (distance ** -0.82) ## Mbps
 
-# 传一个文件所需时间
-def distance_latency(distance, media_size):
-    return 2 * distance_to_delay(1/distance) + distance_to_bandwidth(distance) / media_size * 1024 * 1000 ## 转换单位，Mbps/kb
+# # 对于user而言传一个文件所需时间
+# def latency_user(distance, media_size):
+#     return 2 * distance_to_delay(1/distance) + distance_to_bandwidth(distance) / media_size * 1024 * 1000 ## 转换单位，Mbps/kb
+
+## 传一个文件所需时间，从高层CDN节点往下传时做计算
+def latency_CDN(delay, bandwidth, media_size): ## ms
+    return 2 * delay + media_size / (bandwidth * 1024) * 1000 ## 转换单位，kb/Mbps ==> ms

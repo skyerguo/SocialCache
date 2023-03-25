@@ -40,6 +40,10 @@ class Redis_cache:
         '''设置当前层的redis_cache'''
         self.cache_level = cache_level
         self.lru_social_parameter_s = 0
+        
+        '''设置节点层级之间的关系'''
+        self.higher_CDN_delay = 0
+        self.higher_CDN_bandwidth = 0
 
         '''设置当前cache对应的mininet_host'''
         self.host = host
@@ -49,6 +53,10 @@ class Redis_cache:
         self.host_port = host_port
 
         self.hash_table = {}
+        
+        '''如果是最底层的CDN，设置second-hit的hash表'''
+        if self.cache_level == 3:
+            self.second_view_hash = []
 
         '''设置结果存的根目录'''
         self.result_path = result_path
@@ -178,7 +186,7 @@ class Redis_cache:
             self.hash_table[picture_hash] = (redis_object['sort_value'], redis_object['timestamp'])
             self.priority_queue.put(((redis_object['sort_value'], redis_object['timestamp']), picture_hash))  
 
-    def insert(self, picture_hash, redis_object, need_uplift=True, use_LRU_label=False, use_LRU_social=False, first_insert=False, lru_social_parameter_sp=0):
+    def insert(self, picture_hash, redis_object, need_uplift=True, use_LRU_label=False, use_LRU_social=False, first_insert=False, lru_social_parameter_sp=0, ignore_cache=False):
         '''
             need_uplift: True表示向上传播，False表示向下传播
         '''
@@ -204,7 +212,8 @@ class Redis_cache:
 
         # print("post!!!", self.host_ip, picture_hash, self.cache_level, redis_object)
         # print(self.redis_fake)
-        self.modify_cache_node(picture_hash=picture_hash, redis_object=copy.deepcopy(redis_object), use_LRU_label=use_LRU_label, use_LRU_social=use_LRU_social)
+        if ignore_cache == False or (ignore_cache == True and self.cache_level == 1): ## 如果是second-hit，只有data center才将插入的内容放入缓存
+            self.modify_cache_node(picture_hash=picture_hash, redis_object=copy.deepcopy(redis_object), use_LRU_label=use_LRU_label, use_LRU_social=use_LRU_social)
         # print(self.redis_fake)
         # print("---------")
 
@@ -218,22 +227,22 @@ class Redis_cache:
 
                 if self.cache_level > 1:
                     '''如果有上层cache的需要，使用HTTP_POST向上传播'''
-                    util.HTTP_POST(host=self.host, picture_path=self.picture_root_path+str(picture_hash), IP_address=self.higher_cache_redis.host_ip, port_number=self.higher_cache_redis.host_port, use_TLS=False, result_path=self.result_path+'curl/'+self.host_ip)
+                    util.HTTP_POST(host=self.host, picture_path=self.picture_root_path+str(picture_hash), IP_address=self.higher_CDN_redis.host_ip, port_number=self.higher_CDN_redis.host_port, use_TLS=False, result_path=self.result_path+'curl/'+self.host_ip)
 
             if self.cache_level > 1:
                 '''递归调用，一层层上传'''
                 print(redis_object['media_size'], file=self.file_insert_media_size)
-                self.higher_cache_redis.insert(picture_hash=picture_hash, redis_object=copy.deepcopy(redis_object), need_uplift=need_uplift, use_LRU_label=use_LRU_label, use_LRU_social=use_LRU_social, first_insert=first_insert, lru_social_parameter_sp=lru_social_parameter_sp) 
+                self.higher_CDN_redis.insert(picture_hash=picture_hash, redis_object=copy.deepcopy(redis_object), need_uplift=need_uplift, use_LRU_label=use_LRU_label, use_LRU_social=use_LRU_social, first_insert=first_insert, lru_social_parameter_sp=lru_social_parameter_sp) 
                 # print("???", self.redis_fake)
 
         elif self.cache_level > 1: 
             '''如果不是第一层，需要从上层获取数据传播'''
             if self.picture_root_path != '/dev/null': 
                 '''从该节点对上一层进行HTTP_GET操作。这里保证上层有需要的数据'''
-                util.HTTP_GET(host=self.host, picture_hash=picture_hash, IP_address=self.higher_cache_redis.host_ip, port_number=self.higher_cache_redis.host_port, use_TLS=False, result_path=self.higher_cache_redis.result_path+'wget/'+self.host_ip, picture_path=self.picture_root_path+str(picture_hash))
-            print(redis_object['media_size'], file=self.higher_cache_redis.file_insert_media_size)
+                util.HTTP_GET(host=self.host, picture_hash=picture_hash, IP_address=self.higher_CDN_redis.host_ip, port_number=self.higher_CDN_redis.host_port, use_TLS=False, result_path=self.higher_CDN_redis.result_path+'wget/'+self.host_ip, picture_path=self.picture_root_path+str(picture_hash))
+            print(redis_object['media_size'], file=self.higher_CDN_redis.file_insert_media_size)
 
-    def find(self, picture_hash, user_host, current_timestamp, need_update_cache=False, latency_CDN=0, config_timestamp=1, use_LRU_label=False, use_LRU_social=False):
+    def find(self, picture_hash, user_host, current_timestamp, need_update_cache=False, config_timestamp=1, use_LRU_label=False, use_LRU_social=False, ignore_cache=False, request_delay=0, request_bandwidth=0):
         if picture_hash in self.redis_fake.keys():
             '''如果找到了'''
             redis_object = copy.deepcopy(self.redis_fake[picture_hash])
@@ -265,7 +274,7 @@ class Redis_cache:
                 util.HTTP_GET(host=user_host, picture_hash=picture_hash, IP_address=self.host_ip, port_number=self.host_port, use_TLS=False, result_path=self.result_path+'wget/'+self.host_ip, picture_path='/dev/null')            
 
             '''返回一个list，分别表示[第几层命中的, 查到的redis_object]'''
-            return [result_level, new_redis_object, latency_CDN]
+            return [result_level, new_redis_object, util.latency_CDN(delay=request_delay, bandwidth=request_bandwidth, media_size=new_redis_object['media_size'])]
 
         else:
             result_level = 0
@@ -273,7 +282,13 @@ class Redis_cache:
 
             '''如果当前层没找到，有更高层，向上查询'''
             if self.cache_level > 1:
-                find_result = self.higher_cache_redis.find(picture_hash=picture_hash, user_host=user_host, current_timestamp=current_timestamp, need_update_cache=need_update_cache, latency_CDN=latency_CDN+2*self.higher_cache_latency,config_timestamp=config_timestamp, use_LRU_label=use_LRU_label, use_LRU_social=use_LRU_social)
+                if ignore_cache == True and self.cache_level == 3:
+                    if picture_hash in self.second_view_hash:
+                        ignore_cache = False ## 和常规LRU一样操作即可
+                    else:
+                        self.second_view_hash.append(picture_hash)
+                    
+                find_result = self.higher_CDN_redis.find(picture_hash=picture_hash, user_host=user_host, current_timestamp=current_timestamp, need_update_cache=need_update_cache, config_timestamp=config_timestamp, use_LRU_label=use_LRU_label, use_LRU_social=use_LRU_social, ignore_cache=ignore_cache, request_delay=self.higher_CDN_delay, request_bandwidth=self.higher_CDN_bandwidth)
                 result_level = copy.deepcopy(find_result[0])
                 redis_object = copy.deepcopy(find_result[1])
                 latency_CDN = copy.deepcopy(find_result[2])
@@ -283,10 +298,10 @@ class Redis_cache:
                     '''有命中数据'''
                     # print("view miss!!!", self.host_ip, picture_hash, self.cache_level, result_level, redis_object)
                     # print(self.redis_fake)
-                    self.insert(picture_hash=picture_hash, redis_object=copy.deepcopy(redis_object), need_uplift=False, use_LRU_label=use_LRU_label, use_LRU_social=use_LRU_social, first_insert=False, lru_social_parameter_sp=0)
+                    self.insert(picture_hash=picture_hash, redis_object=copy.deepcopy(redis_object), need_uplift=False, use_LRU_label=use_LRU_label, use_LRU_social=use_LRU_social, first_insert=False, lru_social_parameter_sp=0, ignore_cache=ignore_cache)
                     # print(self.redis_fake)
                     # print("------")
             
             '''返回一个list，分别表示[第几层命中的, 查到的redis_object]'''
-            return [result_level, redis_object, latency_CDN]
+            return [result_level, redis_object, latency_CDN + util.latency_CDN(delay=request_delay, bandwidth=request_bandwidth, media_size=redis_object['media_size'])]
 
