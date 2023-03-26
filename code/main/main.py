@@ -58,7 +58,7 @@ class Main:
         
 
     '''更新实验配置，删除上一次实验记录'''
-    def reflush_cache(self, use_LRU_cache=False):
+    def reflush_cache(self, use_LRU_cache=False, use_OPT=False):
         '''存储结果数据的文件夹'''
         self.result_path = '/proj/socnet-PG0/data/' + str(time.strftime("%Y-%m-%d_%H:%M:%S", time.localtime())) + '/'
         util.reflush_path(self.result_path)
@@ -77,7 +77,10 @@ class Main:
                 result_path=self.result_path,
                 host_ip=self.build_network.level_1_host_ip[level_1_host_id],
                 host_port=str(4433+len(host_all)),
-                cache_level=1
+                cache_level=1,
+                cache_id=level_1_host_id,
+                use_OPT=use_OPT,
+                trace_dir=self.trace_dir
             )
 
             if self.use_http_server:
@@ -95,7 +98,10 @@ class Main:
                 result_path=self.result_path,
                 host_ip=self.build_network.level_2_host_ip[level_2_host_id],
                 host_port=str(4433+len(host_all)),
-                cache_level=2
+                cache_level=2,
+                cache_id=level_2_host_id,
+                use_OPT=use_OPT,
+                trace_dir=self.trace_dir
             )
 
             if self.use_http_server:
@@ -113,7 +119,11 @@ class Main:
                 result_path=self.result_path,
                 host_ip=self.build_network.level_3_host_ip[level_3_host_id],
                 host_port=str(4433+len(host_all)),
-                cache_level=3
+                cache_level=3,
+                cache_id=level_3_host_id,
+                use_OPT=use_OPT,
+                level_3_area_location=self.level_3_area_location,
+                trace_dir=self.trace_dir
             )
 
             if self.use_http_server:
@@ -186,12 +196,14 @@ class Main:
 
     def main(self, caching_policy):
         '''read_trace'''
-        if caching_policy == "LRU" or caching_policy == "Second-Hit-LRU":
+        if caching_policy in ["LRU", "Second-Hit-LRU"]:
             self.reflush_cache(use_LRU_cache=True)
+        elif caching_policy == "OPT":
+            self.reflush_cache(use_LRU_cache=True, use_OPT=True) ## datacenter和L1 CDN Layer使用LRU，仅在L2 CDN Layer使用OPT。
         else:
-            self.reflush_cache(use_LRU_cache=False)
+            self.reflush_cache()
         
-        if caching_policy == "FIFO" or caching_policy == "RAND":
+        if caching_policy in ["FIFO", "RAND", "OPT"]:
             need_update_cache = False
         else:
             need_update_cache = True
@@ -326,10 +338,6 @@ class Main:
                 effective_size_metrics = networkx.effective_size(networkx_graph)
                 pickle.dump(effective_size_metrics, open(curr_social_metric_path, "wb"))
             # print("effective_size_metrics: ", effective_size_metrics)
-        
-        elif caching_policy == "OPT": #optimal algorithm, performance upper limit
-            pass
-            # pre calculate sort_value for each post
             
 
         f_in = open("data/traces/" + self.trace_dir + "/all_timeline.txt", "r")
@@ -372,7 +380,7 @@ class Main:
                 if caching_policy == 'RAND':
                     sort_value = random.randint(0, 1000)
 
-                elif caching_policy == 'FIFO' or caching_policy == 'LRU' or caching_policy == 'Second-Hit-LRU':
+                elif caching_policy in ['FIFO', 'LRU', 'Second-Hit-LRU', 'OPT']:
                     sort_value = current_timestamp
 
                 elif caching_policy == 'PageRank':
@@ -463,29 +471,41 @@ class Main:
                     print("selected_level_3_id: ", selected_level_3_id)
                     print("temp_redis_object: ", temp_redis_object)
                 
-                '''往第三层级插入，后续的调整都由redis内部完成'''
+                '''往第三层级插入，后续的调整都由SocialCDN内部完成'''
                 if caching_policy == "LRU-Social":
-                    self.build_network.level_3_host[selected_level_3_id].redis_cache.insert(picture_hash=post_id, redis_object=temp_redis_object, need_uplift=True, use_LRU_label=False, use_LRU_social=True, first_insert=True, lru_social_parameter_sp=spreading_power_list[user_id])
+                    self.build_network.level_3_host[selected_level_3_id].redis_cache.insert(picture_hash=post_id, redis_object=temp_redis_object, need_uplift=True, use_LRU_social=True, first_insert=True, lru_social_parameter_sp=spreading_power_list[user_id])
                 elif caching_policy == "LRU-label":
-                    self.build_network.level_3_host[selected_level_3_id].redis_cache.insert(picture_hash=post_id, redis_object=temp_redis_object, need_uplift=True, use_LRU_label=True, use_LRU_social=False)
+                    self.build_network.level_3_host[selected_level_3_id].redis_cache.insert(picture_hash=post_id, redis_object=temp_redis_object, need_uplift=True, use_LRU_label=True)
                 elif caching_policy == "Second-Hit-LRU":
-                    self.build_network.level_3_host[selected_level_3_id].redis_cache.insert(picture_hash=post_id, redis_object=temp_redis_object, need_uplift=True, use_LRU_label=False, use_LRU_social=False, ignore_cache=True)
+                    self.build_network.level_3_host[selected_level_3_id].redis_cache.insert(picture_hash=post_id, redis_object=temp_redis_object, need_uplift=True, ignore_cache=True)
+                elif caching_policy == "OPT":
+                    self.build_network.level_3_host[selected_level_3_id].redis_cache.insert(picture_hash=post_id, redis_object=temp_redis_object, need_uplift=True, use_OPT=True)
                 else:
-                    self.build_network.level_3_host[selected_level_3_id].redis_cache.insert(picture_hash=post_id, redis_object=temp_redis_object, need_uplift=True, use_LRU_label=False, use_LRU_social=False)
+                    self.build_network.level_3_host[selected_level_3_id].redis_cache.insert(picture_hash=post_id, redis_object=temp_redis_object, need_uplift=True)
 
             elif current_type == "view":
                 post_id = int(line.split('+')[1])
                 # curr_view_start_time = time.time()
                 # user_id = int(line.split('+')[3])
+                
+                # if post_id == 13 and current_timestamp < 250000:
+                #     print(selected_level_3_id, current_timestamp, "!!!!!!")
                 '''往第三层级查询，后续的调整都由redis内部完成，这里先假设只有一个user节点'''
                 if caching_policy == "LRU-Social":
-                    find_result = self.build_network.level_3_host[selected_level_3_id].redis_cache.find(picture_hash=post_id, user_host=self.build_network.user_host[0], current_timestamp=current_timestamp, need_update_cache=need_update_cache, config_timestamp=1, use_LRU_label=False, use_LRU_social=True, request_delay=util.distance_to_delay(1/nearest_distance), request_bandwidth=util.distance_to_bandwidth(1/nearest_distance))
+                    find_result = self.build_network.level_3_host[selected_level_3_id].redis_cache.find(picture_hash=post_id, user_host=self.build_network.user_host[0], current_timestamp=current_timestamp, need_update_cache=need_update_cache, use_LRU_social=True, request_delay=util.distance_to_delay(1/nearest_distance), request_bandwidth=util.distance_to_bandwidth(1/nearest_distance))
+                    
                 elif caching_policy == "LRU-label":
-                    find_result = self.build_network.level_3_host[selected_level_3_id].redis_cache.find(picture_hash=post_id, user_host=self.build_network.user_host[0], current_timestamp=current_timestamp, need_update_cache=need_update_cache, use_LRU_label=True, use_LRU_social=False, request_delay=util.distance_to_delay(1/nearest_distance), request_bandwidth=util.distance_to_bandwidth(1/nearest_distance))
+                    find_result = self.build_network.level_3_host[selected_level_3_id].redis_cache.find(picture_hash=post_id, user_host=self.build_network.user_host[0], current_timestamp=current_timestamp, need_update_cache=need_update_cache, use_LRU_label=True, request_delay=util.distance_to_delay(1/nearest_distance), request_bandwidth=util.distance_to_bandwidth(1/nearest_distance))
+                    
                 elif caching_policy == "Second-Hit-LRU":
-                    find_result = self.build_network.level_3_host[selected_level_3_id].redis_cache.find(picture_hash=post_id, user_host=self.build_network.user_host[0], current_timestamp=current_timestamp, need_update_cache=need_update_cache, use_LRU_label=False, use_LRU_social=False, ignore_cache=True, request_delay=util.distance_to_delay(1/nearest_distance), request_bandwidth=util.distance_to_bandwidth(1/nearest_distance))
+                    find_result = self.build_network.level_3_host[selected_level_3_id].redis_cache.find(picture_hash=post_id, user_host=self.build_network.user_host[0], current_timestamp=current_timestamp, need_update_cache=need_update_cache, ignore_cache=True, request_delay=util.distance_to_delay(1/nearest_distance), request_bandwidth=util.distance_to_bandwidth(1/nearest_distance))
+                    
+                elif caching_policy == "OPT":
+                    find_result = self.build_network.level_3_host[selected_level_3_id].redis_cache.find(picture_hash=post_id, user_host=self.build_network.user_host[0], current_timestamp=current_timestamp, need_update_cache=need_update_cache, request_delay=util.distance_to_delay(1/nearest_distance), request_bandwidth=util.distance_to_bandwidth(1/nearest_distance), use_OPT=True)
+                    
                 else:
-                    find_result = self.build_network.level_3_host[selected_level_3_id].redis_cache.find(picture_hash=post_id, user_host=self.build_network.user_host[0], current_timestamp=current_timestamp, need_update_cache=need_update_cache, config_timestamp=1, use_LRU_label=False, use_LRU_social=False, request_delay=util.distance_to_delay(1/nearest_distance), request_bandwidth=util.distance_to_bandwidth(1/nearest_distance))
+                    find_result = self.build_network.level_3_host[selected_level_3_id].redis_cache.find(picture_hash=post_id, user_host=self.build_network.user_host[0], current_timestamp=current_timestamp, need_update_cache=need_update_cache, request_delay=util.distance_to_delay(1/nearest_distance), request_bandwidth=util.distance_to_bandwidth(1/nearest_distance))
+                    
                 result_level = find_result[0]
                 
                 if self.if_debug:

@@ -5,10 +5,11 @@ import subprocess
 from collections import OrderedDict, defaultdict
 import os
 import code.util.util as util
+from code.trace.opt_eviction import Opt_eviction
 import copy
 
 class Redis_cache:
-    def __init__(self, db, host, cache_size=5, use_priority_queue=True, use_LRU_cache=False, result_path='~/', host_ip='', host_port='', cache_level=0):
+    def __init__(self, db, host, cache_size=5, use_priority_queue=True, use_LRU_cache=False, result_path='~/', host_ip='', host_port='', cache_level=0, use_OPT=False, trace_dir='', cache_id='', level_3_area_location=''):
         """初始化
 
         Args:
@@ -39,6 +40,7 @@ class Redis_cache:
 
         '''设置当前层的redis_cache'''
         self.cache_level = cache_level
+        self.cache_id = int(cache_id)
         self.lru_social_parameter_s = 0
         
         '''设置节点层级之间的关系'''
@@ -57,6 +59,11 @@ class Redis_cache:
         '''如果是最底层的CDN，设置second-hit的hash表'''
         if self.cache_level == 3:
             self.second_view_hash = []
+        
+        '''如果是最底层的CDN，且使用了OPT，记录opt表格'''
+        if use_OPT and self.cache_level == 3:    
+            self.opt = Opt_eviction("data/traces/" + trace_dir + '/', level_3_area_location, self.cache_id)
+            # self.picture_hash_list = []
 
         '''设置结果存的根目录'''
         self.result_path = result_path
@@ -122,11 +129,25 @@ class Redis_cache:
         # print(self.redis_fake)
         # print("-------")
 
-    def modify_cache_node(self, picture_hash, redis_object, use_LRU_label, use_LRU_social):
+    def modify_cache_node(self, picture_hash, redis_object, use_LRU_label, use_LRU_social, use_OPT):
         '''修改cache里面的节点，一般为插入或者调整'''
 
-        '''如果是LRU，特殊处理'''
-        if self.use_LRU_cache: 
+        whether_insert_flag = True
+        if use_OPT and self.cache_level == 3: 
+            if len(self.redis_fake.keys()) >= self.cache_size and picture_hash not in self.redis_fake.keys(): ## 如果缓存已满，替换最后被访问的那个文件
+                latest_next = self.opt.request_latest(self.redis_fake.keys(), redis_object['timestamp'])
+                now_next = self.opt.request_latest([picture_hash], redis_object['timestamp'])
+                if now_next[1] < latest_next[1]:
+                    self.redis_fake.pop(latest_next[0])
+                else:
+                    # print(self.redis_fake, redis_object['timestamp'], self.cache_id)
+                    # print(latest_next)
+                    # print(picture_hash, now_next)
+                    # exit(0)
+                    whether_insert_flag = False
+                
+        elif self.use_LRU_cache: 
+            '''如果是LRU，特殊处理'''
             if picture_hash in self.LRUcache:
                 '''若数据已存在，表示命中一次，需要把数据移到缓存队列末端'''
                 self.LRUcache.move_to_end(picture_hash)
@@ -165,7 +186,7 @@ class Redis_cache:
                 self.redis_fake[picture_hash] = redis_object
                 if redis_object['sort_value'] > self.cache_size:
                     self.lru_social_parameter_s += 1
-
+                    
         else:
             '''如果当前cache的空间使用完了，且不是LRU，则按照内在的权值替换'''
             if len(self.redis_fake) >= self.cache_size:
@@ -173,7 +194,7 @@ class Redis_cache:
                     self.remove_cache_node()
         
         '''插入redis数据库, LRU_social单独处理'''
-        if not use_LRU_social:
+        if use_LRU_social == False and whether_insert_flag == True:
             self.redis_fake[picture_hash] = redis_object
 
         '''留个检测，以防出现bug'''
@@ -186,7 +207,7 @@ class Redis_cache:
             self.hash_table[picture_hash] = (redis_object['sort_value'], redis_object['timestamp'])
             self.priority_queue.put(((redis_object['sort_value'], redis_object['timestamp']), picture_hash))  
 
-    def insert(self, picture_hash, redis_object, need_uplift=True, use_LRU_label=False, use_LRU_social=False, first_insert=False, lru_social_parameter_sp=0, ignore_cache=False):
+    def insert(self, picture_hash, redis_object, need_uplift=True, use_LRU_label=False, use_LRU_social=False, first_insert=False, lru_social_parameter_sp=0, ignore_cache=False, use_OPT=False):
         '''
             need_uplift: True表示向上传播，False表示向下传播
         '''
@@ -209,11 +230,12 @@ class Redis_cache:
             else:
                 '''set label as C-S'''
                 redis_object['sort_value'] = self.cache_size - self.lru_social_parameter_s
-
+                
         # print("post!!!", self.host_ip, picture_hash, self.cache_level, redis_object)
         # print(self.redis_fake)
-        if ignore_cache == False or (ignore_cache == True and self.cache_level == 1): ## 如果是second-hit，只有data center才将插入的内容放入缓存
-            self.modify_cache_node(picture_hash=picture_hash, redis_object=copy.deepcopy(redis_object), use_LRU_label=use_LRU_label, use_LRU_social=use_LRU_social)
+        '''如果是second-hit，只有data center才将插入的内容放入缓存'''
+        if (ignore_cache == False or (ignore_cache == True and self.cache_level == 1)):
+            self.modify_cache_node(picture_hash=picture_hash, redis_object=copy.deepcopy(redis_object), use_LRU_label=use_LRU_label, use_LRU_social=use_LRU_social, use_OPT=use_OPT)
         # print(self.redis_fake)
         # print("---------")
 
@@ -242,8 +264,8 @@ class Redis_cache:
                 util.HTTP_GET(host=self.host, picture_hash=picture_hash, IP_address=self.higher_CDN_redis.host_ip, port_number=self.higher_CDN_redis.host_port, use_TLS=False, result_path=self.higher_CDN_redis.result_path+'wget/'+self.host_ip, picture_path=self.picture_root_path+str(picture_hash))
             print(redis_object['media_size'], file=self.higher_CDN_redis.file_insert_media_size)
 
-    def find(self, picture_hash, user_host, current_timestamp, need_update_cache=False, config_timestamp=1, use_LRU_label=False, use_LRU_social=False, ignore_cache=False, request_delay=0, request_bandwidth=0):
-        if picture_hash in self.redis_fake.keys():
+    def find(self, picture_hash, user_host, current_timestamp, need_update_cache=False, config_timestamp=1, use_LRU_label=False, use_LRU_social=False, ignore_cache=False, request_delay=0, request_bandwidth=0, use_OPT=False):
+        if picture_hash in self.redis_fake.keys(): 
             '''如果找到了'''
             redis_object = copy.deepcopy(self.redis_fake[picture_hash])
             result_level = self.cache_level
@@ -265,7 +287,7 @@ class Redis_cache:
                 
                 # print("view hit!!!", self.host_ip, picture_hash, self.cache_level, result_level, redis_object, new_redis_object)
                 # print(self.redis_fake)
-                self.modify_cache_node(picture_hash=picture_hash, redis_object=copy.deepcopy(new_redis_object), use_LRU_label=use_LRU_label, use_LRU_social=use_LRU_social)
+                self.modify_cache_node(picture_hash=picture_hash, redis_object=copy.deepcopy(new_redis_object), use_LRU_label=use_LRU_label, use_LRU_social=use_LRU_social, use_OPT=use_OPT)
                 # print(self.redis_fake)
                 # print("------")
 
@@ -277,6 +299,9 @@ class Redis_cache:
             return [result_level, new_redis_object, util.latency_CDN(delay=request_delay, bandwidth=request_bandwidth, media_size=new_redis_object['media_size'])]
 
         else:
+            # if self.cache_level == 3:
+            #     print(self.cache_id, picture_hash, current_timestamp)
+            #     exit(0)
             result_level = 0
             redis_object = {}
 
@@ -288,7 +313,7 @@ class Redis_cache:
                     else:
                         self.second_view_hash.append(picture_hash)
                     
-                find_result = self.higher_CDN_redis.find(picture_hash=picture_hash, user_host=user_host, current_timestamp=current_timestamp, need_update_cache=need_update_cache, config_timestamp=config_timestamp, use_LRU_label=use_LRU_label, use_LRU_social=use_LRU_social, ignore_cache=ignore_cache, request_delay=self.higher_CDN_delay, request_bandwidth=self.higher_CDN_bandwidth)
+                find_result = self.higher_CDN_redis.find(picture_hash=picture_hash, user_host=user_host, current_timestamp=current_timestamp, need_update_cache=need_update_cache, config_timestamp=config_timestamp, use_LRU_label=use_LRU_label, use_LRU_social=use_LRU_social, ignore_cache=ignore_cache, request_delay=self.higher_CDN_delay, request_bandwidth=self.higher_CDN_bandwidth, use_OPT=use_OPT)
                 result_level = copy.deepcopy(find_result[0])
                 redis_object = copy.deepcopy(find_result[1])
                 latency_CDN = copy.deepcopy(find_result[2])
@@ -298,7 +323,7 @@ class Redis_cache:
                     '''有命中数据'''
                     # print("view miss!!!", self.host_ip, picture_hash, self.cache_level, result_level, redis_object)
                     # print(self.redis_fake)
-                    self.insert(picture_hash=picture_hash, redis_object=copy.deepcopy(redis_object), need_uplift=False, use_LRU_label=use_LRU_label, use_LRU_social=use_LRU_social, first_insert=False, lru_social_parameter_sp=0, ignore_cache=ignore_cache)
+                    self.insert(picture_hash=picture_hash, redis_object=copy.deepcopy(redis_object), need_uplift=False, use_LRU_label=use_LRU_label, use_LRU_social=use_LRU_social, first_insert=False, lru_social_parameter_sp=0, ignore_cache=ignore_cache, use_OPT=use_OPT)
                     # print(self.redis_fake)
                     # print("------")
             
