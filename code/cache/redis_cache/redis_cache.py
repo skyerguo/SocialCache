@@ -9,7 +9,7 @@ from code.trace.opt_eviction import Opt_eviction
 import copy
 
 class Redis_cache:
-    def __init__(self, db, host, cache_size=5, use_priority_queue=True, use_LRU_cache=False, result_path='~/', host_ip='', host_port='', cache_level=0, use_OPT=False, trace_dir='', cache_id='', level_3_area_location=''):
+    def __init__(self, db, host, cache_size=5, use_priority_queue=True, use_LRU_cache=False, result_path='~/', host_ip='', host_port='', cache_level=0, use_OPT=False, trace_dir='', cache_id='', level_CDN_1_area_location=''):
         """初始化
 
         Args:
@@ -62,7 +62,7 @@ class Redis_cache:
         
         '''如果是最底层的CDN，且使用了OPT，记录opt表格'''
         if use_OPT and self.cache_level == 3:    
-            self.opt = Opt_eviction("data/traces/" + trace_dir + '/', level_3_area_location, self.cache_id)
+            self.opt = Opt_eviction("data/traces/" + trace_dir + '/', level_CDN_1_area_location, self.cache_id)
             # self.picture_hash_list = []
 
         '''设置结果存的根目录'''
