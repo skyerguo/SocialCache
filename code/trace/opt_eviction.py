@@ -98,7 +98,7 @@ class Opt_eviction:
 
 if __name__ == "__main__":
     print("Run as single process.")
-    opt = Opt_eviction("data/traces/TwitterSmall/")
+    opt = Opt_eviction("data/traces/TwitterEgo/")
     # print(opt.viewlog_dict[174])
     # print(opt.viewlog_dict[45])
     # print(opt.viewlog_dict[118])
