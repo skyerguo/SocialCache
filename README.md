@@ -47,3 +47,15 @@ sudo sysctl -w vm.max_map_count=4194303
 sudo /usr/local/etc/emulab/rc/rc.mounts boot
 ```
 
+
+# 运行
+## 主要实验
+
+```
+sudo python3 -m code.main.main
+```
+## 分析结果
+### 查看最后一次结果，不输出到文件
+```
+python3 -m code.analyze.main -m -e -l -c -p -d -q -y
+```

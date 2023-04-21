@@ -212,12 +212,12 @@ if __name__ == "__main__":
     if args.G == 'big':
         print("use big net")
         usernet_filename = "./data/static/twitter_combined.txt"
-        res_path = "./data/traces/gtc_long_trace/"
+        res_path = "./data/traces/TwitterLarge/"
         zipf_size = 5000
     else:
         print("use litte net")
         usernet_filename = "./data/static/twitter_single.txt"
-        res_path = "./data/traces/gtc_short_trace/"
+        res_path = "./data/traces/TwitterSmall/"
         zipf_size = 2000
     trace_data = gen_trace_data(usernet_filename, "./data/static/user_country.csv", res_path, zipf_size)
     trace_data.launch()
