@@ -7,6 +7,7 @@ import easygraph as eg
 import matplotlib.pyplot as plt
 import pickle
 import math
+import code.trace.trace_utils as trace_utils
 
 class gen_trace_data:
     def __init__(self, edge_file="edges.dat", loc_file="loc.dat", res_path="./", zipf_size=2000):
@@ -118,9 +119,14 @@ class gen_trace_data:
         print("trans trace data to all_timeline")
         user_postline_dict  = {}
         position_post_dict  = {}
+        
+        user_viewed_post_list_dict = {}
+        user_adj_post_list_dict = {}
 
         for user in self.G.nodes:
             user_postline_dict[user] = []
+            user_viewed_post_list_dict[user] = []
+            user_adj_post_list_dict[user] = []
 
         for loc in self.locations:
             position_post_dict[loc] = []
@@ -148,6 +154,8 @@ class gen_trace_data:
                             row["location"][0], row["location"][1],\
                             curr_user_id,\
                             post_seq_num)
+                for adj_user in list(self.G.predecessors(curr_user_id)): # 对当前节点的predecessors（存在入边的节点）进行更新
+                    user_adj_post_list_dict[adj_user].append(post_seq_num)
             else:
                 # get a view item
                 viewid  = -1
@@ -160,26 +168,30 @@ class gen_trace_data:
                         viewid = loc_post_list[-1]
                 else:
                     # friend view
-                    viewadj = -1
-                    adjlist = list(self.G.neighbors(curr_user_id))
+                    viewed_post_id = trace_utils.get_neareast_friend_post(curr_user_id, user_adj_post_list_dict[curr_user_id], user_viewed_post_list_dict[curr_user_id])
+                    if viewed_post_id:
+                        user_viewed_post_list_dict[curr_user_id].append(viewed_post_id)
+                        view_id = viewed_post_id
+                    # viewadj = -1
+                    # adjlist = list(self.G.neighbors(curr_user_id))
                     
-                    while adjlist:
-                        adj_idx = random.choice(adjlist)
-                        user_post_list = user_postline_dict[adj_idx]
+                    # while adjlist:
+                    #     adj_idx = random.choice(adjlist)
+                    #     user_post_list = user_postline_dict[adj_idx]
 
-                        if user_post_list:
-                            viewadj = adj_idx
+                    #     if user_post_list:
+                    #         viewadj = adj_idx
 
-                            # to prevent the situation that the same user always views the same post
-                            for i in range(len(user_post_list)):
-                                viewid = user_post_list[-(i+1)]
-                                if not (viewid == last_view_id and curr_user_id == last_user_id):
-                                    break
-                            last_view_id = viewid
-                            last_user_id = curr_user_id
-                            break
+                    #         # to prevent the situation that the same user always views the same post
+                    #         for i in range(len(user_post_list)):
+                    #             viewid = user_post_list[-(i+1)]
+                    #             if not (viewid == last_view_id and curr_user_id == last_user_id):
+                    #                 break
+                    #         last_view_id = viewid
+                    #         last_user_id = curr_user_id
+                    #         break
                         
-                        adjlist.remove(adj_idx)
+                    #     adjlist.remove(adj_idx)
 
                 if viewid != -1:
                     # valid view
