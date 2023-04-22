@@ -171,7 +171,7 @@ class gen_trace_data:
                     viewed_post_id = trace_utils.get_neareast_friend_post(curr_user_id, user_adj_post_list_dict[curr_user_id], user_viewed_post_list_dict[curr_user_id])
                     if viewed_post_id:
                         user_viewed_post_list_dict[curr_user_id].append(viewed_post_id)
-                        view_id = viewed_post_id
+                        viewid = viewed_post_id
                     # viewadj = -1
                     # adjlist = list(self.G.neighbors(curr_user_id))
                     
