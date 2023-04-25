@@ -42,6 +42,7 @@ class make_twitter_trace:
     def gen_trace(self):
         # generate trace for each post
         print("gen trace")
+        log_count = 0
         for post in self.post_line:
             if 'post' not in post:
                 continue
@@ -61,6 +62,10 @@ class make_twitter_trace:
             for view in view_trace:
                 # view_time, viewer_id, post_id 
                 self.unordered_trace.append((view[0] + post_time, view[1], post_id))
+            
+            log_count += 1
+            if log_count % 100 == 0:
+                print("log_count: %d" %(log_count))
     
     def export_trace(self):
         # sort by time
@@ -93,10 +98,11 @@ class make_twitter_trace:
 
 if __name__ == "__main__":
     print("make twitter trace")
-    mtt = make_twitter_trace("./data/traces/TwitterSmall/all_timeline.txt")
-    mtt.load_graph("./data/traces/TwitterSmall/relations.txt")
+    twitter_file = "TwitterSmall"
+    mtt = make_twitter_trace("./data/traces/" + twitter_file +"/all_timeline.txt")
+    mtt.load_graph("./data/traces/" + twitter_file + "/relations.txt")
     mtt.load_location("./data/static/user_country.csv")
-    mtt.load_post("./data/traces/TwitterSmall/all_timeline.txt")
+    mtt.load_post("./data/traces/" + twitter_file + "/all_timeline.txt")
     mtt.gen_trace()
     mtt.export_trace()
 

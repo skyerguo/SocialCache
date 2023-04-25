@@ -1,6 +1,6 @@
 import random
 
-def propagation(G, seed, interval=600, p=0.5, max_time=16):
+def propagation(G, seed, interval=600, p=0.5, max_time=6):
     '''
     G: easygraph.Graph
     seed: list of seed nodes
