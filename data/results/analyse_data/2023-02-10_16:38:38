@@ -5,7 +5,7 @@ cache_size_level_1:  1000000
 parameters:  [0.05, 50.5, 90]
 use_priority_queue:  True
 ------
-dataset:  TwitterSmall
+dataset:  TwitterEgo
 ------
 三级CDN缓存命中率:  0.1905596877739755
 二级CDN缓存命中率:  0.5195485832081339

@@ -5,8 +5,8 @@
 #     cat code/main/basic_config.json | jq ".cache_size_level_3=$cache_size" > code/main/config_tmp.json
 #     cat code/main/config_tmp.json | jq ".cache_size_level_2=$cache_size_higher" > code/main/basic_config.json
 
-# ## TwitterSmall
-# cat code/main/basic_config.json | jq '.trace_dir="TwitterSmall"' > code/main/config_tmp.json
+# ## TwitterEgo
+# cat code/main/basic_config.json | jq '.trace_dir="TwitterEgo"' > code/main/config_tmp.json
 # cat code/main/config_tmp.json | jq '.params=[0.05, 50.5, 90]' > code/main/basic_config.json
 
 # sleep 5
@@ -39,8 +39,8 @@
 #     python3 -m code.analyze.main -l -m -e -c -p -d -q -y -z -n $i
 # done
 
-# ## TwitterLarge
-# cat code/main/basic_config.json | jq '.trace_dir="TwitterLarge"' > code/main/config_tmp.json
+# ## TwitterFull
+# cat code/main/basic_config.json | jq '.trace_dir="TwitterFull"' > code/main/config_tmp.json
 # cat code/main/config_tmp.json | jq '.params=[0.05, 50.5, 90]' > code/main/basic_config.json
 
 # sleep 5

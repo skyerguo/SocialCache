@@ -98,7 +98,7 @@ class make_twitter_trace:
 
 if __name__ == "__main__":
     print("make twitter trace")
-    twitter_file = "TwitterSmall"
+    twitter_file = "TwitterEgo"
     mtt = make_twitter_trace("./data/traces/" + twitter_file +"/all_timeline.txt")
     mtt.load_graph("./data/traces/" + twitter_file + "/relations.txt")
     mtt.load_location("./data/static/user_country.csv")

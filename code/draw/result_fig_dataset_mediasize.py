@@ -10,8 +10,8 @@ import math
 raw_data = {
     'Dataset': [
         'Erdos', 'Erdos', 'Erdos', 'Erdos', 'Erdos',
-        'TwitterSmall', 'TwitterSmall', 'TwitterSmall', 'TwitterSmall', 'TwitterSmall', 
-        'TwitterLarge', 'TwitterLarge', 'TwitterLarge', 'TwitterLarge', 'TwitterLarge'
+        'TwitterEgo', 'TwitterEgo', 'TwitterEgo', 'TwitterEgo', 'TwitterEgo', 
+        'TwitterFull', 'TwitterFull', 'TwitterFull', 'TwitterFull', 'TwitterFull'
     ],
     'Method': [
         'RAND', 'FIFO', 'LRU', 'LRU-Social', 'SocialCache', 

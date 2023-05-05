@@ -1,5 +1,5 @@
 {
-  "trace_dir": "TwitterSmall",
+  "trace_dir": "TwitterEgo",
   "caching_policy": "EffectiveSize",
   "use_http_server": false,
   "use_priority_queue": true,

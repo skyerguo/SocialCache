@@ -11,7 +11,7 @@ result_path = 'figures/experiment_url.pdf'
 
 def calc_mediasize(data_path):
     f_out = open(data_path, 'w')
-    with open('data/traces/TwitterLarge/all_timeline.txt', 'r') as f_in:
+    with open('data/traces/TwitterFull/all_timeline.txt', 'r') as f_in:
         for line in f_in:
             current_type = line.split('+')[-1].strip()
             if current_type == "post":
@@ -20,7 +20,7 @@ def calc_mediasize(data_path):
     f_out.close()
 
 def old():
-    trace_data_path = "data/traces/TwitterLarge/mediasize.txt"
+    trace_data_path = "data/traces/TwitterFull/mediasize.txt"
     if not os.path.exists(trace_data_path):
         calc_mediasize(trace_data_path)
     trace_data = np.loadtxt(trace_data_path, dtype='int')

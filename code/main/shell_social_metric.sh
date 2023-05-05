@@ -1,4 +1,4 @@
-cat code/main/basic_config.json | jq '.trace_dir="TwitterLarge"' > code/main/config_tmp.json
+cat code/main/basic_config.json | jq '.trace_dir="TwitterFull"' > code/main/config_tmp.json
 cat code/main/config_tmp.json | jq '.params=[0, 0, 0]' > code/main/basic_config.json
 
 sleep 5

@@ -5,7 +5,7 @@ cache_size_level_1:  1000000
 parameters:  [0, 66, 310]
 use_priority_queue:  True
 ------
-dataset:  TwitterLarge
+dataset:  TwitterFull
 ------
 三级CDN缓存命中率:  0.020902642257534926
 二级CDN缓存命中率:  0.13721439373327174
