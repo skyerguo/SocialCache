@@ -17,6 +17,6 @@ data/traces/BrightkiteBigraph/*
 data/traces/BrightkiteBigraphCommunity/*
 data/traces/GowallaBigraph/*
 data/traces/GowallaBigraphCommunity/*
-data/traces/IC/TwitterFull/*
-data/traces/LT/TwitterFull/*
+data/traces/ICTwitterFull/*
+data/traces/LTTwitterFull/*
 

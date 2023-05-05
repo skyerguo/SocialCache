@@ -57,5 +57,5 @@ sudo python3 -m code.main.main
 ## 分析结果
 ### 查看最后一次结果，不输出到文件
 ```
-python3 -m code.analyze.main -m -e -l -c -p -d -q -y
+python3 -m code.analyze.main -m -e -l -c -p -d -q -y -n 0
 ```
