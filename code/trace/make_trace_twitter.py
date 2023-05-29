@@ -172,26 +172,6 @@ class gen_trace_data:
                     if viewed_post_id:
                         user_viewed_post_list_dict[curr_user_id].append(viewed_post_id)
                         viewid = viewed_post_id
-                    # viewadj = -1
-                    # adjlist = list(self.G.neighbors(curr_user_id))
-                    
-                    # while adjlist:
-                    #     adj_idx = random.choice(adjlist)
-                    #     user_post_list = user_postline_dict[adj_idx]
-
-                    #     if user_post_list:
-                    #         viewadj = adj_idx
-
-                    #         # to prevent the situation that the same user always views the same post
-                    #         for i in range(len(user_post_list)):
-                    #             viewid = user_post_list[-(i+1)]
-                    #             if not (viewid == last_view_id and curr_user_id == last_user_id):
-                    #                 break
-                    #         last_view_id = viewid
-                    #         last_user_id = curr_user_id
-                    #         break
-                        
-                    #     adjlist.remove(adj_idx)
 
                 if viewid != -1:
                     # valid view
