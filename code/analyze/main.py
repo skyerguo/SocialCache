@@ -159,7 +159,7 @@ def get_cache_hit_ratio():
     print("二三级缓存命中率: ", (find_success_number_each_level[3] + find_success_number_each_level[2]) / (find_success_number_each_level[3] + find_success_number_each_level[2] + find_fail_number_each_level[3] + find_fail_number_each_level[2]))
     
     if args.case:
-         for i in range(1,4):
+         for i in range(1, 4):
             for j in range(len(find_success_number_each_node[i])):
                 if find_success_number_each_node[i][j] + find_fail_number_each_node[i][j] > 0:
                     print("level %i; node %i; 缓存命中率: %s"%(i, j + 1, find_success_number_each_node[i][j] / (find_success_number_each_node[i][j] + find_fail_number_each_node[i][j])))
@@ -173,9 +173,9 @@ if __name__ == '__main__':
         pass
     print("caching_policy: ", config_json['caching_policy'])
     if args.parameters:
-        print("cache_size_level_3: ", config_json['cache_size_level_3'])
-        print("cache_size_level_2: ", config_json['cache_size_level_2'])
-        print("cache_size_level_1: ", config_json['cache_size_level_1'])
+        print("cache_size_level_data_center: ", config_json['cache_size_level_data_center'])
+        print("cache_size_level_CDN_2: ", config_json['cache_size_level_CDN_2'])
+        print("cache_size_level_CDN_1: ", config_json['cache_size_level_CDN_1'])
         print("parameters: ", config_json['params'])
     
     if args.priority_queue:
