@@ -23,10 +23,10 @@ class Main:
         self.build_network.run(self.if_debug)
 
         self.topo = json.load(open('code/build/topo.json', 'r'))
-        level_3_area_id = self.topo['level_3_id']
-        self.level_3_area_location = []
-        for area_id in level_3_area_id:
-            self.level_3_area_location.append(self.topo["areaid2position"][str(area_id)])
+        level_CDN_1_area_id = self.topo['level_CDN_1_id']
+        self.level_CDN_1_area_location = []
+        for area_id in level_CDN_1_area_id:
+            self.level_CDN_1_area_location.append(self.topo["areaid2position"][str(area_id)])
 
         self.trace_dir = trace_dir
         os.system("mkdir -p data/traces/" + self.trace_dir)
@@ -67,86 +67,86 @@ class Main:
         
         os.system("ps -ef |grep simple_httpserver.py | grep -v grep | awk '{print $2}' | xargs sudo kill -9 > /dev/null 2>&1 && sleep 3") ## 删除之前的HTTP_server
         host_all = []
-        for level_1_host_id in range(self.build_network.level_1_host_number):
-            self.build_network.level_1_host[level_1_host_id].redis_cache = Redis_cache(
+        for level_data_center_host_id in range(self.build_network.level_data_center_host_number):
+            self.build_network.level_data_center_host[level_data_center_host_id].redis_cache = Redis_cache(
                 db=len(host_all),
-                host=self.build_network.level_1_host[level_1_host_id], 
-                cache_size=CONFIG['cache_size_level_1'], 
+                host=self.build_network.level_data_center_host[level_data_center_host_id], 
+                cache_size=CONFIG['cache_size_level_data_center'], 
                 use_priority_queue=CONFIG['use_priority_queue'],
                 use_LRU_cache=use_LRU_cache, 
                 result_path=self.result_path,
-                host_ip=self.build_network.level_1_host_ip[level_1_host_id],
+                host_ip=self.build_network.level_data_center_host_ip[level_data_center_host_id],
                 host_port=str(4433+len(host_all)),
                 cache_level=1,
-                cache_id=level_1_host_id,
+                cache_id=level_data_center_host_id,
                 use_OPT=use_OPT,
                 trace_dir=self.trace_dir
             )
 
             if self.use_http_server:
-                self.build_network.level_1_host[level_1_host_id].redis_cache.picture_root_path = '/proj/socnet-PG0/temp_media_data/' + str(len(host_all)) + '/picture/'
-                self.start_http_server(host=self.build_network.level_1_host[level_1_host_id], db=len(host_all), host_ip=self.build_network.level_1_host_ip[level_1_host_id], temp_picture_path=self.build_network.level_1_host[level_1_host_id].redis_cache.picture_root_path)
-            host_all.append(self.build_network.level_1_host[level_1_host_id])
+                self.build_network.level_data_center_host[level_data_center_host_id].redis_cache.picture_root_path = '/proj/socnet-PG0/temp_media_data/' + str(len(host_all)) + '/picture/'
+                self.start_http_server(host=self.build_network.level_data_center_host[level_data_center_host_id], db=len(host_all), host_ip=self.build_network.level_data_center_host_ip[level_data_center_host_id], temp_picture_path=self.build_network.level_data_center_host[level_data_center_host_id].redis_cache.picture_root_path)
+            host_all.append(self.build_network.level_data_center_host[level_data_center_host_id])
 
-        for level_2_host_id in range(self.build_network.level_2_host_number):
-            self.build_network.level_2_host[level_2_host_id].redis_cache = Redis_cache(
+        for level_CDN_2_host_id in range(self.build_network.level_CDN_2_host_number):
+            self.build_network.level_CDN_2_host[level_CDN_2_host_id].redis_cache = Redis_cache(
                 db=len(host_all), 
-                host=self.build_network.level_2_host[level_2_host_id], 
-                cache_size=CONFIG['cache_size_level_2'], 
+                host=self.build_network.level_CDN_2_host[level_CDN_2_host_id], 
+                cache_size=CONFIG['cache_size_level_CDN_2'], 
                 use_priority_queue=CONFIG['use_priority_queue'],
                 use_LRU_cache=use_LRU_cache,
                 result_path=self.result_path,
-                host_ip=self.build_network.level_2_host_ip[level_2_host_id],
+                host_ip=self.build_network.level_CDN_2_host_ip[level_CDN_2_host_id],
                 host_port=str(4433+len(host_all)),
                 cache_level=2,
-                cache_id=level_2_host_id,
+                cache_id=level_CDN_2_host_id,
                 use_OPT=use_OPT,
                 trace_dir=self.trace_dir
             )
 
             if self.use_http_server:
-                self.build_network.level_2_host[level_2_host_id].redis_cache.picture_root_path = '/proj/socnet-PG0/temp_media_data/' + str(len(host_all)) + '/picture/'
-                self.start_http_server(host=self.build_network.level_2_host[level_2_host_id], db=len(host_all), host_ip=self.build_network.level_2_host_ip[level_2_host_id], temp_picture_path=self.build_network.level_2_host[level_2_host_id].redis_cache.picture_root_path)
-            host_all.append(self.build_network.level_2_host[level_2_host_id])
+                self.build_network.level_CDN_2_host[level_CDN_2_host_id].redis_cache.picture_root_path = '/proj/socnet-PG0/temp_media_data/' + str(len(host_all)) + '/picture/'
+                self.start_http_server(host=self.build_network.level_CDN_2_host[level_CDN_2_host_id], db=len(host_all), host_ip=self.build_network.level_CDN_2_host_ip[level_CDN_2_host_id], temp_picture_path=self.build_network.level_CDN_2_host[level_CDN_2_host_id].redis_cache.picture_root_path)
+            host_all.append(self.build_network.level_CDN_2_host[level_CDN_2_host_id])
 
-        for level_3_host_id in range(self.build_network.level_3_host_number):
-            self.build_network.level_3_host[level_3_host_id].redis_cache = Redis_cache(
+        for level_CDN_1_host_id in range(self.build_network.level_CDN_1_host_number):
+            self.build_network.level_CDN_1_host[level_CDN_1_host_id].redis_cache = Redis_cache(
                 db=len(host_all), 
-                host=self.build_network.level_3_host[level_3_host_id], 
-                cache_size=CONFIG['cache_size_level_3'], 
+                host=self.build_network.level_CDN_1_host[level_CDN_1_host_id], 
+                cache_size=CONFIG['cache_size_level_CDN_1'], 
                 use_priority_queue=CONFIG['use_priority_queue'],
                 use_LRU_cache=use_LRU_cache,
                 result_path=self.result_path,
-                host_ip=self.build_network.level_3_host_ip[level_3_host_id],
+                host_ip=self.build_network.level_CDN_1_host_ip[level_CDN_1_host_id],
                 host_port=str(4433+len(host_all)),
                 cache_level=3,
-                cache_id=level_3_host_id,
+                cache_id=level_CDN_1_host_id,
                 use_OPT=use_OPT,
-                level_3_area_location=self.level_3_area_location,
+                level_CDN_1_area_location=self.level_CDN_1_area_location,
                 trace_dir=self.trace_dir
             )
 
             if self.use_http_server:
-                self.build_network.level_3_host[level_3_host_id].redis_cache.picture_root_path = '/proj/socnet-PG0/temp_media_data/' + str(len(host_all)) + '/picture/'
-                self.start_http_server(host=self.build_network.level_3_host[level_3_host_id], db=len(host_all), host_ip=self.build_network.level_3_host_ip[level_3_host_id], temp_picture_path=self.build_network.level_3_host[level_3_host_id].redis_cache.picture_root_path)
-            host_all.append(self.build_network.level_3_host[level_3_host_id])
+                self.build_network.level_CDN_1_host[level_CDN_1_host_id].redis_cache.picture_root_path = '/proj/socnet-PG0/temp_media_data/' + str(len(host_all)) + '/picture/'
+                self.start_http_server(host=self.build_network.level_CDN_1_host[level_CDN_1_host_id], db=len(host_all), host_ip=self.build_network.level_CDN_1_host_ip[level_CDN_1_host_id], temp_picture_path=self.build_network.level_CDN_1_host[level_CDN_1_host_id].redis_cache.picture_root_path)
+            host_all.append(self.build_network.level_CDN_1_host[level_CDN_1_host_id])
 
         '''设置层级关系'''
-        for level_3_host_id in range(self.build_network.level_3_host_number):
-            bind_level_2_id = self.topo['up_bind_3_2'][level_3_host_id]
-            self.build_network.level_3_host[level_3_host_id].redis_cache.higher_CDN_redis = self.build_network.level_2_host[bind_level_2_id].redis_cache
-            self.build_network.level_3_host[level_3_host_id].redis_cache.higher_CDN_id = bind_level_2_id
-            self.build_network.level_3_host[level_3_host_id].redis_cache.higher_CDN_level = 2
-            self.build_network.level_3_host[level_3_host_id].redis_cache.higher_CDN_delay = self.topo["delay_topo"][self.topo["level_3_id"][level_3_host_id]][self.topo["level_2_id"][bind_level_2_id]]
-            self.build_network.level_3_host[level_3_host_id].redis_cache.higher_CDN_bandwidth = self.topo["bandwidth_topo"][self.topo["level_3_id"][level_3_host_id]][self.topo["level_2_id"][bind_level_2_id]]
+        for level_CDN_1_host_id in range(self.build_network.level_CDN_1_host_number):
+            bind_level_CDN_2_id = self.topo['up_bind_3_2'][level_CDN_1_host_id]
+            self.build_network.level_CDN_1_host[level_CDN_1_host_id].redis_cache.higher_CDN_redis = self.build_network.level_CDN_2_host[bind_level_CDN_2_id].redis_cache
+            self.build_network.level_CDN_1_host[level_CDN_1_host_id].redis_cache.higher_CDN_id = bind_level_CDN_2_id
+            self.build_network.level_CDN_1_host[level_CDN_1_host_id].redis_cache.higher_CDN_level = 2
+            self.build_network.level_CDN_1_host[level_CDN_1_host_id].redis_cache.higher_CDN_delay = self.topo["delay_topo"][self.topo["level_CDN_1_id"][level_CDN_1_host_id]][self.topo["level_CDN_2_id"][bind_level_CDN_2_id]]
+            self.build_network.level_CDN_1_host[level_CDN_1_host_id].redis_cache.higher_CDN_bandwidth = self.topo["bandwidth_topo"][self.topo["level_CDN_1_id"][level_CDN_1_host_id]][self.topo["level_CDN_2_id"][bind_level_CDN_2_id]]
 
-        for level_2_host_id in range(self.build_network.level_2_host_number):
-            bind_level_1_id = self.topo['up_bind_2_1'][level_2_host_id]
-            self.build_network.level_2_host[level_2_host_id].redis_cache.higher_CDN_redis = self.build_network.level_1_host[bind_level_1_id].redis_cache
-            self.build_network.level_2_host[level_2_host_id].redis_cache.higher_CDN_id = bind_level_1_id
-            self.build_network.level_2_host[level_2_host_id].redis_cache.higher_CDN_level = 1
-            self.build_network.level_2_host[level_2_host_id].redis_cache.higher_CDN_delay = self.topo["delay_topo"][self.topo["level_2_id"][level_1_host_id]][self.topo["level_1_id"][bind_level_1_id]]
-            self.build_network.level_2_host[level_2_host_id].redis_cache.higher_CDN_bandwidth = self.topo["bandwidth_topo"][self.topo["level_2_id"][level_1_host_id]][self.topo["level_1_id"][bind_level_1_id]]
+        for level_CDN_2_host_id in range(self.build_network.level_CDN_2_host_number):
+            bind_level_data_center_id = self.topo['up_bind_2_1'][level_CDN_2_host_id]
+            self.build_network.level_CDN_2_host[level_CDN_2_host_id].redis_cache.higher_CDN_redis = self.build_network.level_data_center_host[bind_level_data_center_id].redis_cache
+            self.build_network.level_CDN_2_host[level_CDN_2_host_id].redis_cache.higher_CDN_id = bind_level_data_center_id
+            self.build_network.level_CDN_2_host[level_CDN_2_host_id].redis_cache.higher_CDN_level = 1
+            self.build_network.level_CDN_2_host[level_CDN_2_host_id].redis_cache.higher_CDN_delay = self.topo["delay_topo"][self.topo["level_CDN_2_id"][level_data_center_host_id]][self.topo["level_data_center_id"][bind_level_data_center_id]]
+            self.build_network.level_CDN_2_host[level_CDN_2_host_id].redis_cache.higher_CDN_bandwidth = self.topo["bandwidth_topo"][self.topo["level_CDN_2_id"][level_data_center_host_id]][self.topo["level_data_center_id"][bind_level_data_center_id]]
 
         self.find_success_number = [0, 0, 0, 0]
         self.find_fail_number = [0, 0, 0, 0]
@@ -322,7 +322,7 @@ class Main:
                 spreading_power_list = [0 for _ in range(len(self.G.nodes))]
                 for i in range(len(self.G.nodes)):
                     spreading_number = SIR.SIR_network(networkx_graph, [i] , epidemic_threshold, 1, 1)
-                    spreading_power_list[i] = (spreading_number - 1) / CONFIG['cache_size_level_3'] + 1 # 如果没有传播，设置为1，即和LRU等同。
+                    spreading_power_list[i] = (spreading_number - 1) / CONFIG['cache_size_level_CDN_1'] + 1 # 如果没有传播，设置为1，即和LRU等同。
                     # spreading_power_list[i] = SIR.SIR_network(networkx_graph, [i] , epidemic_threshold, 1, 1, 1)
                 pickle.dump(spreading_power_list, open(curr_social_metric_path, "wb"))
             # print("spreading_power_list: ", spreading_power_list)
@@ -364,7 +364,7 @@ class Main:
                 current_timestamp = last_timestamp + 0.001
             last_timestamp = current_timestamp
 
-            [selected_level_3_id, nearest_distance] = util.find_nearest_location(current_location, self.level_3_area_location)
+            [selected_level_CDN_1_id, nearest_distance] = util.find_nearest_location(current_location, self.level_CDN_1_area_location)
             if int(nearest_distance) == 0:
                 nearest_distance = 2
             else:
@@ -463,25 +463,25 @@ class Main:
                     'timestamp': current_timestamp
                 }
 
-                print(cnt_line, selected_level_3_id, temp_redis_object, file=f_out_insert)
+                print(cnt_line, selected_level_CDN_1_id, temp_redis_object, file=f_out_insert)
 
                 if self.if_debug:
                     print("post_id: ", post_id)
                     print("user_id: ", user_id)
-                    print("selected_level_3_id: ", selected_level_3_id)
+                    print("selected_level_CDN_1_id: ", selected_level_CDN_1_id)
                     print("temp_redis_object: ", temp_redis_object)
                 
                 '''往第三层级插入，后续的调整都由SocialCDN内部完成'''
                 if caching_policy == "LRU-Social":
-                    self.build_network.level_3_host[selected_level_3_id].redis_cache.insert(picture_hash=post_id, redis_object=temp_redis_object, need_uplift=True, use_LRU_social=True, first_insert=True, lru_social_parameter_sp=spreading_power_list[user_id])
+                    self.build_network.level_CDN_1_host[selected_level_CDN_1_id].redis_cache.insert(picture_hash=post_id, redis_object=temp_redis_object, need_uplift=True, use_LRU_social=True, first_insert=True, lru_social_parameter_sp=spreading_power_list[user_id])
                 elif caching_policy == "LRU-label":
-                    self.build_network.level_3_host[selected_level_3_id].redis_cache.insert(picture_hash=post_id, redis_object=temp_redis_object, need_uplift=True, use_LRU_label=True)
+                    self.build_network.level_CDN_1_host[selected_level_CDN_1_id].redis_cache.insert(picture_hash=post_id, redis_object=temp_redis_object, need_uplift=True, use_LRU_label=True)
                 elif caching_policy == "Second-Hit-LRU":
-                    self.build_network.level_3_host[selected_level_3_id].redis_cache.insert(picture_hash=post_id, redis_object=temp_redis_object, need_uplift=True, ignore_cache=True)
+                    self.build_network.level_CDN_1_host[selected_level_CDN_1_id].redis_cache.insert(picture_hash=post_id, redis_object=temp_redis_object, need_uplift=True, ignore_cache=True)
                 elif caching_policy == "OPT":
-                    self.build_network.level_3_host[selected_level_3_id].redis_cache.insert(picture_hash=post_id, redis_object=temp_redis_object, need_uplift=True, use_OPT=True)
+                    self.build_network.level_CDN_1_host[selected_level_CDN_1_id].redis_cache.insert(picture_hash=post_id, redis_object=temp_redis_object, need_uplift=True, use_OPT=True)
                 else:
-                    self.build_network.level_3_host[selected_level_3_id].redis_cache.insert(picture_hash=post_id, redis_object=temp_redis_object, need_uplift=True)
+                    self.build_network.level_CDN_1_host[selected_level_CDN_1_id].redis_cache.insert(picture_hash=post_id, redis_object=temp_redis_object, need_uplift=True)
 
             elif current_type == "view":
                 post_id = int(line.split('+')[1])
@@ -489,22 +489,22 @@ class Main:
                 # user_id = int(line.split('+')[3])
                 
                 # if post_id == 13 and current_timestamp < 250000:
-                #     print(selected_level_3_id, current_timestamp, "!!!!!!")
+                #     print(selected_level_CDN_1_id, current_timestamp, "!!!!!!")
                 '''往第三层级查询，后续的调整都由redis内部完成，这里先假设只有一个user节点'''
                 if caching_policy == "LRU-Social":
-                    find_result = self.build_network.level_3_host[selected_level_3_id].redis_cache.find(picture_hash=post_id, user_host=self.build_network.user_host[0], current_timestamp=current_timestamp, need_update_cache=need_update_cache, use_LRU_social=True, request_delay=util.distance_to_delay(1/nearest_distance), request_bandwidth=util.distance_to_bandwidth(1/nearest_distance))
+                    find_result = self.build_network.level_CDN_1_host[selected_level_CDN_1_id].redis_cache.find(picture_hash=post_id, user_host=self.build_network.user_host[0], current_timestamp=current_timestamp, need_update_cache=need_update_cache, use_LRU_social=True, request_delay=util.distance_to_delay(1/nearest_distance), request_bandwidth=util.distance_to_bandwidth(1/nearest_distance))
                     
                 elif caching_policy == "LRU-label":
-                    find_result = self.build_network.level_3_host[selected_level_3_id].redis_cache.find(picture_hash=post_id, user_host=self.build_network.user_host[0], current_timestamp=current_timestamp, need_update_cache=need_update_cache, use_LRU_label=True, request_delay=util.distance_to_delay(1/nearest_distance), request_bandwidth=util.distance_to_bandwidth(1/nearest_distance))
+                    find_result = self.build_network.level_CDN_1_host[selected_level_CDN_1_id].redis_cache.find(picture_hash=post_id, user_host=self.build_network.user_host[0], current_timestamp=current_timestamp, need_update_cache=need_update_cache, use_LRU_label=True, request_delay=util.distance_to_delay(1/nearest_distance), request_bandwidth=util.distance_to_bandwidth(1/nearest_distance))
                     
                 elif caching_policy == "Second-Hit-LRU":
-                    find_result = self.build_network.level_3_host[selected_level_3_id].redis_cache.find(picture_hash=post_id, user_host=self.build_network.user_host[0], current_timestamp=current_timestamp, need_update_cache=need_update_cache, ignore_cache=True, request_delay=util.distance_to_delay(1/nearest_distance), request_bandwidth=util.distance_to_bandwidth(1/nearest_distance))
+                    find_result = self.build_network.level_CDN_1_host[selected_level_CDN_1_id].redis_cache.find(picture_hash=post_id, user_host=self.build_network.user_host[0], current_timestamp=current_timestamp, need_update_cache=need_update_cache, ignore_cache=True, request_delay=util.distance_to_delay(1/nearest_distance), request_bandwidth=util.distance_to_bandwidth(1/nearest_distance))
                     
                 elif caching_policy == "OPT":
-                    find_result = self.build_network.level_3_host[selected_level_3_id].redis_cache.find(picture_hash=post_id, user_host=self.build_network.user_host[0], current_timestamp=current_timestamp, need_update_cache=need_update_cache, request_delay=util.distance_to_delay(1/nearest_distance), request_bandwidth=util.distance_to_bandwidth(1/nearest_distance), use_OPT=True)
+                    find_result = self.build_network.level_CDN_1_host[selected_level_CDN_1_id].redis_cache.find(picture_hash=post_id, user_host=self.build_network.user_host[0], current_timestamp=current_timestamp, need_update_cache=need_update_cache, request_delay=util.distance_to_delay(1/nearest_distance), request_bandwidth=util.distance_to_bandwidth(1/nearest_distance), use_OPT=True)
                     
                 else:
-                    find_result = self.build_network.level_3_host[selected_level_3_id].redis_cache.find(picture_hash=post_id, user_host=self.build_network.user_host[0], current_timestamp=current_timestamp, need_update_cache=need_update_cache, request_delay=util.distance_to_delay(1/nearest_distance), request_bandwidth=util.distance_to_bandwidth(1/nearest_distance))
+                    find_result = self.build_network.level_CDN_1_host[selected_level_CDN_1_id].redis_cache.find(picture_hash=post_id, user_host=self.build_network.user_host[0], current_timestamp=current_timestamp, need_update_cache=need_update_cache, request_delay=util.distance_to_delay(1/nearest_distance), request_bandwidth=util.distance_to_bandwidth(1/nearest_distance))
                     
                 result_level = find_result[0]
                 
@@ -519,7 +519,7 @@ class Main:
                 # curr_view_end_time = time.time()
                 # latency = curr_view_end_time - curr_view_start_time + find_result[2]
 
-                print(cnt_line, selected_level_3_id, result_level, find_result[1], file=f_out_find)
+                print(cnt_line, selected_level_CDN_1_id, result_level, find_result[1], file=f_out_find)
                 print(cnt_line, find_result[2], file=f_out_latency)
                 
                 for temp_level in range(3, result_level, -1):
@@ -537,17 +537,17 @@ class Main:
         f_out_latency.close()
 
         if self.use_http_server == True:
-            for level_3_host_id in range(self.build_network.level_3_host_number):
-                for eth_port in range(self.build_network.level_2_host_number): # 对应第二层的每一个节点
-                    util.calculate_flow(host=self.build_network.level_3_host[level_3_host_id], eth_name='c%s-eth%s'%(str(level_3_host_id), str(eth_port)), flow_direction='TX', result_path=self.result_path+'flow/'+self.build_network.level_3_host_ip[level_3_host_id])
+            for level_CDN_1_host_id in range(self.build_network.level_CDN_1_host_number):
+                for eth_port in range(self.build_network.level_CDN_2_host_number): # 对应第二层的每一个节点
+                    util.calculate_flow(host=self.build_network.level_CDN_1_host[level_CDN_1_host_id], eth_name='c%s-eth%s'%(str(level_CDN_1_host_id), str(eth_port)), flow_direction='TX', result_path=self.result_path+'flow/'+self.build_network.level_CDN_1_host_ip[level_CDN_1_host_id])
 
-            for level_2_host_id in range(self.build_network.level_2_host_number):
-                for eth_port in range(self.build_network.level_1_host_number): # 对应第一层的每一个节点，以及自己的switch
-                    util.calculate_flow(host=self.build_network.level_2_host[level_2_host_id], eth_name='b%s-eth%s'%(str(level_2_host_id), str(eth_port)), flow_direction='TX', result_path=self.result_path+'flow/'+self.build_network.level_2_host_ip[level_2_host_id])
+            for level_CDN_2_host_id in range(self.build_network.level_CDN_2_host_number):
+                for eth_port in range(self.build_network.level_data_center_host_number): # 对应第一层的每一个节点，以及自己的switch
+                    util.calculate_flow(host=self.build_network.level_CDN_2_host[level_CDN_2_host_id], eth_name='b%s-eth%s'%(str(level_CDN_2_host_id), str(eth_port)), flow_direction='TX', result_path=self.result_path+'flow/'+self.build_network.level_CDN_2_host_ip[level_CDN_2_host_id])
 
-            for level_1_host_id in range(self.build_network.level_1_host_number):
+            for level_data_center_host_id in range(self.build_network.level_data_center_host_number):
                 for eth_port in range(1): # 对应自己的switch
-                    util.calculate_flow(host=self.build_network.level_1_host[level_1_host_id], eth_name='a%s-eth%s'%(str(level_1_host_id), str(eth_port)), flow_direction='TX', result_path=self.result_path+'flow/'+self.build_network.level_1_host_ip[level_1_host_id])
+                    util.calculate_flow(host=self.build_network.level_data_center_host[level_data_center_host_id], eth_name='a%s-eth%s'%(str(level_data_center_host_id), str(eth_port)), flow_direction='TX', result_path=self.result_path+'flow/'+self.build_network.level_data_center_host_ip[level_data_center_host_id])
 
 
     def run(self, caching_policy):
