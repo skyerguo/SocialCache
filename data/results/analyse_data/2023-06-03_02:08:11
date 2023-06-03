@@ -1,0 +1,25 @@
+caching_policy:  LRU-Social
+cache_size_level_data_center:  1000000
+cache_size_level_CDN_2:  150
+cache_size_level_CDN_1:  15
+parameters:  [0.05, 50.5, 90]
+use_priority_queue:  False
+------
+dataset:  TwitterFull
+------
+三级CDN缓存命中率:  0.1875651773227379
+二级CDN缓存命中率:  0.4580045572592762
+一级CDN缓存命中率:  1.0
+总缓存命中率:  0.44389780026554704
+二三级缓存命中率:  0.3087912578055308
+------
+total_media_size:  70146760.90917969
+insert_all_media_size:  34092663.087890625
+level 1; media size: 12630250.837890625
+level 2; media size: 34092663.087890625
+level 3; media size: 23423846.983398438
+------
+time_duration:  390.434726
+------
+latency_average:  147.81003184494145
+------

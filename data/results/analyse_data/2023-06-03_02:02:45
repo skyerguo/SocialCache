@@ -1,0 +1,25 @@
+caching_policy:  RAND
+cache_size_level_data_center:  1000000
+cache_size_level_CDN_2:  150
+cache_size_level_CDN_1:  15
+parameters:  [0.05, 50.5, 90]
+use_priority_queue:  True
+------
+dataset:  TwitterEgo
+------
+三级CDN缓存命中率:  0.06470771232218106
+二级CDN缓存命中率:  0.24649995464304073
+一级CDN缓存命中率:  1.0
+总缓存命中率:  0.37878284716494015
+二三级缓存命中率:  0.15256466462078036
+------
+total_media_size:  11280364.305664062
+insert_all_media_size:  5547720.9150390625
+level 1; media size: 2397060.96875
+level 2; media size: 5547720.9150390625
+level 3; media size: 3335582.421875
+------
+time_duration:  6.822721
+------
+latency_average:  185.9244359528944
+------
