@@ -180,7 +180,7 @@ class Main:
         A = np.matlib.zeros((n, n))
         for i in range(n):
             for j in range(n):
-                if g.has_edge(i, j):
+                if g.has_edge(str(i), str(j)):
                     A[i, j] = 1
         B = A * A
         C = 1 - A
@@ -192,7 +192,7 @@ class Main:
                     sum += 1.0 / B[i, j]
         if flag == False:
             sum /= 2
-        return sum
+        return 2 * sum / ((n - 1) * (n - 2))
 
     def main(self, caching_policy):
         '''read_trace'''
