@@ -1,5 +1,5 @@
 {
-  "trace_dir": "TwitterFull",
+  "trace_dir": "TwitterEgo",
   "caching_policy": "EffectiveSize",
   "use_http_server": false,
   "use_priority_queue": true,
@@ -9,8 +9,8 @@
   "max_trace_len": null,
   "mode": "normal",
   "params": [
-    0.05,
-    50.5,
-    90
+    0,
+    0,
+    0
   ]
 }

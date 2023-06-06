@@ -17,12 +17,12 @@ init_list = {
     "PageRank": [[3000, 25.5, 50000]],
     "HITS": [[3000, 25.5, 50000]],
     "ClusteringCoefficient": [[15000, 64.5, 310]],
-    "DegreeCentrality": [[15000, 64.5, 310]],
+    "DegreeCentrality": [[15000, 25.5, 500]],
     "BetweennessCentrality": [[15000, 57.5, 54000]],
-    "ClosenessCentrality": [[15000, 50.0, 310]],
-    "EigenvectorCentrality": [[15000, 62.0, 52000]],
-    "LaplacianCentrality": [[15000, 54.0, 52000]],
-    "EgoBetweennessCentrality": [[15000, 53.5, 40000]],
+    "ClosenessCentrality": [[15000, 25.5, 175]],
+    "EigenvectorCentrality": [[15000, 25.5, 800]],
+    "LaplacianCentrality": [[15000, 25.5, 10000]],
+    "EgoBetweennessCentrality": [[15000, 25.5, 2000]],
     "EffectiveSize": [[3000, 40.5, 80]],
 }
 
@@ -31,12 +31,25 @@ step_social = {
     "HITS": 50000,
     "ClusteringCoefficient": 30,
     "DegreeCentrality": 30,
-    "ClosenessCentrality": 30,
+    "ClosenessCentrality": 15,
     "BetweennessCentrality": 5000,
-    "EigenvectorCentrality": 5000,
-    "LaplacianCentrality": 5000,
-    "EgoBetweennessCentrality": 7000,
+    "EigenvectorCentrality": 50,
+    "LaplacianCentrality": 1000,
+    "EgoBetweennessCentrality": 200,
     "EffectiveSize": 2.5,
+}
+
+step_media_size = {
+    "PageRank": 1,
+    "HITS": 1,
+    "ClusteringCoefficient": 1,
+    "DegreeCentrality": 1,
+    "ClosenessCentrality": 0.5,
+    "BetweennessCentrality": 1,
+    "EigenvectorCentrality": 0.5,
+    "LaplacianCentrality": 1,
+    "EgoBetweennessCentrality": 0.5,
+    "EffectiveSize": 0.5,
 }
 
 class hill_climb_optimize():
@@ -53,7 +66,7 @@ class hill_climb_optimize():
 
         # define step length
         self.step_len0 = 3000       # location
-        self.step_len1 = 1       # media_size
+        self.step_len1 = step_media_size[self.init_config['caching_policy']]       # media_size
         self.step_len2 = step_social[self.init_config['caching_policy']]      # social_metric
         self.step_list = [self.step_len0, self.step_len1, self.step_len2]
 

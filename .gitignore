@@ -17,10 +17,6 @@ data/traces/BrightkiteBigraph/*
 data/traces/BrightkiteBigraphCommunity/*
 data/traces/GowallaBigraph/*
 data/traces/GowallaBigraphCommunity/*
-<<<<<<< HEAD
 data/traces/ICTwitterFull/*
 data/traces/LTTwitterFull/*
-
-=======
 figures/temp_data/*
->>>>>>> 32b7511d6eaad5827a92b55e03b8a990c629bdc1
