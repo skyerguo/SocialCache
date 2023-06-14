@@ -13,7 +13,12 @@ import random
 import math
 import numpy as np
 import pickle
-from multiprocessing import Pool
+import multiprocessing
+
+def calculate_spreading_power(i, networkx_graph, epidemic_threshold, n):
+    spreading_number = SIR.SIR_network(networkx_graph, [i], epidemic_threshold, 1, 1)
+    spreading_power = (spreading_number - 1) / n + 1
+    return i, spreading_power
 
 class Main:
     def __init__(self, trace_dir, use_http_server=False, if_debug=False):
@@ -193,7 +198,7 @@ class Main:
                     sum += 1.0 / B[i, j]
         if flag == False:
             sum /= 2
-        return 2 * sum / ((n - 1) * (n - 2))
+        return 2 * sum / ((n - 1) * (n - 2)) 
 
     def main(self, caching_policy):
         '''read_trace'''
@@ -309,12 +314,10 @@ class Main:
             # print("ego_betweenness_centrality_metrics: ", ego_betweenness_centrality_metrics)
 
         elif caching_policy == "LRU-Social":
-            curr_social_metric_path = self.social_metric_dict_path + 'LRUSocial_test.pkl'
-            print("!!!!!")
+            curr_social_metric_path = self.social_metric_dict_path + 'LRUSocial.pkl'
             if os.path.exists(curr_social_metric_path):
                 spreading_power_list = pickle.load(open(curr_social_metric_path, "rb"))
             else:
-                print("total nodes: ", len(self.G.nodes))
                 all_degree_dict = self.G.degree()
                 parameter_k = np.mean(list(all_degree_dict.values()))
                 epidemic_threshold = parameter_k / (parameter_k * parameter_k - parameter_k)
@@ -323,13 +326,23 @@ class Main:
                 adj_matrix = util.generate_adj_matrix_graph("data/traces/" + self.trace_dir + "/relations.txt", len(self.G.nodes))
                 networkx_graph = networkx.DiGraph(adj_matrix)
                 spreading_power_list = [0 for _ in range(len(self.G.nodes))]
-                for i in range(len(self.G.nodes)):
-                    spreading_number = SIR.SIR_network(networkx_graph, [i] , epidemic_threshold, 1, 1)
-                    spreading_power_list[i] = (spreading_number - 1) / CONFIG['cache_size_level_CDN_1'] + 1 # 如果没有传播，设置为1，即和LRU等同。p
-                    if i % 1 == 0:
-                        print("calculated: ", i)
-            exit(0)
-                # pickle.dump(spreading_power_list, open(curr_social_metric_path, "wb"))
+
+                num_processes = multiprocessing.cpu_count()
+                pool = multiprocessing.Pool(processes=num_processes)
+                results = pool.starmap(calculate_spreading_power, [(i, networkx_graph, epidemic_threshold, CONFIG['cache_size_level_CDN_1']) for i in range(len(self.G.nodes))])
+                pool.close()
+                pool.join()
+
+                spreading_power_list = [0] * len(self.G.nodes)
+                for i, spreading_power in results:
+                    spreading_power_list[i] = spreading_power
+                    
+                # for i in range(len(self.G.nodes)):
+                #     spreading_number = SIR.SIR_network(networkx_graph, [i] , epidemic_threshold, 1, 1)
+                #     spreading_power_list[i] = (spreading_number - 1) / CONFIG['cache_size_level_CDN_1'] + 1 # 如果没有传播，设置为1，即和LRU等同。
+                #     if i % 1 == 0:
+                #         print("calculated: ", i)
+                pickle.dump(spreading_power_list, open(curr_social_metric_path, "wb"))
             # print("spreading_power_list: ", spreading_power_list)
             
         elif caching_policy == "EffectiveSize":
