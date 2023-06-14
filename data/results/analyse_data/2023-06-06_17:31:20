@@ -1,0 +1,25 @@
+caching_policy:  FIFO
+cache_size_level_data_center:  1000000
+cache_size_level_CDN_2:  150
+cache_size_level_CDN_1:  15
+parameters:  [200, 0.0035, 10]
+use_priority_queue:  True
+------
+dataset:  BrightkiteBigraphCommunity
+------
+三级CDN缓存命中率:  0.6412629791293397
+二级CDN缓存命中率:  0.7839517281532843
+一级CDN缓存命中率:  1.0
+总缓存命中率:  0.6962617193098054
+二三级缓存命中率:  0.6789360063232339
+------
+total_media_size:  243781928742.0
+insert_all_media_size:  109092386824.0
+level 1; media size: 35856001391.0
+level 2; media size: 109092386824.0
+level 3; media size: 98833540527.0
+------
+time_duration:  252.616872
+------
+latency_average:  285.4038313661215
+------

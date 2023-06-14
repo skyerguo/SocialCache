@@ -1,0 +1,25 @@
+caching_policy:  RAND
+cache_size_level_data_center:  1000000
+cache_size_level_CDN_2:  150
+cache_size_level_CDN_1:  15
+parameters:  [200, 0.0035, 10]
+use_priority_queue:  True
+------
+dataset:  BrightkiteBigraphCommunity
+------
+三级CDN缓存命中率:  0.10296415174160149
+二级CDN缓存命中率:  0.04992011460823137
+一级CDN缓存命中率:  1.0
+总缓存命中率:  0.36373006524102935
+二三级缓存命中率:  0.0778816511190295
+------
+total_media_size:  591162986696.0
+insert_all_media_size:  282782915801.0
+level 1; media size: 138412763214.0
+level 2; media size: 282782915801.0
+level 3; media size: 169967307681.0
+------
+time_duration:  309.410783
+------
+latency_average:  938.0780822179512
+------

@@ -1,0 +1,25 @@
+caching_policy:  Efficiency
+cache_size_level_data_center:  1000000
+cache_size_level_CDN_2:  150
+cache_size_level_CDN_1:  15
+parameters:  [500, 25.5, 90]
+use_priority_queue:  True
+------
+dataset:  TwitterFull
+------
+三级CDN缓存命中率:  0.5474683544303798
+二级CDN缓存命中率:  0.5524475524475524
+一级CDN缓存命中率:  1.0
+总缓存命中率:  0.6042065009560229
+二三级缓存命中率:  0.5490196078431373
+------
+total_media_size:  129821.1015625
+insert_all_media_size:  55325.0751953125
+level 1; media size: 29017.505859375
+level 2; media size: 63513.4443359375
+level 3; media size: 37290.1513671875
+------
+time_duration:  -1
+------
+latency_average:  103.84908375350379
+------

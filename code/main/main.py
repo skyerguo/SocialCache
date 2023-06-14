@@ -13,6 +13,7 @@ import random
 import math
 import numpy as np
 import pickle
+from multiprocessing import Pool
 
 class Main:
     def __init__(self, trace_dir, use_http_server=False, if_debug=False):
@@ -308,10 +309,12 @@ class Main:
             # print("ego_betweenness_centrality_metrics: ", ego_betweenness_centrality_metrics)
 
         elif caching_policy == "LRU-Social":
-            curr_social_metric_path = self.social_metric_dict_path + 'LRUSocial.pkl'
+            curr_social_metric_path = self.social_metric_dict_path + 'LRUSocial_test.pkl'
+            print("!!!!!")
             if os.path.exists(curr_social_metric_path):
                 spreading_power_list = pickle.load(open(curr_social_metric_path, "rb"))
             else:
+                print("total nodes: ", len(self.G.nodes))
                 all_degree_dict = self.G.degree()
                 parameter_k = np.mean(list(all_degree_dict.values()))
                 epidemic_threshold = parameter_k / (parameter_k * parameter_k - parameter_k)
@@ -322,9 +325,11 @@ class Main:
                 spreading_power_list = [0 for _ in range(len(self.G.nodes))]
                 for i in range(len(self.G.nodes)):
                     spreading_number = SIR.SIR_network(networkx_graph, [i] , epidemic_threshold, 1, 1)
-                    spreading_power_list[i] = (spreading_number - 1) / CONFIG['cache_size_level_CDN_1'] + 1 # 如果没有传播，设置为1，即和LRU等同。
-                    # spreading_power_list[i] = SIR.SIR_network(networkx_graph, [i] , epidemic_threshold, 1, 1, 1)
-                pickle.dump(spreading_power_list, open(curr_social_metric_path, "wb"))
+                    spreading_power_list[i] = (spreading_number - 1) / CONFIG['cache_size_level_CDN_1'] + 1 # 如果没有传播，设置为1，即和LRU等同。p
+                    if i % 1 == 0:
+                        print("calculated: ", i)
+            exit(0)
+                # pickle.dump(spreading_power_list, open(curr_social_metric_path, "wb"))
             # print("spreading_power_list: ", spreading_power_list)
             
         elif caching_policy == "EffectiveSize":
