@@ -339,6 +339,18 @@ class Main:
                 pickle.dump(effective_size_metrics, open(curr_social_metric_path, "wb"))
             # print("effective_size_metrics: ", effective_size_metrics)
             
+        elif caching_policy == "Efficiency":
+            curr_social_metric_path = self.social_metric_dict_path + 'Efficency.pkl'
+            if os.path.exists(curr_social_metric_path):
+                efficiency_metrics = pickle.load(open(curr_social_metric_path, "rb"))
+            else:
+                adj_matrix = util.generate_adj_matrix_graph("data/traces/" + self.trace_dir + "/relations.txt", len(self.G.nodes))
+                networkx_graph = networkx.DiGraph(adj_matrix).reverse() ## 关注的方向，传播需要反向
+                '''easygraph的constraint只能针对无向图，networkx的constraint可以针对有向图'''
+                effective_size_metrics = networkx.effective_size(networkx_graph)
+                efficiency_metrics = {n: v / networkx_graph.degree(n) for n, v in effective_size_metrics.items()}
+                pickle.dump(efficiency_metrics, open(curr_social_metric_path, "wb"))
+            # print("efficiency_metrics: ", efficiency_metrics)
 
         f_in = open("data/traces/" + self.trace_dir + "/all_timeline.txt", "r")
         f_out_find = open(self.result_path + 'find_log.txt', 'w')
@@ -455,6 +467,15 @@ class Main:
                                 nearest_distance * CONFIG['params'][0] + \
                                 media_size * CONFIG['params'][1] + \
                                 effective_size_metrics[user_id] * CONFIG['params'][2]
+                                
+                elif caching_policy == "Efficiency":
+                    if math.isnan(efficiency_metrics[user_id]):
+                        efficiency_metrics[user_id] = 0
+                    # print(current_timestamp, nearest_distance, media_size, efficiency_metrics[user_id])
+                    sort_value = current_timestamp + \
+                                nearest_distance * CONFIG['params'][0] + \
+                                media_size * CONFIG['params'][1] + \
+                                efficiency_metrics[user_id] * CONFIG['params'][2]
 
                 '''记录redis_object，使用json形式保存'''
                 temp_redis_object = {
@@ -517,7 +538,6 @@ class Main:
                     continue
                 
                 # curr_view_end_time = time.time()
-                # latency = curr_view_end_time - curr_view_start_time + find_result[2]
 
                 print(cnt_line, selected_level_CDN_1_id, result_level, find_result[1], file=f_out_find)
                 print(cnt_line, find_result[2], file=f_out_latency)
