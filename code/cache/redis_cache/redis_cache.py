@@ -296,6 +296,8 @@ class Redis_cache:
                 util.HTTP_GET(host=user_host, picture_hash=picture_hash, IP_address=self.host_ip, port_number=self.host_port, use_TLS=False, result_path=self.result_path+'wget/'+self.host_ip, picture_path='/dev/null')            
 
             '''返回一个list，分别表示[第几层命中的, 查到的redis_object]'''
+            # if picture_hash == 0:
+                # print("???", self.cache_level, result_level, new_redis_object['media_size'], request_delay, request_bandwidth, util.latency_CDN(delay=request_delay, bandwidth=request_bandwidth, media_size=new_redis_object['media_size']))
             return [result_level, new_redis_object, util.latency_CDN(delay=request_delay, bandwidth=request_bandwidth, media_size=new_redis_object['media_size'])]
 
         else:
@@ -328,5 +330,7 @@ class Redis_cache:
                     # print("------")
             
             '''返回一个list，分别表示[第几层命中的, 查到的redis_object]'''
+            # if picture_hash == 0:
+                # print("!!!", self.cache_level, result_level, latency_CDN, redis_object['media_size'], request_delay, request_bandwidth, latency_CDN + util.latency_CDN(delay=request_delay, bandwidth=request_bandwidth, media_size=redis_object['media_size']))
             return [result_level, redis_object, latency_CDN + util.latency_CDN(delay=request_delay, bandwidth=request_bandwidth, media_size=redis_object['media_size'])]
 

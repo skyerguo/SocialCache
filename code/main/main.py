@@ -555,8 +555,6 @@ class Main:
                     print("!!!! ", cnt_line)
                     continue
                 
-                # curr_view_end_time = time.time()
-
                 print(cnt_line, selected_level_CDN_1_id, result_level, find_result[1], file=f_out_find)
                 print(cnt_line, find_result[2], file=f_out_latency)
                 
