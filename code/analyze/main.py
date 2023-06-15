@@ -140,31 +140,31 @@ def get_cache_hit_ratio():
     # print(find_success_number_each_node)
 
     if find_success_number_each_level[3] + find_fail_number_each_level[3] > 0:
-        print('三级CDN缓存命中率: ', find_success_number_each_level[3] / (find_success_number_each_level[3] + find_fail_number_each_level[3]))
+        print('三级CDN(L1 CDN Layer)缓存命中率: ', find_success_number_each_level[3] / (find_success_number_each_level[3] + find_fail_number_each_level[3]))
     else:
         print('未经过三级CDN缓存')
 
     if find_success_number_each_level[2] + find_fail_number_each_level[2] > 0:
-        print('二级CDN缓存命中率: ', find_success_number_each_level[2] / (find_success_number_each_level[2] + find_fail_number_each_level[2]))
+        print('二级CDN(L2 CDN Layer)缓存命中率: ', find_success_number_each_level[2] / (find_success_number_each_level[2] + find_fail_number_each_level[2]))
     else:
         print('未经过二级CDN缓存')
         
     if find_success_number_each_level[1] + find_fail_number_each_level[1] > 0:
-        print('一级CDN缓存命中率: ', find_success_number_each_level[1] / (find_success_number_each_level[1] + find_fail_number_each_level[1]))
+        print('一级CDN(Data Center Layer)缓存命中率: ', find_success_number_each_level[1] / (find_success_number_each_level[1] + find_fail_number_each_level[1]))
     else:
         print('未经过一级CDN缓存')
 
     print("总缓存命中率: ", (find_success_number_each_level[3] + find_success_number_each_level[2] + find_success_number_each_level[1]) / (find_success_number_each_level[3] + find_success_number_each_level[2] + find_success_number_each_level[1] + find_fail_number_each_level[3] + find_fail_number_each_level[2] + find_fail_number_each_level[1]))
 
-    print("二三级缓存命中率: ", (find_success_number_each_level[3] + find_success_number_each_level[2]) / (find_success_number_each_level[3] + find_success_number_each_level[2] + find_fail_number_each_level[3] + find_fail_number_each_level[2]))
+    print("二三级(L1+L2)缓存命中率: ", (find_success_number_each_level[3] + find_success_number_each_level[2]) / (find_success_number_each_level[3] + find_success_number_each_level[2] + find_fail_number_each_level[3] + find_fail_number_each_level[2]))
     
     if args.case:
-         for i in range(1, 4):
+        for i in range(1, 4):
             for j in range(len(find_success_number_each_node[i])):
                 if find_success_number_each_node[i][j] + find_fail_number_each_node[i][j] > 0:
-                    print("level %i; node %i; 缓存命中率: %s"%(i, j + 1, find_success_number_each_node[i][j] / (find_success_number_each_node[i][j] + find_fail_number_each_node[i][j])))
+                    print("%i级; node %i; 缓存命中率: %s"%(i, j + 1, find_success_number_each_node[i][j] / (find_success_number_each_node[i][j] + find_fail_number_each_node[i][j])))
                 else:
-                    print("level %i; node %i; 缓存命中率: %s"%(i, j + 1, -1))
+                    print("%i级; node %i; 缓存命中率: %s"%(i, j + 1, -1))
 
 if __name__ == '__main__':
     if args.outputFile:

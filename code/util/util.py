@@ -127,4 +127,4 @@ def distance_to_bandwidth(distance):
 
 ## 传一个文件所需时间，从高层CDN节点往下传时做计算
 def latency_CDN(delay, bandwidth, media_size): ## ms
-    return 2 * delay + media_size / (bandwidth * 1024) * 1000 ## 转换单位，kb/Mbps ==> ms
+    return 2 * delay + media_size * 1000 * 8 / (bandwidth * 1024) ## 转换单位，KB/Mbps ==> ms
