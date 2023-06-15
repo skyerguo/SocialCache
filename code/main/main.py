@@ -327,7 +327,7 @@ class Main:
                 networkx_graph = networkx.DiGraph(adj_matrix)
                 spreading_power_list = [0 for _ in range(len(self.G.nodes))]
 
-                num_processes = multiprocessing.cpu_count()
+                num_processes = int(multiprocessing.cpu_count() / 4)
                 pool = multiprocessing.Pool(processes=num_processes)
                 results = pool.starmap(calculate_spreading_power, [(i, networkx_graph, epidemic_threshold, CONFIG['cache_size_level_CDN_1']) for i in range(len(self.G.nodes))])
                 pool.close()
