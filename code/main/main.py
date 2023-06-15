@@ -15,7 +15,14 @@ import numpy as np
 import pickle
 import multiprocessing
 
-def calculate_spreading_power(i, networkx_graph, epidemic_threshold, n):
+# def calculate_spreading_power(i, networkx_graph, epidemic_threshold, n):
+#     spreading_number = SIR.SIR_network(networkx_graph, [i], epidemic_threshold, 1, 1)
+#     spreading_power = (spreading_number - 1) / n + 1
+#     return i, spreading_power
+def calculate_spreading_power(params):
+    i, networkx_graph, epidemic_threshold, n = params
+    if i % 100 == 0:
+        print("sp: ", i)
     spreading_number = SIR.SIR_network(networkx_graph, [i], epidemic_threshold, 1, 1)
     spreading_power = (spreading_number - 1) / n + 1
     return i, spreading_power
@@ -327,11 +334,22 @@ class Main:
                 networkx_graph = networkx.DiGraph(adj_matrix)
                 spreading_power_list = [0 for _ in range(len(self.G.nodes))]
 
-                num_processes = int(multiprocessing.cpu_count() / 4)
+                num_processes = int(multiprocessing.cpu_count())
+                params_list = [(i, networkx_graph, epidemic_threshold, CONFIG['cache_size_level_CDN_1']) for i in range(len(self.G.nodes))]
+                chunk_size = len(self.G.nodes) // num_processes
+                chunks = [params_list[i:i+chunk_size] for i in range(0, len(params_list), chunk_size)]
+
                 pool = multiprocessing.Pool(processes=num_processes)
-                results = pool.starmap(calculate_spreading_power, [(i, networkx_graph, epidemic_threshold, CONFIG['cache_size_level_CDN_1']) for i in range(len(self.G.nodes))])
+                results = []
+                for chunk in chunks:
+                    chunk_results = pool.map(calculate_spreading_power, chunk)
+                    results.extend(chunk_results)
                 pool.close()
                 pool.join()
+                # pool = multiprocessing.Pool(processes=num_processes)
+                # results = pool.starmap(calculate_spreading_power, [(i, networkx_graph, epidemic_threshold, CONFIG['cache_size_level_CDN_1']) for i in range(len(self.G.nodes))])
+                # pool.close()
+                # pool.join()
 
                 spreading_power_list = [0] * len(self.G.nodes)
                 for i, spreading_power in results:
