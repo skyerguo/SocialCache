@@ -15,14 +15,10 @@ import numpy as np
 import pickle
 import multiprocessing
 
-# def calculate_spreading_power(i, networkx_graph, epidemic_threshold, n):
-#     spreading_number = SIR.SIR_network(networkx_graph, [i], epidemic_threshold, 1, 1)
-#     spreading_power = (spreading_number - 1) / n + 1
-#     return i, spreading_power
 def calculate_spreading_power(params):
     i, networkx_graph, epidemic_threshold, n = params
-    if i % 100 == 0:
-        print("sp: ", i)
+    # if i % 100 == 0:
+    #     print("sp: ", i)
     spreading_number = SIR.SIR_network(networkx_graph, [i], epidemic_threshold, 1, 1)
     spreading_power = (spreading_number - 1) / n + 1
     return i, spreading_power
@@ -346,20 +342,11 @@ class Main:
                     results.extend(chunk_results)
                 pool.close()
                 pool.join()
-                # pool = multiprocessing.Pool(processes=num_processes)
-                # results = pool.starmap(calculate_spreading_power, [(i, networkx_graph, epidemic_threshold, CONFIG['cache_size_level_CDN_1']) for i in range(len(self.G.nodes))])
-                # pool.close()
-                # pool.join()
 
                 spreading_power_list = [0] * len(self.G.nodes)
                 for i, spreading_power in results:
                     spreading_power_list[i] = spreading_power
                     
-                # for i in range(len(self.G.nodes)):
-                #     spreading_number = SIR.SIR_network(networkx_graph, [i] , epidemic_threshold, 1, 1)
-                #     spreading_power_list[i] = (spreading_number - 1) / CONFIG['cache_size_level_CDN_1'] + 1 # 如果没有传播，设置为1，即和LRU等同。
-                #     if i % 1 == 0:
-                #         print("calculated: ", i)
                 pickle.dump(spreading_power_list, open(curr_social_metric_path, "wb"))
             # print("spreading_power_list: ", spreading_power_list)
             
