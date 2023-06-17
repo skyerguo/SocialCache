@@ -334,7 +334,7 @@ class Main:
                 networkx_graph = networkx.DiGraph(adj_matrix)
                 spreading_power_list = [0 for _ in range(len(self.G.nodes))]
 
-                num_processes = int(multiprocessing.cpu_count())
+                num_processes = int(multiprocessing.cpu_count() / 2)
                 params_list = [(i, networkx_graph, epidemic_threshold, CONFIG['cache_size_level_CDN_1']) for i in range(len(self.G.nodes))]
                 chunk_size = len(self.G.nodes) // num_processes
                 chunks = [params_list[i:i+chunk_size] for i in range(0, len(params_list), chunk_size)]
