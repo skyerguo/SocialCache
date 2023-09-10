@@ -1,0 +1,25 @@
+caching_policy:  LRU
+cache_size_level_data_center:  1000000
+cache_size_level_CDN_2:  150
+cache_size_level_CDN_1:  15
+parameters:  [200, 0.0035, 10]
+use_priority_queue:  True
+------
+dataset:  GowallaBigraphCommunity
+------
+三级CDN(L1 CDN Layer)缓存命中率:  0.6044889085053864
+二级CDN(L2 CDN Layer)缓存命中率:  0.9697866466070941
+一级CDN(Data Center Layer)缓存命中率:  1.0
+总缓存命中率:  0.7104993577131336
+二三级(L1+L2)缓存命中率:  0.7080203730689395
+------
+total_media_size:  202624988409.0
+insert_all_media_size:  86085610459.0
+level 1; media size: 31205166068.0
+level 2; media size: 86085610459.0
+level 3; media size: 85334211882.0
+------
+time_duration:  148.202144
+------
+latency_average:  1018.8692873072886
+------

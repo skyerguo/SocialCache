@@ -1,0 +1,25 @@
+caching_policy:  LRU-Social
+cache_size_level_data_center:  1000000
+cache_size_level_CDN_2:  150
+cache_size_level_CDN_1:  15
+parameters:  [200, 0.0035, 10]
+use_priority_queue:  False
+------
+dataset:  BrightkiteBigraphCommunity
+------
+三级CDN(L1 CDN Layer)缓存命中率:  0.37657342630786256
+二级CDN(L2 CDN Layer)缓存命中率:  0.37926888102687056
+一级CDN(Data Center Layer)缓存命中率:  1.0
+总缓存命中率:  0.4974117556389046
+二三级(L1+L2)缓存命中率:  0.37760853200789535
+------
+total_media_size:  395897671212.0
+insert_all_media_size:  185150258059.0
+level 1; media size: 76929676741.0
+level 2; media size: 185150258059.0
+level 3; media size: 133817736412.0
+------
+time_duration:  45565.831325
+------
+latency_average:  3812.4291428829188
+------

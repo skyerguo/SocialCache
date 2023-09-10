@@ -1,0 +1,25 @@
+caching_policy:  Second-Hit-LRU
+cache_size_level_data_center:  1000000
+cache_size_level_CDN_2:  150
+cache_size_level_CDN_1:  15
+parameters:  [200, 0.0035, 10]
+use_priority_queue:  True
+------
+dataset:  GooglePlus
+------
+三级CDN(L1 CDN Layer)缓存命中率:  0.27790909520406776
+二级CDN(L2 CDN Layer)缓存命中率:  0.3527288972672691
+一级CDN(Data Center Layer)缓存命中率:  1.0
+总缓存命中率:  0.45672956000288606
+二三级(L1+L2)缓存命中率:  0.3092818284424863
+------
+total_media_size:  377759916.0996094
+insert_all_media_size:  182906002.3359375
+level 1; media size: 74446646.27246094
+level 2; media size: 182906002.3359375
+level 3; media size: 120407267.49121094
+------
+time_duration:  1389.34281
+------
+latency_average:  152.80030046039383
+------

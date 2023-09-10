@@ -1,0 +1,25 @@
+caching_policy:  Second-Hit-LRU
+cache_size_level_data_center:  1000000
+cache_size_level_CDN_2:  150
+cache_size_level_CDN_1:  15
+parameters:  [200, 0.0035, 10]
+use_priority_queue:  True
+------
+dataset:  BrightkiteBigraphCommunity
+------
+三级CDN(L1 CDN Layer)缓存命中率:  0.3564630386751661
+二级CDN(L2 CDN Layer)缓存命中率:  0.7967832012670807
+一级CDN(Data Center Layer)缓存命中率:  1.0
+总缓存命中率:  0.5635979471953722
+二三级(L1+L2)缓存命中率:  0.5288730946169825
+------
+total_media_size:  333194323514.0
+insert_all_media_size:  153798584210.0
+level 1; media size: 42887829185.0
+level 2; media size: 153798584210.0
+level 3; media size: 136507910119.0
+------
+time_duration:  1023.281941
+------
+latency_average:  2600.00716080822
+------

@@ -1,0 +1,25 @@
+caching_policy:  FIFO
+cache_size_level_data_center:  1000000
+cache_size_level_CDN_2:  150
+cache_size_level_CDN_1:  15
+parameters:  [0.05, 50.5, 90]
+use_priority_queue:  True
+------
+dataset:  TwitterFull
+------
+三级CDN(L1 CDN Layer)缓存命中率:  0.22109360474046288
+二级CDN(L2 CDN Layer)缓存命中率:  0.43125431363289624
+一级CDN(Data Center Layer)缓存命中率:  1.0
+总缓存命中率:  0.4500640344621833
+二三级(L1+L2)缓存命中率:  0.3131139159973188
+------
+total_media_size:  68434633.73730469
+insert_all_media_size:  33236599.501953125
+level 1; media size: 12631817.720703125
+level 2; media size: 33236599.501953125
+level 3; media size: 22566216.514648438
+------
+time_duration:  41.043569
+------
+latency_average:  151.9305651388632
+------

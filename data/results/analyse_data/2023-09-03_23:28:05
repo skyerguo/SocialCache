@@ -1,0 +1,25 @@
+caching_policy:  RAND
+cache_size_level_data_center:  1000000
+cache_size_level_CDN_2:  150
+cache_size_level_CDN_1:  15
+parameters:  [0.05, 50.5, 90]
+use_priority_queue:  True
+------
+dataset:  TwitterFull
+------
+三级CDN(L1 CDN Layer)缓存命中率:  0.02217443674667141
+二级CDN(L2 CDN Layer)缓存命中率:  0.034656657682832055
+一级CDN(Data Center Layer)缓存命中率:  1.0
+总缓存命中率:  0.3422591132323442
+二三级(L1+L2)缓存命中率:  0.028345574861337618
+------
+total_media_size:  102256244.15722656
+insert_all_media_size:  50147404.71191406
+level 1; media size: 24698582.265625
+level 2; media size: 50147404.71191406
+level 3; media size: 27410257.1796875
+------
+time_duration:  46.340841
+------
+latency_average:  225.92309860793816
+------

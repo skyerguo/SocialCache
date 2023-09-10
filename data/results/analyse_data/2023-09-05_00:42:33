@@ -1,0 +1,25 @@
+caching_policy:  RAND
+cache_size_level_data_center:  1000000
+cache_size_level_CDN_2:  150
+cache_size_level_CDN_1:  15
+parameters:  [200, 0.0035, 10]
+use_priority_queue:  True
+------
+dataset:  GooglePlus
+------
+三级CDN(L1 CDN Layer)缓存命中率:  0.10087122263495757
+二级CDN(L2 CDN Layer)缓存命中率:  0.017010631336704427
+一级CDN(Data Center Layer)缓存命中率:  1.0
+总缓存命中率:  0.3593292722553572
+二三级(L1+L2)缓存命中率:  0.061168032508101565
+------
+total_media_size:  537156611.3105469
+insert_all_media_size:  262604349.94140625
+level 1; media size: 130300614.56054688
+level 2; media size: 262604349.94140625
+level 3; media size: 144251646.80859375
+------
+time_duration:  255.840549
+------
+latency_average:  215.12817503836064
+------

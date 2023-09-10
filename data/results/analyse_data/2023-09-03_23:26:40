@@ -1,0 +1,25 @@
+caching_policy:  LRU
+cache_size_level_data_center:  1000000
+cache_size_level_CDN_2:  150
+cache_size_level_CDN_1:  15
+parameters:  [0.05, 50.5, 90]
+use_priority_queue:  True
+------
+dataset:  TwitterEgo
+------
+三级CDN(L1 CDN Layer)缓存命中率:  0.21086569190305154
+二级CDN(L2 CDN Layer)缓存命中率:  0.7543274916675626
+一级CDN(Data Center Layer)缓存命中率:  1.0
+总缓存命中率:  0.5042856939116049
+二三级(L1+L2)缓存命中率:  0.45057064272391006
+------
+total_media_size:  7361977.1416015625
+insert_all_media_size:  3588527.3330078125
+level 1; media size: 832586.3076171875
+level 2; media size: 3588527.3330078125
+level 3; media size: 2940863.5009765625
+------
+time_duration:  5.811752
+------
+latency_average:  119.11577687572748
+------
