@@ -95,48 +95,50 @@ int init_graph_neighbor_arr(effective_size_t* effective_size)
     return 1;
 }
 
-int mutal_weight(char** matrix, int node_i, int node_j)
+float mutal_weight(effective_size_t *context, int node_i, int node_j)
 {
-    return (matrix[node_i][node_j] == '1'?1:0) + (matrix[node_j][node_i] == '1'?1:0);
+    char **matrix = context->adj_matrix;
+    int w_ij = (matrix[node_i][node_j] == '1')?1:0;
+    int w_ji = (matrix[node_j][node_i] == '1')?1:0;
+
+    return (float)(w_ij+w_ji);
 }
 
-int redundancy(char **matrix, int node_i, int node_j)
+float normalized_mutual_weight(effective_size_t *context, int node_i, int node_j, int max)
 {
-    float r = 0;
-    int node_j = nei_info.neighbors[j];
-    int mutual_ij = (matrix[i][node_j] == '1' ? 1 : 0) + (matrix[node_j][i] == '1' ? 1 : 0);
-    neighbor_info_t j_nei_info = effective_size->neighbors_arr[node_j];
-    // printf("# Processing neighbor %d\n", node_j);
-
-    for (int q = 0; q < j_nei_info.nei_num; q++)
+    float nmw = 0;
+    neighbor_info_t node_i_nei = context->neighbors_arr[node_i];
+    for (int i=0; i<node_i_nei.nei_num; i++)
     {
-        // printf("# compute r\n");
-        int node_q = j_nei_info.neighbors[q];
-        // compute p_{iq}
-        int sum_z_iq_qi = (matrix[i][node_q] == '1' ? 1 : 0) + (matrix[node_q][i] == '1' ? 1 : 0);
-        if (sum_z_iq_qi == 0)
-            continue;
-
-        float p_iq = (float)sum_z_iq_qi / (sum_mutual_ij - mutual_ij);
-
-        // compute m_{jq}
-        int max_z_jk = 0;
-        for (int k = 0; k < j_nei_info.nei_num; k++)
+        int node_nei = node_i_nei.neighbors[i];
+        float mw = mutal_weight(context, node_i, node_nei);
+        if (max == 1)
         {
-            // printf("# compute the max mutal weight\n");
-            int node_k = j_nei_info.neighbors[k];
-            if (node_k == node_q)
-                continue;
-            int z_jk = (matrix[node_j][node_k] == '1' ? 1 : 0) + (matrix[node_k][node_j] == '1' ? 1 : 0);
-            max_z_jk = (max_z_jk < z_jk) ? z_jk : max_z_jk;
+            //max
+            nmw = (nmw<mw)?mw:nmw;
+        }else
+        {
+            //sum
+            nmw += mw;
         }
-        int sum_z_jq_qj = (matrix[node_j][node_q] == '1' ? 1 : 0) + (matrix[node_q][node_j] == '1' ? 1 : 0);
-        float m_jq = (float)sum_z_jq_qj / max_z_jk;
+    }
+    if (nmw == 0) return 0;
+    return mutal_weight(context, node_i, node_j)/nmw;
+}
 
-        r += p_iq * m_jq;
+float redundancy(effective_size_t *context, int node_i, int node_j)
+{
+    char **matrix = context->adj_matrix;
+
+    neighbor_info_t node_i_nei = context->neighbors_arr[node_i];
+    float r = 0;
+    for (int i=0; i<node_i_nei.nei_num; i++)
+    {
+        int node_w = node_i_nei.neighbors[i];
+        r += normalized_mutual_weight(context, node_i, node_w, 0) * normalized_mutual_weight(context, node_j, node_w, 1);    
     }
 
-    effective += 1 - r;
+    return 1 - r;
 }
 
 int compute_effective_size_for_each_node(effective_size_t* effective_size)
@@ -173,7 +175,7 @@ int compute_effective_size_for_each_node(effective_size_t* effective_size)
         for (int j=0; j<nei_info.nei_num; j++)
         {
             int node_j = nei_info.neighbors[j];
-            effective += 1 - redundancy(matrix, i, node_j);
+            effective += redundancy(effective_size, i, node_j);
         }
         printf("# Node effective size : %f\n", effective);
         effective_size->effective_size_arr[i] = effective;
