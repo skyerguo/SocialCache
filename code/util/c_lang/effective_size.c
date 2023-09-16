@@ -80,7 +80,11 @@ int init_graph_neighbor_arr(effective_size_t* effective_size)
         memset(nei_info, 0, sizeof(neighbor_info_t));
         for (int j=0; j<num_nodes; j++)
         {
-            if (adj_matrix[i][j] == '1') nei_info->nei_num++;
+            // in edge and out edge
+            if (adj_matrix[i][j] == '1' || adj_matrix[j][i] == '1')
+            {
+                nei_info->nei_num++;
+            }
         }
 
         printf("# Node %d with %d neighbors. \n", i, nei_info->nei_num);
@@ -88,7 +92,10 @@ int init_graph_neighbor_arr(effective_size_t* effective_size)
         nei_info->neighbors = (int*)malloc(nei_info->nei_num * sizeof(int));
         for (int j=0,k=0; j<num_nodes; j++)
         {
-            if (adj_matrix[i][j] == '1') nei_info->neighbors[k++] = j;
+            if (adj_matrix[i][j] == '1' || adj_matrix[j][i] == '1')
+            {
+                nei_info->neighbors[k++] = j;
+            }
         }
     }
 
@@ -129,8 +136,8 @@ float normalized_mutual_weight(effective_size_t *context, int node_i, int node_j
 float redundancy(effective_size_t *context, int node_i, int node_j)
 {
     char **matrix = context->adj_matrix;
-
     neighbor_info_t node_i_nei = context->neighbors_arr[node_i];
+
     float r = 0;
     for (int i=0; i<node_i_nei.nei_num; i++)
     {
@@ -159,19 +166,9 @@ int compute_effective_size_for_each_node(effective_size_t* effective_size)
             effective_size->effective_size_arr[i] = -1;
             continue;
         }
-
-        float effective = 0;
-        int sum_mutual_ij = 0;
-        for (int j=0; j<nei_info.nei_num; j++)
-        {
-            int node_j = nei_info.neighbors[j];
-            sum_mutual_ij += (matrix[i][node_j] == '1'? 1:0);
-            sum_mutual_ij += (matrix[node_j][i] == '1'? 1:0);
-        }
-        printf("# Node %d with mutual weight %d\n", i, sum_mutual_ij);
     
-        // ###### 2. do for each neighbors ######
-        // process neighbors
+        // ###### 2. compute effective size of node i
+        float effective = 0;
         for (int j=0; j<nei_info.nei_num; j++)
         {
             int node_j = nei_info.neighbors[j];
