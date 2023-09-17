@@ -1,11 +1,29 @@
+//**********************************************************************
+//*                                                                    *
+//*     Using multi-core computing for effectvie size                  *
+//*                                                                    *
+//**********************************************************************
+//
+//  Algorithm:
+//  
+//  1. Construct Graph
+//      [1] Reading graph from edge files
+//      [2] Initiating adjencent array
+//  2. Rank with node degree
+//  3. Divide the tasks
+//  4. Multi-core computing
+//
+//
 #include "effective_size.h"
 
-int load_graph_from_file(const char* file_name, char ***matrix)
+/*
+ * Construct Graph
+ */
+int load_graph_from_file(effective_size_t *context)
 {
     printf("$func: %s\n", __FUNCTION__);
     FILE *file;
-    file = fopen(file_name, "r");
-
+    file = fopen(context->file_name, "r");
     if (file == NULL)
     {
         perror("Unable to open file.\n");
@@ -29,7 +47,11 @@ int load_graph_from_file(const char* file_name, char ***matrix)
     }
 
     num_nodes++;
+    context->node_num = num_nodes;
     printf("# get %d nodes.\n", num_nodes);
+
+    // init adj array
+    context->nei_num_arr = (int *)malloc(num_nodes*sizeof(int));
 
     // alloc memroy for adjecent matrix
     char **adj_matrix = (char **)malloc(num_nodes*sizeof(char*));
@@ -41,12 +63,10 @@ int load_graph_from_file(const char* file_name, char ***matrix)
             adj_matrix[i][j] = '0';
         }
     }
-
     printf("# memeory alloced for adjecent matrix.\n");
 
-    // go back to head of file
+    // go back to head of file and read edges
     fseek(file, 0, SEEK_SET);
-
     num_lines = 0;
     while(fscanf(file, "%d %d", &node1, &node2) == 2)
     {
@@ -55,26 +75,32 @@ int load_graph_from_file(const char* file_name, char ***matrix)
             printf("# totally %d lines handled.\n", num_lines);
         }
         adj_matrix[node1][node2] = '1'; // set edge
+#if 0
+        if (!context->is_directed)
+        {
+            adj_matrix[node2][node1] = '1';
+        }
+#endif
     }
 
+    context->adj_matrix = adj_matrix;
+
     fclose(file);
-
-    *matrix = adj_matrix;
-
     return num_nodes;
 }
 
 int init_graph_neighbor_arr(effective_size_t* effective_size)
 {
     printf("$func: %s\n", __FUNCTION__);
-    char **adj_matrix;
-    int num_nodes;
+    char **adj_matrix = effective_size->adj_matrix;;
+    int num_nodes = effective_size->node_num;
 
-    adj_matrix = effective_size->adj_matrix;
-    num_nodes = effective_size->node_num;
     effective_size->neighbors_arr = (neighbor_info_t*)malloc(num_nodes*sizeof(neighbor_info_t));
-    for (int i=0; i<effective_size->node_num; i++)
+
+    int process_bar = 0;
+    for (int i=0; i<num_nodes; i++)
     {
+        process_bar++;
         // get neighbor number
         neighbor_info_t *nei_info = &(effective_size->neighbors_arr[i]);
         memset(nei_info, 0, sizeof(neighbor_info_t));
@@ -87,7 +113,7 @@ int init_graph_neighbor_arr(effective_size_t* effective_size)
             }
         }
 
-        printf("# Node %d with %d neighbors. \n", i, nei_info->nei_num);
+        //printf("# Node %d with %d neighbors. \n", i, nei_info->nei_num);
         // alloc memory for neighbors id
         nei_info->neighbors = (int*)malloc(nei_info->nei_num * sizeof(int));
         for (int j=0,k=0; j<num_nodes; j++)
@@ -96,6 +122,10 @@ int init_graph_neighbor_arr(effective_size_t* effective_size)
             {
                 nei_info->neighbors[k++] = j;
             }
+        }
+        if (process_bar % 10000 == 0)
+        {
+            printf("# [%d/%d] nodes handled.\n", process_bar, effective_size->node_num);
         }
     }
 
@@ -142,62 +172,99 @@ float redundancy(effective_size_t *context, int node_i, int node_j)
     for (int i=0; i<node_i_nei.nei_num; i++)
     {
         int node_w = node_i_nei.neighbors[i];
+        //printf("# comput pm and wm of neighbor %d\n", node_w);
         r += normalized_mutual_weight(context, node_i, node_w, 0) * normalized_mutual_weight(context, node_j, node_w, 1);    
     }
 
     return 1 - r;
 }
 
-int compute_effective_size_for_each_node(effective_size_t* effective_size)
+int compute_effective_size_for_each_node(effective_size_t* context)
 {
     printf("$func: %s\n", __FUNCTION__);
-    char **matrix = effective_size->adj_matrix;
-    int num_nodes = effective_size->node_num;
-    effective_size->effective_size_arr = (float *)malloc(num_nodes*sizeof(float));
+    char **matrix = context->adj_matrix;
+    int num_nodes = context->node_num;
+    context->effective_size_arr = (float *)malloc(num_nodes*sizeof(float));
 
-    for(int i=0; i<num_nodes; i++)
+    for (int i = 0; i < num_nodes; i++)
     {
         printf("# Processing node : %d\n", i);
-        // ###### 1. Get neighbors info ######
-        // get neighbors
-        neighbor_info_t nei_info = effective_size->neighbors_arr[i];
+        float effective = 0;
+        neighbor_info_t nei_info = context->neighbors_arr[i];
         if (nei_info.nei_num <= 0)
         {
-            effective_size->effective_size_arr[i] = -1;
+            context->effective_size_arr[i] = -1;
             continue;
         }
-    
-        // ###### 2. compute effective size of node i
-        float effective = 0;
-        for (int j=0; j<nei_info.nei_num; j++)
+
+        if (context->is_directed == 1)
         {
-            int node_j = nei_info.neighbors[j];
-            effective += redundancy(effective_size, i, node_j);
+            // ###### 1. compute effective size of node in
+            for (int j = 0; j < nei_info.nei_num; j++)
+            {
+                int node_j = nei_info.neighbors[j];
+                // printf("# calculating redundancy of neighbor %d\n", node_j);
+                effective += redundancy(context, i, node_j);
+            }
         }
+        else
+        {
+            // ###### 1. count number of edges of ego network ######
+            int num_ties = 0;
+            for (int p=0; p<nei_info.nei_num; p++)
+            {
+                int node_p = nei_info.neighbors[p];
+                for (int q=p; q<nei_info.nei_num; q++)
+                {
+                    int node_q = nei_info.neighbors[q];
+                    if (context->adj_matrix[node_p][node_q] == '1' || context->adj_matrix[node_q][node_p] == '1')
+                    {
+                        num_ties++;
+                    }
+
+                }
+            }
+
+            effective = nei_info.nei_num - (float)(2*num_ties) / nei_info.nei_num;
+        }
+
         printf("# Node effective size : %f\n", effective);
-        effective_size->effective_size_arr[i] = effective;
+        context->effective_size_arr[i] = effective;
     }
 }
+
+int save_to_csv(float *effective_size_arr, int len)
+{
+    printf("$func %s \n", __FUNCTION__);
+    if (!effective_size_arr) return 0;
+
+    FILE *file;
+    file = fopen("./effective_size.csv", "w+");
+
+    for (int i=0; i<len; i++)
+    {
+        fprintf(file, "%d,%f\n", i, effective_size_arr[i]);
+    }
+    
+    fclose(file);
+}
+
+
 
 int main()
 {
     effective_size_t effsize;
+    effsize.is_directed = 0;
+    snprintf(effsize.file_name, sizeof(effsize.file_name), FILE_NAME);
 
-    effsize.node_num = load_graph_from_file(FILE_NAME, &(effsize.adj_matrix));
-
-    // head matrix
-    for (int i=0; i<4; i++)
-    {
-        for (int j=0; j<4; j++)
-        {
-            printf("%c ", effsize.adj_matrix[i][j]);
-        }
-        printf("\n");
-    }
+    load_graph_from_file(&effsize);
+    printf("$ Success to read graph with %d nodes.\n", effsize.node_num);
 
     init_graph_neighbor_arr(&effsize);
 
     compute_effective_size_for_each_node(&effsize);
+
+    save_to_csv(effsize.effective_size_arr, effsize.node_num);
 
     return 0;
 }

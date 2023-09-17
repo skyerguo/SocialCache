@@ -14,6 +14,7 @@ import math
 import numpy as np
 import pickle
 import multiprocessing
+import pandas as pd
 
 def calculate_spreading_power(params):
     i, networkx_graph, epidemic_threshold, n = params
@@ -351,9 +352,11 @@ class Main:
             # print("spreading_power_list: ", spreading_power_list)
             
         elif caching_policy == "EffectiveSize":
-            curr_social_metric_path = self.social_metric_dict_path + 'EffectiveSize.pkl'
+            curr_social_metric_path = self.social_metric_dict_path + 'EffectiveSize.csv'
             if os.path.exists(curr_social_metric_path):
-                effective_size_metrics = pickle.load(open(curr_social_metric_path, "rb"))
+                df = pd.read_csv(curr_social_metric_path)
+                #print(df)
+                effective_size_metrics = dict(zip(df['NodeID'], df['EffectiveSize']))
             else:
                 adj_matrix = util.generate_adj_matrix_graph("data/traces/" + self.trace_dir + "/relations.txt", len(self.G.nodes))
                 networkx_graph = networkx.DiGraph(adj_matrix).reverse() ## 关注的方向，传播需要反向
