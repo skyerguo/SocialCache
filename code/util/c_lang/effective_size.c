@@ -19,7 +19,7 @@
 /*
  * Construct Graph
  */
-int load_graph_from_file(effective_size_t *context)
+int load_graph_from_file(effective_size_t *context, int reverse)
 {
     printf("$func: %s\n", __FUNCTION__);
     FILE *file;
@@ -74,7 +74,12 @@ int load_graph_from_file(effective_size_t *context)
         {
             printf("# totally %d lines handled.\n", num_lines);
         }
-        adj_matrix[node1][node2] = '1'; // set edge
+        if (reverse == 1)
+        {
+            adj_matrix[node2][node1] = '1';
+        }else{
+            adj_matrix[node1][node2] = '1';
+        }
 #if 0
         if (!context->is_directed)
         {
@@ -241,6 +246,7 @@ int save_to_csv(float *effective_size_arr, int len)
     FILE *file;
     file = fopen("./effective_size.csv", "w+");
 
+    fprintf(file, "NodeID,EffectiveSize\n");
     for (int i=0; i<len; i++)
     {
         fprintf(file, "%d,%f\n", i, effective_size_arr[i]);
@@ -251,13 +257,35 @@ int save_to_csv(float *effective_size_arr, int len)
 
 
 
-int main()
+int main(int argc, char *argv[])
 {
+    int opt;
+    int reverse_option = 0;
+    char *file_name_option = NULL;
+
+    // parse command line
+    while ((opt = getopt(argc, argv, "r:f:")) != -1)
+    {
+        switch (opt)
+        {
+        case 'r':
+            reverse_option = atoi(optarg);
+            break;
+        case 'f':
+            file_name_option = optarg;
+            break;
+        default:
+            fprintf(stderr, "Usage: %s -r <integer> -f <string>\n", argv[0]);
+            exit(EXIT_FAILURE);
+            break;
+        }
+    }
+
     effective_size_t effsize;
     effsize.is_directed = 0;
-    snprintf(effsize.file_name, sizeof(effsize.file_name), FILE_NAME);
+    snprintf(effsize.file_name, sizeof(effsize.file_name), file_name_option);
 
-    load_graph_from_file(&effsize);
+    load_graph_from_file(&effsize, reverse_option);
     printf("$ Success to read graph with %d nodes.\n", effsize.node_num);
 
     init_graph_neighbor_arr(&effsize);
