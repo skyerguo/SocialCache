@@ -20,3 +20,9 @@ typedef struct effective_size {
     int* nei_num_arr;
     neighbor_info_t *neighbors_arr; // array of neighbor info for each node
 }effective_size_t;
+
+typedef struct thread_context {
+    effective_size_t *graph;
+    int n_worker;
+    int worker_id;
+}thread_context_t;

@@ -14,6 +14,8 @@
 //  4. Multi-core computing
 //
 //
+#include <pthread.h>
+#include <sched.h>
 #include "effective_size.h"
 
 #define MUTUAL_WEIGHT(context, node_i, node_j) \
@@ -177,7 +179,7 @@ float redundancy(effective_size_t *context, int node_i, int node_j)
     return 1 - r;
 }
 
-int compute_effective_size_for_each_node(effective_size_t* context)
+int compute_effective_size_for_each_node(effective_size_t* context, int n_worker, int worker_id)
 {
     printf("$func: %s\n", __FUNCTION__);
     char **matrix = context->adj_matrix;
@@ -186,7 +188,8 @@ int compute_effective_size_for_each_node(effective_size_t* context)
 
     for (int i = 0; i < num_nodes; i++)
     {
-        printf("# Processing node : %d\n", i);
+        if ((i % n_worker) != worker_id) continue;
+        printf("#Thread[%d] processing node : %d\n", worker_id, i);
         float effective = 0;
         neighbor_info_t nei_info = context->neighbors_arr[i];
         if (nei_info.nei_num <= 0)
@@ -201,7 +204,7 @@ int compute_effective_size_for_each_node(effective_size_t* context)
             for (int j = 0; j < nei_info.nei_num; j++)
             {
                 int node_j = nei_info.neighbors[j];
-                // printf("# calculating redundancy of neighbor %d\n", node_j);
+                //printf("# calculating redundancy of neighbor %d\n", node_j);
                 effective += redundancy(context, i, node_j);
             }
         }
@@ -231,6 +234,17 @@ int compute_effective_size_for_each_node(effective_size_t* context)
     }
 }
 
+void* calculate_effectvie_size_in_batch(void* context)
+{
+    thread_context_t* thread_context = (thread_context_t*)context;
+    effective_size_t* graph = thread_context->graph;
+    int n_worker = thread_context->n_worker;
+    int worker_id = thread_context->worker_id;
+
+    compute_effective_size_for_each_node(graph, n_worker, worker_id);
+    return 0;
+}
+
 int save_to_csv(float *effective_size_arr, int len)
 {
     printf("$func %s \n", __FUNCTION__);
@@ -253,11 +267,13 @@ int save_to_csv(float *effective_size_arr, int len)
 int main(int argc, char *argv[])
 {
     int opt;
-    int reverse_option = 0;
-    char *file_name_option = NULL;
+    int reverse_option = 0; // wheather to reverse the edges
+    int is_directed = 0; // wheather the graph is directed or not
+    int n_workers = 1; //number of workers 
+    char *file_name_option = NULL; // graph file name
 
     // parse command line
-    while ((opt = getopt(argc, argv, "r:f:")) != -1)
+    while ((opt = getopt(argc, argv, "r:f:d:n:")) != -1)
     {
         switch (opt)
         {
@@ -267,6 +283,13 @@ int main(int argc, char *argv[])
         case 'f':
             file_name_option = optarg;
             break;
+        case 'd':
+            is_directed = atoi(optarg);
+            break;
+        case 'n':
+            n_workers = atoi(optarg);
+            if (n_workers < 1) n_workers = 1;
+            break;
         default:
             fprintf(stderr, "Usage: %s -r <integer> -f <string>\n", argv[0]);
             exit(EXIT_FAILURE);
@@ -275,7 +298,7 @@ int main(int argc, char *argv[])
     }
 
     effective_size_t effsize;
-    effsize.is_directed = 0;
+    effsize.is_directed = is_directed;
     snprintf(effsize.file_name, sizeof(effsize.file_name), file_name_option);
 
     load_graph_from_file(&effsize, reverse_option);
@@ -283,7 +306,28 @@ int main(int argc, char *argv[])
 
     init_graph_neighbor_arr(&effsize);
 
-    compute_effective_size_for_each_node(&effsize);
+    // Parallel Computing of Effective Size
+    pthread_t workers[n_workers];
+    for (int i=0; i<n_workers; i++)
+    {
+        thread_context_t *batch_context = (thread_context_t*)malloc(sizeof(thread_context_t));
+        batch_context->graph = &effsize;
+        batch_context->n_worker = n_workers;
+        batch_context->worker_id = i;
+
+        pthread_create(&workers[i], NULL, calculate_effectvie_size_in_batch, batch_context);
+
+        // set cpu affinity
+        //cpu_set_t cpuset;
+        //CPU_ZERO(&cpuset);
+        //CPU_SET(i, &cpuset);
+        //pthread_setaffinity_np(workers[i], sizeof(cpu_set_t), &cpuset);
+    }
+
+    for (int i=0; i<n_workers; i++)
+    {
+        pthread_join(workers[i], NULL);
+    }
 
     save_to_csv(effsize.effective_size_arr, effsize.node_num);
 
