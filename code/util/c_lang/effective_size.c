@@ -16,6 +16,30 @@
 //
 #include "effective_size.h"
 
+#define MUTUAL_WEIGHT(context, node_i, node_j) \
+    ((float)((context)->adj_matrix[(node_i)][(node_j)] == '1' ? 1 : 0) + \
+     (float)((context)->adj_matrix[(node_j)][(node_i)] == '1' ? 1 : 0))
+
+#define NORMALIZED_MUTUAL_WEIGHT(context, node_i, node_j, max) \
+    ({ \
+        float nmw = 0; \
+        neighbor_info_t node_i_nei = (context)->neighbors_arr[(node_i)]; \
+        for (int i = 0; i < node_i_nei.nei_num; i++) \
+        { \
+            int node_nei = node_i_nei.neighbors[i]; \
+            float mw = MUTUAL_WEIGHT(context, (node_i), (node_nei)); \
+            if ((max) == 1) \
+            { \
+                nmw = (nmw < mw) ? mw : nmw; \
+            } \
+            else \
+            { \
+                nmw += mw; \
+            } \
+        } \
+        (nmw == 0) ? 0 : MUTUAL_WEIGHT(context, (node_i), (node_j)) / nmw; \
+    })
+
 /*
  * Construct Graph
  */
@@ -137,37 +161,6 @@ int init_graph_neighbor_arr(effective_size_t* effective_size)
     return 1;
 }
 
-float mutal_weight(effective_size_t *context, int node_i, int node_j)
-{
-    char **matrix = context->adj_matrix;
-    int w_ij = (matrix[node_i][node_j] == '1')?1:0;
-    int w_ji = (matrix[node_j][node_i] == '1')?1:0;
-
-    return (float)(w_ij+w_ji);
-}
-
-float normalized_mutual_weight(effective_size_t *context, int node_i, int node_j, int max)
-{
-    float nmw = 0;
-    neighbor_info_t node_i_nei = context->neighbors_arr[node_i];
-    for (int i=0; i<node_i_nei.nei_num; i++)
-    {
-        int node_nei = node_i_nei.neighbors[i];
-        float mw = mutal_weight(context, node_i, node_nei);
-        if (max == 1)
-        {
-            //max
-            nmw = (nmw<mw)?mw:nmw;
-        }else
-        {
-            //sum
-            nmw += mw;
-        }
-    }
-    if (nmw == 0) return 0;
-    return mutal_weight(context, node_i, node_j)/nmw;
-}
-
 float redundancy(effective_size_t *context, int node_i, int node_j)
 {
     char **matrix = context->adj_matrix;
@@ -178,7 +171,7 @@ float redundancy(effective_size_t *context, int node_i, int node_j)
     {
         int node_w = node_i_nei.neighbors[i];
         //printf("# comput pm and wm of neighbor %d\n", node_w);
-        r += normalized_mutual_weight(context, node_i, node_w, 0) * normalized_mutual_weight(context, node_j, node_w, 1);    
+        r += NORMALIZED_MUTUAL_WEIGHT(context, node_i, node_w, 0) * NORMALIZED_MUTUAL_WEIGHT(context, node_j, node_w, 1);    
     }
 
     return 1 - r;
