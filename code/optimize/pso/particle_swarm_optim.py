@@ -15,7 +15,8 @@ import pandas as pd
 # you must change the code before you run it
 
 
-CONFIG_FILE_PATH="./code/main/basic_config.json"
+#CONFIG_FILE_PATH="./code/main/basic_config.json"
+CONFIG_FILE_PATH="./code/optimize/pso/emu_config.json"
 
 class particle():
     def __init__(self, name, init_config, position, speed, max_speed, min_speed, omega, c1, c2) -> None:
@@ -36,15 +37,17 @@ class particle():
         self.best_fitness   = 0
         self.best_position  = self.position
 
-        self.log_file = "./particles/%s/log.txt" %self.name
-        if os.path.exists(self.log_file):
-            os.remove(self.log_file)
-
         # create working directory and write config
         if not os.path.exists("./particles/%s" %self.name):
             os.mkdir("./particles/%s" %self.name)
         with open("./particles/%s/config.json" %self.name, "w+") as config_fd:
             config_fd.write(json.dumps(self.config_json))
+        
+        self.log_file = "./particles/%s/log.txt" %self.name
+        if os.path.exists(self.log_file):
+            os.remove(self.log_file)
+        # create log file
+        self.log_fd = open(self.log_file, "w+")
 
         print("init particle %s with init config %s" %(self.name, self.config_json))
 
@@ -52,43 +55,50 @@ class particle():
     def get_fitness(self, debug=False):
         """
         Get current fitness of the particle
-        """ 
+        """
+        self.log_fd.write("------ iteration ------\n")
+
         # write config to file
         self.config_json['params'] = self.position.tolist()
         with open("./particles/%s/config.json" %self.name, "w+") as config_fd:
             config_fd.write(json.dumps(self.config_json))
+            self.log_fd.write("config file: %s\n" %json.dumps(self.config_json))
 
         # run docker image
-        cmd = 'sudo docker run --rm --privileged -v /users/gtc/SocialCache/particles/%s/config.json:/root/config.json social-cdn /bin/bash -c "cp /root/config.json /root/socialcache/code/main/config.json && cd /root/socialcache && sudo python3 -m code.main.main && sudo python3 -m code.analyze.main -c | tail -n 3 | head -n 1"' %self.name
+        cmd = 'sudo docker run --rm --privileged -v /users/gtc/SocialCache/particles/%s/config.json:/root/config.json mayuke/social-cdn:tpds /bin/bash -c "cp /root/config.json /root/socialcache/code/main/config.json && cd /root/socialcache && sudo python3 -m code.main.main && sudo python3 -m code.analyze.main -c | tail -n 3 | head -n 1"' %self.name
 
-        print("run cmd : %s" %cmd)
+        self.log_fd.write("run docker image cmd: %s\n" %cmd)
         docker_res = None
         try:
             # get result
             docker_res = subprocess.check_output(cmd, shell=True)
+            self.log_fd.write("docker result: %s\n" %docker_res.decode('utf-8'))
             print(docker_res.decode('utf-8'))
         except subprocess.CalledProcessError as e:
             print("run cmd error", e.output.decode('utf-8'))
+            sys.exit(-1)
 
         # convert to float
         fitness = float(docker_res.decode('utf-8').split(":")[-1])
-
-        print("particle %s fitness : %f" %(self.name, fitness))
+    
+        self.log_fd.write("particle %s fitness : %f\n" %(self.name, fitness))
         self.fitness = fitness
 
         if self.fitness > self.best_fitness:
             self.best_fitness   = self.fitness
             self.best_position  = self.position
+            self.log_fd.write("find better result : %f, %s\n" %(self.best_fitness, self.best_position))
         
         # write log
-        with open(self.log_file, "a+") as log_fd:
-            log_fd.write("------ iteration ------\n")
-            log_fd.write(self.config_json.__str__() + "\n")
-            log_fd.write("fitness: %f, position: %s, speed: %s\n\n" %(self.fitness, self.position, self.speed))
+        self.log_fd.write(" fitness : %f\n" %self.fitness)
+        self.log_fd.write(" position: %s\n" %self.position)
+        self.log_fd.write(" speed   : %s\n" %self.speed)
+        self.log_fd.write("------ iteration end ------\n\n")
 
-        return self.best_fitness, self.best_position
+        return self.fitness, self.position
     
     def update_position(self, gbest_position):
+        self.log_fd.write("------ update position ------\n")
         # update speed
         self.speed = self.omega * self.speed + \
                      self.c1 * np.random.rand() * (self.best_position - self.position) + \
@@ -98,18 +108,18 @@ class particle():
         for i in range(len(self.speed)):
             self.speed[i] = np.clip(self.speed[i], self.min_speed[i], self.max_speed[i])
 
+        self.log_fd.write("speed: %s\n" %self.speed)
         # update position
         self.position += self.speed
+        self.log_fd.write("position: %s\n" %self.position)
 
         # write config to file
-        self.config_json['params'] = self.position.tolist()
-        with open("./particles/%s/config.json" %self.name, "w+") as config_fd:
-            config_fd.write(json.dumps(self.config_json))
+        #self.config_json['params'] = self.position.tolist()
+        #with open("./particles/%s/config.json" %self.name, "w+") as config_fd:
+        #    config_fd.write(json.dumps(self.config_json))
     
     def get_status(self):
-        return dict(fitness  = round(self.fitness, 4), \
-                    position = np.round(self.position, 4), \
-                    speed    = np.round(self.speed, 4))
+        return dict(fitness = self.fitness, position = self.position, speed = self.speed)
 
 class pso_optimzer():
     def __init__(self, pop_size, bounds, speed, max_speed, min_speed, max_iteration, omega=1, c1=1.33, c2=1.33) -> None:
@@ -187,7 +197,7 @@ class pso_optimzer():
             for thread in threads:
                 thread.join()
             
-            # update best fitness and position
+            # update global best fitness and position
             particle_num = 0
             for particle in self.particles_list:
                 fitness, position = particle.get_status()['fitness'], particle.get_status()['position']

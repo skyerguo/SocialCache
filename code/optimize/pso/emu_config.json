@@ -1,0 +1,16 @@
+{
+  "trace_dir": "GooglePlus",
+  "caching_policy": "EffectiveSize",
+  "use_http_server": false,
+  "use_priority_queue": true,
+  "cache_size_level_CDN_1": 15,
+  "cache_size_level_CDN_2": 150,
+  "cache_size_level_data_center": 1000000,
+  "max_trace_len": null,
+  "mode": "normal",
+  "params": [
+    200,
+    0.0035,
+    10
+  ]
+}
