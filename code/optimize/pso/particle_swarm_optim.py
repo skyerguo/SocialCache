@@ -59,7 +59,7 @@ class particle():
             config_fd.write(json.dumps(self.config_json))
 
         # run docker image
-        cmd = 'sudo docker run --rm --privileged -v /users/gtc/SocialCache/particles/%s/config.json:/root/config.json social-cdn /bin/bash -c "cp /root/config.json /root/socialcache/code/main/config.json && cd /root/socialcache && sudo python3 -m code.main.main && sudo python3 -m code.analyze.main -c | tail -n 3 | head -n 1"' %self.name
+        cmd = 'sudo docker run --rm --privileged -v /users/gtc/SocialCache/particles/%s/config.json:/root/config.json mayuke/social-cdn /bin/bash -c "cp /root/config.json /root/socialcache/code/main/config.json && cd /root/socialcache && sudo python3 -m code.main.main && sudo python3 -m code.analyze.main -c | tail -n 3 | head -n 1"' %self.name
 
         print("run cmd : %s" %cmd)
         docker_res = None
@@ -69,6 +69,7 @@ class particle():
             print(docker_res.decode('utf-8'))
         except subprocess.CalledProcessError as e:
             print("run cmd error", e.output.decode('utf-8'))
+            sys.exit(-1)
 
         # convert to float
         fitness = float(docker_res.decode('utf-8').split(":")[-1])

@@ -353,19 +353,23 @@ class Main:
             # print("spreading_power_list: ", spreading_power_list)
             
         elif caching_policy == "EffectiveSize":
-            curr_social_metric_path = self.social_metric_dict_path + 'EffectiveSize.csv'
-            if not os.path.exists(curr_social_metric_path):
-                print("# file {} not exist, try to compute.".format(curr_social_metric_path))
-                result = subprocess.run("./code/util/cal_effectvie_size.sh", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                if result.returncode != 0:
-                    print("Using shell to compute effectivesize failed!")
+            curr_social_metric_path = self.social_metric_dict_path + 'EffectiveSize.pkl'
+            if os.path.exists(curr_social_metric_path):
+                effective_size_metrics = pickle.load(open(curr_social_metric_path, "rb"))
+            else:
+                curr_social_metric_path = self.social_metric_dict_path + 'EffectiveSize.csv'
+                if not os.path.exists(curr_social_metric_path):
+                    print("# file {} not exist, try to compute.".format(curr_social_metric_path))
+                    result = subprocess.run("./code/util/cal_effectvie_size.sh", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                    if result.returncode != 0:
+                        print("Using shell to compute effectivesize failed!")
                 #adj_matrix = util.generate_adj_matrix_graph("data/traces/" + self.trace_dir + "/relations.txt", len(self.G.nodes))
                 #networkx_graph = networkx.DiGraph(adj_matrix).reverse() ## 关注的方向，传播需要反向
                 #'''easygraph的constraint只能针对无向图，networkx的constraint可以针对有向图'''
                 #effective_size_metrics = networkx.effective_size(networkx_graph)
                 #pickle.dump(effective_size_metrics, open(curr_social_metric_path, "wb"))
-            df = pd.read_csv(curr_social_metric_path)
-            effective_size_metrics = dict(zip(df['NodeID'], df['EffectiveSize']))
+                df = pd.read_csv(curr_social_metric_path)
+                effective_size_metrics = dict(zip(df['NodeID'], df['EffectiveSize']))
             # print("effective_size_metrics: ", effective_size_metrics)
             
         elif caching_policy == "Efficiency":
