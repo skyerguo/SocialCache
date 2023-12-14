@@ -83,3 +83,6 @@ echo "gtc            hard    nofile          102400" | sudo tee -a /etc/security
 ## Matlab字体
 ## 缺少字体：https://stackoverflow.com/questions/42097053/matplotlib-cannot-find-basic-fonts
 ## 中文字体：https://blog.csdn.net/weixin_45772050/article/details/121222052
+
+# Install Docker
+wget -qO- https://get.docker.com/ | sh
