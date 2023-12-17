@@ -10,6 +10,10 @@ import subprocess
 import pandas as pd
 import argparse
 
+import pandas as pd
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+
 # Basic configure json
 '''
 basic_configure = {
@@ -126,6 +130,11 @@ def reduce_traffic_volume():
   result_df_L2.to_csv("%s/traffic_volume_L2.csv" %reduce_dir)
   result_df_L3.to_csv("%s/traffic_volume_L3.csv" %reduce_dir)
 
+  # Write the result to the file
+  result_df_L1.to_string("%s/traffic_volume_L1.txt" %reduce_dir)
+  result_df_L2.to_string("%s/traffic_volume_L2.txt" %reduce_dir)
+  result_df_L3.to_string("%s/traffic_volume_L3.txt" %reduce_dir)
+
 def reduce_request_latency():
   # Reduce the request latency
   # Create result dataframe
@@ -155,6 +164,8 @@ def reduce_request_latency():
   # Write the result to the file
   result_df.to_csv("%s/request_latency.csv" %reduce_dir)
 
+  result_df.to_string("%s/request_latency.txt" %reduce_dir)
+
 def reduce_runtime():
   # Reduce the runtime
   # Create result dataframe
@@ -183,6 +194,8 @@ def reduce_runtime():
 
   # Write the result to the file
   result_df.to_csv("%s/runtime.csv" %reduce_dir)
+
+  result_df.to_string("%s/runtime.txt" %reduce_dir)
 
 def reduce_hit_rate():
   # Reduce the hit rate
@@ -227,6 +240,10 @@ def reduce_hit_rate():
   result_df_l2.to_csv("%s/hit_rate_L2.csv" %reduce_dir)
   result_df_l3.to_csv("%s/hit_rate_L3.csv" %reduce_dir)
 
+  result_df_l1.to_string("%s/hit_rate_L1.txt" %reduce_dir)
+  result_df_l2.to_string("%s/hit_rate_L2.txt" %reduce_dir)
+  result_df_l3.to_string("%s/hit_rate_L3.txt" %reduce_dir)
+
 def parse_result():
   
   # Network Traffic Volume
@@ -262,11 +279,6 @@ def InitDir():
   if not os.path.exists(reduce_dir):
     os.makedirs(reduce_dir)
 
-################################################################################
-#                               Reduce the result
-################################################################################
-
-
 def main():
   print("========== Start Batch Run ==========")
 
@@ -298,6 +310,7 @@ if __name__ == "__main__":
   parser.add_argument('-m', '--map', action='store_true', help='Run the map')
   parser.add_argument('-r', '--reduce', action='store_true', help='Run the reduce')
   parser.add_argument('-mr', '--mapreduce', action='store_true', help='Run the mapreduce')
+  parser.add_argument('-o', '--outputPDF', action='store_true', help='Output the result to PDF')
 
   if len(sys.argv) == 1:
     parser.print_help()
@@ -310,6 +323,5 @@ if __name__ == "__main__":
 
   if args.reduce or args.mapreduce:
     parse_result()
-
 
 

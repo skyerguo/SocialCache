@@ -1,0 +1,6 @@
+               BrightkiteBigraphCommunity GooglePlus GowallaBigraphCommunity TwitterEgo TwitterFull
+RAND                             0.049749   0.016438                0.017326   0.260495    0.035507
+FIFO                             0.783952   0.336674                0.970859   0.502943    0.431254
+LRU                              0.786223   0.377326                0.969787   0.754327    0.459407
+LRU-Social                       0.084905   0.066126                0.045377   0.436364    0.142675
+Second-Hit-LRU                   0.796783   0.352729                 0.97664   0.667697    0.416089
