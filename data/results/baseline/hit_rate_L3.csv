@@ -1,0 +1,6 @@
+,BrightkiteBigraphCommunity,GooglePlus,GowallaBigraphCommunity,TwitterEgo,TwitterFull
+RAND,1.0,1.0,1.0,1.0,1.0
+FIFO,1.0,1.0,1.0,1.0,1.0
+LRU,1.0,1.0,1.0,1.0,1.0
+LRU-Social,1.0,1.0,1.0,1.0,1.0
+Second-Hit-LRU,1.0,1.0,1.0,1.0,1.0
