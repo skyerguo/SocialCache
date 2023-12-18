@@ -1,8 +1,8 @@
 {
     "max_iteration": 1000,
-    "early_stopping": ,
-    "optimization_type": "hit_rate",
-    "pop_size": 10,
+    "early_stop_value": 0,
+    "optim_target": "traffic_volume",
+    "pop_size": 20,
     "init_bounds": [
         [
             -1000,

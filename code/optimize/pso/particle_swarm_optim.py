@@ -8,6 +8,7 @@ import threading
 import copy
 import numpy as np
 import pandas as pd
+import logging
 
 # Be clear that what you want to optimize
 # if you want to optimize the cache hit rate, then the larger fitness is better
@@ -19,7 +20,7 @@ import pandas as pd
 CONFIG_FILE_PATH="./code/optimize/pso/emu_config.json"
 
 class particle():
-    def __init__(self, name, init_config, position, speed, max_speed, min_speed, omega, c1, c2) -> None:
+    def __init__(self, name, optim_target, init_config, position, speed, max_speed, min_speed, omega, c1, c2) -> None:
         self.name = name
         self.fitness    = sys.maxsize
         self.position   = position
@@ -36,6 +37,8 @@ class particle():
 
         self.best_fitness   = 0
         self.best_position  = self.position
+
+        self.optim_target = optim_target
 
         # create working directory and write config
         if not os.path.exists("./particles/%s" %self.name):
@@ -65,7 +68,7 @@ class particle():
             self.log_fd.write("config file: %s\n" %json.dumps(self.config_json))
 
         # run docker image
-        cmd = 'sudo docker run --rm --privileged -v /users/gtc/SocialCache/particles/%s/config.json:/root/config.json mayuke/social-cdn:tpds /bin/bash -c "cp /root/config.json /root/socialcache/code/main/config.json && cd /root/socialcache && sudo python3 -m code.main.main && sudo python3 -m code.analyze.main -c | tail -n 3 | head -n 1"' %self.name
+        cmd = 'sudo docker run --rm --privileged -v /users/gtc/SocialCache/particles/%s/config.json:/root/config.json mayuke/social-cdn:tpds /bin/bash -c "cp /root/config.json /root/socialcache/code/main/config.json && cd /root/socialcache && sudo python3 -m code.main.main && sudo python3 -m code.analyze.main -ecpdlmy"' %self.name
 
         self.log_fd.write("run docker image cmd: %s\n" %cmd)
         docker_res = None
@@ -78,17 +81,35 @@ class particle():
             print("run cmd error", e.output.decode('utf-8'))
             sys.exit(-1)
 
-        # convert to float
-        fitness = float(docker_res.decode('utf-8').split(":")[-1])
+        # get fitness
+        fitness = 0
+        # split result by line
+        docker_res = docker_res.decode('utf-8').split("\n")
+        if self.optim_target == "traffic_volume":
+            for line in docker_res:
+                if "total_media_size" in line:
+                    fitness = float(line.split(":")[-1])
+                    break
+        elif self.optim_target == "cache_hit_rate":
+            for line in docker_res:
+                if "总缓存命中率" in line:
+                    fitness = float(line.split(":")[-1])
+                    break
     
         self.log_fd.write("particle %s fitness : %f\n" %(self.name, fitness))
         self.fitness = fitness
 
-        if self.fitness > self.best_fitness:
-            self.best_fitness   = self.fitness
-            self.best_position  = self.position
-            self.log_fd.write("find better result : %f, %s\n" %(self.best_fitness, self.best_position))
-        
+        if self.optim_target == "traffic_volume":
+            if self.fitness < self.best_fitness:
+                self.best_fitness   = self.fitness
+                self.best_position  = self.position
+                self.log_fd.write("find better result : %f, %s\n" %(self.best_fitness, self.best_position))
+        elif self.optim_target == "cache_hit_rate":
+            if self.fitness > self.best_fitness:
+                self.best_fitness   = self.fitness
+                self.best_position  = self.position
+                self.log_fd.write("find better result : %f, %s\n" %(self.best_fitness, self.best_position))
+            
         # write log
         self.log_fd.write(" fitness : %f\n" %self.fitness)
         self.log_fd.write(" position: %s\n" %self.position)
@@ -122,7 +143,10 @@ class particle():
         return dict(fitness = self.fitness, position = self.position, speed = self.speed)
 
 class pso_optimzer():
-    def __init__(self, pop_size, bounds, speed, max_speed, min_speed, max_iteration, omega=1, c1=1.33, c2=1.33) -> None:
+    def __init__(self, optim_target, early_stop_val, pop_size, bounds, speed, max_speed, min_speed, max_iteration, omega=1, c1=1.33, c2=1.33) -> None:
+        # optimization target
+        self.optim_target = optim_target
+        self.early_stop_val = early_stop_val
 
         # swarm params
         self.pop_size = pop_size
@@ -137,12 +161,35 @@ class pso_optimzer():
         self.c1     = c1
         self.c2     = c2
 
-        self.best_fitness  = 0
-        self.best_position = None
+        if self.optim_target == "cache_hit_rate":
+            self.best_fitness  = 0
+            self.best_position = None
+        elif self.optim_target == "traffic_volume":
+            self.best_fitness  = sys.maxsize
+            self.best_position = None
 
-        self.log_file = "./particles/log.txt"
-        if os.path.exists(self.log_file):
-            os.remove(self.log_file)
+        # create log file
+        self.log_file_name = "./particles/log.txt"
+        if os.path.exists(self.log_file_name):
+            os.remove(self.log_file_name)
+        os.mknod(self.log_file_name)
+
+        self.logger = logging.getLogger("pso")
+        self.logger.setLevel(logging.INFO)
+
+        self.log_file_handler = logging.FileHandler(self.log_file_name, mode="w+", encoding="utf-8")
+        self.log_file_handler.setLevel(logging.INFO)
+
+        self.log_file_handler.setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s"))
+        self.logger.addHandler(self.log_file_handler)
+
+        # print info
+        self.logger.info("====== Particle Swarm Optimization ======")
+        self.logger.info("optim target: %s" %self.optim_target)
+        self.logger.info("early stop val: %f" %self.early_stop_val)
+        self.logger.info("max iteration: %d" %self.max_iteration)
+        self.logger.info("pop size: %d" %self.pop_size)
+        self.logger.info("init speed: %s" %self.init_speed)
 
 
     def generate_particles(self):
@@ -159,6 +206,7 @@ class pso_optimzer():
             # generate one instance
             particle_name = "particle_%d" %i
             particle_instance = particle(particle_name, \
+                                         self.optim_target, \
                                         init_config, \
                                         init_positions[:, i], \
                                         self.init_speed, \
@@ -202,10 +250,16 @@ class pso_optimzer():
             for particle in self.particles_list:
                 fitness, position = particle.get_status()['fitness'], particle.get_status()['position']
 
-                if fitness > self.best_fitness:
-                    print("find better result")
-                    self.best_fitness  = copy.deepcopy(fitness)
-                    self.best_position = copy.deepcopy(position)
+                if self.optim_target == "cache_hit_rate":
+                    if fitness > self.best_fitness:
+                        print("find better result")
+                        self.best_fitness  = copy.deepcopy(fitness)
+                        self.best_position = copy.deepcopy(position)
+                elif self.optim_target == "traffic_volume":
+                    if fitness < self.best_fitness:
+                        print("find better result")
+                        self.best_fitness  = copy.deepcopy(fitness)
+                        self.best_position = copy.deepcopy(position)
 
                 log_df.loc['p%d' %particle_num] = particle.get_status()
                 particle_num += 1
@@ -215,10 +269,9 @@ class pso_optimzer():
                 particle.update_position(self.best_position)
 
             # print log
-            with open(self.log_file, "a+") as log_fd:
-                log_fd.write("------ iteration %d ------\n" %i)
-                log_fd.write(log_df.to_string() + "\n")
-                log_fd.write("best fitness: %f, best position: %s\n\n" %(self.best_fitness, self.best_position))
+            self.logger.info("------ iteration %d ------" %i)
+            self.logger.info(log_df.to_string())
+            self.logger.info("best fitness: %f, best position: %s" %(self.best_fitness, self.best_position))
             
             print(log_df)
             print("best fitness :", self.best_fitness)
@@ -231,7 +284,9 @@ if __name__ == "__main__":
         config_json = json.load(conf_fd)
         init_bounds = [tuple(item) for item in config_json['init_bounds']]
         
-        optim = pso_optimzer(config_json['pop_size'], \
+        optim = pso_optimzer(config_json['optim_target'], \
+                            config_json['early_stop_value'], \
+                            config_json['pop_size'], \
                             init_bounds, \
                             np.array(config_json['init_speed'], dtype=np.float64), \
                             np.array(config_json['max_speed'], dtype=np.float64), \
@@ -239,5 +294,6 @@ if __name__ == "__main__":
                             config_json['max_iteration'], \
                             config_json['omega'], \
                             config_json['c1'], \
-                            config_json['c2'])
+                            config_json['c2'],
+                            )
         optim.launch()
