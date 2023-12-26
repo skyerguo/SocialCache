@@ -280,6 +280,10 @@ class pso_optimzer():
 if __name__ == "__main__":
     print("====== Particle Swarm Optimization =======")
 
+    # create working directory for particles
+    if not os.path.exists("./particles"):
+        os.mkdir("./particles")
+
     with open("./code/optimize/pso/config.json") as conf_fd:
         config_json = json.load(conf_fd)
         init_bounds = [tuple(item) for item in config_json['init_bounds']]
