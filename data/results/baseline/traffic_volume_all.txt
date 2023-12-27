@@ -1,0 +1,6 @@
+                BrightkiteBigraphCommunity    GooglePlus  GowallaBigraphCommunity    TwitterEgo   TwitterFull
+RAND                          5.912889e+11  5.370536e+08             3.780911e+11  1.176718e+07  1.020457e+08
+FIFO                          2.437819e+11  2.918541e+08             2.044414e+11  8.600735e+06  6.843463e+07
+LRU                           2.447365e+11  2.998430e+08             2.026250e+11  7.361977e+06  7.025757e+07
+LRU-Social                    5.567545e+11  4.919211e+08             3.644397e+11  9.684605e+06  9.245651e+07
+Second-Hit-LRU                3.331943e+11  3.777599e+08             2.366561e+11  8.112076e+06  7.553695e+07
