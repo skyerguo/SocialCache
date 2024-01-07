@@ -86,3 +86,7 @@ echo "gtc            hard    nofile          102400" | sudo tee -a /etc/security
 
 # Install Docker
 wget -qO- https://get.docker.com/ | sh
+
+sudo docker pull mayuke/social-cdn:tpds
+
+git config --global core.editor vim
